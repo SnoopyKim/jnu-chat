@@ -5,7 +5,7 @@
         android:radius="0dp"
         />
     <solid
-        android:color="@color/conceptRed"
+        android:color="@color/facebookBlue"
         />
     <padding
         android:left="0dp"

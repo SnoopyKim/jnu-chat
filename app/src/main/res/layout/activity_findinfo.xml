@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="100">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_red_light"
+        android:minHeight="?attr/actionBarSize"/>
+
+    <LinearLayout
+        android:id="@+id/upper_side"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="40dp"
+        android:layout_weight="49"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_idfind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="아이디 찾기"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/name_side"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="이름       "
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/edit_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:ems="8"
+                android:maxLength="20"
+                android:inputType="textPersonName"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/birth_side"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_birth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="생년월일"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/edit_birth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.91"
+                android:ems="8"
+                android:maxLength="8"
+                android:hint="ex)19700101"
+                android:inputType="textPersonName|number"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_warning_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="입력하신 정보가 존재하지 않습니다."
+            android:textAlignment="center"
+            android:textColor="#ff0900" />
+
+        <Button
+            android:id="@+id/button_idfind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp"
+            android:text="찾기" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_weight="2"
+        android:adjustViewBounds="false"
+        android:background="@android:color/holo_red_light"
+        android:cropToPadding="true"
+        android:scaleType="center"
+        app:srcCompat="?attr/dividerHorizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/donw_side"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="49"
+        android:orientation="vertical"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+        <TextView
+            android:id="@+id/text_passwordfind"
+            android:layout_width="match_parent"
+            android:layout_height="31dp"
+            android:text="비밀번호 찾기"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="30dp"/>
+
+        <LinearLayout
+            android:id="@+id/id_side"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/text_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="아이디          "
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/edit_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:ems="10"
+                android:maxLength="10"
+                android:inputType="textPersonName"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/phone_side"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="휴대폰 번호     "
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/edit_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:ems="11"
+                android:maxLength="11"
+                android:inputType="textPersonName"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="인증" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="인증번호 입력" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_warning_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#ff0900"
+            android:text="없는 아이디이거나 인증번호가 틀립니다."
+            android:textAlignment="center" />
+
+        <Button
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp"
+            android:id="@+id/button_passwordfind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="찾기" />
+    </LinearLayout>
+
+</LinearLayout>

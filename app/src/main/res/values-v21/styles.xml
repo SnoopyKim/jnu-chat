@@ -6,4 +6,13 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+
+    <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="colorControlNormal">@color/conceptRed</item>
+        <item name="android:colorControlActivated">@color/conceptRed</item>
+        <item name="android:textCursorDrawable">@color/colorBlack</item>
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:textColorHint">@color/colorHintGray</item>
+        <item name="android:textColorHighlight">@color/colorBlack</item>
+    </style>
 </resources>

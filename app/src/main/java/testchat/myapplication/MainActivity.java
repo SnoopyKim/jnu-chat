@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
     EditText etEmail;
     EditText etPassword;
 
+    TextView textbtnFindinfo;
+    TextView textbtnSignin;
+
+    Intent intent;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -40,6 +46,19 @@ public class MainActivity extends AppCompatActivity {
         etEmail = (EditText) findViewById(R.id.etEmail);
         etPassword = (EditText) findViewById(R.id.etPassword);
         pbLogin = (ProgressBar) findViewById(R.id.pbLogin);
+
+        textbtnFindinfo = (TextView) findViewById(R.id.textbtnFindinfo);
+        textbtnFindinfo.setText(Html.fromHtml("<u>"+textbtnFindinfo.getText()+"</u>"));
+        textbtnFindinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                intent = new Intent(MainActivity.this,FindinfoActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        textbtnSignin = (TextView) findViewById(R.id.textbtnSignin);
+        textbtnSignin.setText(Html.fromHtml("<u>"+textbtnSignin.getText()+"</u>"));
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {

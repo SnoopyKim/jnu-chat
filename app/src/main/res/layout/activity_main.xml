@@ -1,77 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorWhite"
     
     tools:context="testchat.myapplication.MainActivity">
-    
 
-    <RelativeLayout
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
 
-        >
-
+    <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/RLinput"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/pbLogin">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            android:id="@+id/textView"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="30dp"
-            android:textColor="#ffffff"
-            android:textSize="30sp"
-
-            />
+            android:id="@+id/imgLogo"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:text="JNU LOGO"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack" />
 
         <EditText
-            android:layout_width="200dp"
-            android:layout_height="40dp"
-            android:hint="EMAIL"
             android:id="@+id/etEmail"
-            android:background="#ffffff"
-            android:layout_below="@+id/textView"
-            />
+            style="@style/EditTextStyle"
+            android:layout_width="400dp"
+
+            android:layout_height="50dp"
+            android:layout_below="@+id/imgLogo"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:hint="아이디를 입력해주세요."
+
+            android:maxLines="1"
+            app:theme="@style/EditTextStyle" />
+
         <EditText
-            android:layout_width="200dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="1dp"
-            android:hint="PASSWORD"
             android:id="@+id/etPassword"
-            android:background="#ffffff"
+            style="@style/EditTextStyle"
+            android:layout_width="400dp"
+
+            android:layout_height="50dp"
             android:layout_below="@+id/etEmail"
-            />
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:hint="비밀번호를 입력해주세요."
+
+            android:maxLines="1"
+            app:theme="@style/EditTextStyle" />
 
         <Button
-            android:text="REGISTER"
+            android:id="@+id/btnRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btnRegister"
             android:layout_below="@+id/etPassword"
             android:layout_centerHorizontal="true"
-            />
+            android:text="REGISTER" />
+
         <Button
-            android:text="LOGIN"
+            android:id="@+id/btnLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btnLogin"
+
             android:layout_below="@+id/btnRegister"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:layout_marginTop="@dimen/short_margin"
             android:background="@drawable/button_big_login"
-            />
+            android:text="로그인"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
         <Button
-            android:text="CANCEL"
+            android:id="@+id/btnLoginFacebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btnCancel"
+
             android:layout_below="@+id/btnLogin"
             android:layout_centerHorizontal="true"
-            />
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:layout_marginTop="@dimen/short_margin"
+            android:background="@drawable/button_big_login_facebook"
+            android:text="페이스북 계정으로 로그인"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/btnLoginFacebook"
+            android:layout_marginTop="100dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textFindinfo"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:text="비밀번호를 잊으셨다면"
+                    android:textAlignment="viewEnd"
+                    android:textColor="@color/colorHintGray" />
+
+                <TextView
+                    android:id="@+id/textbtnFindinfo"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:text="여기"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorHintGray"
+                    android:onClick="true"
+                    android:clickable="true"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textSignin"
+                    android:layout_width="230dp"
+                    android:layout_height="wrap_content"
+                    android:text="처음 오셨다면"
+                    android:textAlignment="viewEnd"
+                    android:textColor="@color/colorHintGray"
+                    />
+
+                <TextView
+                    android:id="@+id/textbtnSignin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:text="여기"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorHintGray"
+                    android:clickable="true"/>
+            </LinearLayout>
+        </LinearLayout>
+
 
     </RelativeLayout>
 
