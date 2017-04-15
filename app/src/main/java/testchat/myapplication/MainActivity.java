@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
-    Intent intent;
-
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         textbtnFindinfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                intent = new Intent(MainActivity.this,FindinfoActivity.class);
+                Intent intent = new Intent(MainActivity.this,FindinfoActivity.class);
                 startActivity(intent);
             }
         });
@@ -84,7 +82,11 @@ public class MainActivity extends AppCompatActivity {
                 stPassword = etPassword.getText().toString();
 
                 //Toast.makeText(MainActivity.this, stEmail+""+stPassword, Toast.LENGTH_SHORT).show();
-                registerUser(stEmail, stPassword);
+                if (stEmail.isEmpty()||stEmail.equals("")||stPassword.isEmpty()||stPassword.equals("")) {
+                    Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                } else {
+                    registerUser(stEmail, stPassword);
+                }
             }
         });
 
@@ -96,8 +98,11 @@ public class MainActivity extends AppCompatActivity {
                 stPassword = etPassword.getText().toString();
 
                 //Toast.makeText(MainActivity.this, "LOGIN", Toast.LENGTH_SHORT).show();
-                userLogin(stEmail, stPassword);
-
+                if (stEmail.isEmpty()||stEmail.equals("")||stPassword.isEmpty()||stPassword.equals("")) {
+                    Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                } else {
+                    userLogin(stEmail, stPassword);
+                }
             }
         });
     }
@@ -130,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
                         // ...
                     }
                 });
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                         } else {
 
-                            Intent in = new Intent(MainActivity.this, ChatActivity.class);
+                            Intent in = new Intent(MainActivity.this, TabActivity.class);
                             startActivity(in);
                         }
 
