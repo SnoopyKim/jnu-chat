@@ -1,4 +1,12 @@
 <resources>
-    <string name="app_name">JNU Chat</string>
+    <string name="app_name">JNU CHAT</string>
     <string name="title_activity_chat">ChatActivity</string>
+    <string name="title_activity_tab">TabActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string name="title_friends">Friends</string>
+    <string name="title_chats">Chats</string>
+    <string name="title_profile">Profile</string>
 </resources>
