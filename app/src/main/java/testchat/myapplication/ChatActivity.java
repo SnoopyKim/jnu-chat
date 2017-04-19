@@ -73,6 +73,7 @@ public class ChatActivity extends AppCompatActivity {
                     chat.put("email",email);
                     chat.put("text",stText);
                     myRef.setValue(chat);
+                    etText.setText("");
                     //Toast.makeText(ChatActivity.this, email + "," + stText, Toast.LENGTH_SHORT).show();
                 }
             }

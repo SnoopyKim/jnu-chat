@@ -1,6 +1,7 @@
 package testchat.myapplication;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Hashtable;
+
+import static android.view.View.GONE;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    DatabaseReference myRef;
+    FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         etEmail = (EditText) findViewById(R.id.etEmail);
         etPassword = (EditText) findViewById(R.id.etPassword);
         pbLogin = (ProgressBar) findViewById(R.id.pbLogin);
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("users");
 
         textbtnFindinfo = (TextView) findViewById(R.id.textbtnFindinfo);
         textbtnFindinfo.setText(Html.fromHtml("<u>"+textbtnFindinfo.getText()+"</u>"));
@@ -62,10 +75,17 @@ public class MainActivity extends AppCompatActivity {
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
+                    SharedPreferences sharedPreferences = getSharedPreferences("email", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("uid", user.getUid());
+                    editor.putString("email", user.getEmail());
+                    editor.apply();
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -126,16 +146,22 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
 
-                        Toast.makeText(MainActivity.this, "Authentication success.",
-                                Toast.LENGTH_SHORT).show();
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Authentication success.",
+                                    Toast.LENGTH_SHORT).show();
+                            if(user != null) {
+                                Hashtable<String, String> profile = new Hashtable<String, String>();
+                                profile.put("email", user.getEmail());
+                                profile.put("photo", "");
+                                myRef.child(user.getUid()).setValue(profile);
+                            }
                         }
-                        // ...
                     }
                 });
     }
@@ -160,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
                             Intent in = new Intent(MainActivity.this, TabActivity.class);
                             startActivity(in);
+                            pbLogin.setVisibility(GONE);
                         }
 
                         // ...
