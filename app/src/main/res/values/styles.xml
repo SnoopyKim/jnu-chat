@@ -20,5 +20,7 @@
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/conceptRed</item>
     </style>
-
+    <style name="FindInfoTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="colorControlNormal">@color/conceptRed</item>
+    </style>
 </resources>
