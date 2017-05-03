@@ -75,27 +75,39 @@
             android:textColor="#FFFFFF"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/btnLoginFacebook"
+        <FrameLayout
+            android:id="@+id/flFacebook"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/btnLogin">
 
-            android:layout_below="@+id/btnLogin"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/short_margin"
-            android:layout_marginLeft="@dimen/fab_margin"
-            android:layout_marginRight="@dimen/fab_margin"
-            android:layout_marginTop="@dimen/short_margin"
-            android:background="@drawable/button_big_login_facebook"
-            android:text="페이스북 계정으로 로그인"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp" />
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/facebook_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnLoginFacebook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:layout_marginLeft="@dimen/fab_margin"
+                android:layout_marginRight="@dimen/fab_margin"
+                android:layout_marginTop="@dimen/short_margin"
+                android:background="@drawable/button_big_login_facebook"
+                android:text="페이스북 계정으로 로그인"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/btnLoginFacebook"
+            android:layout_below="@+id/flFacebook"
             android:layout_marginTop="100dp"
             android:orientation="vertical">
 

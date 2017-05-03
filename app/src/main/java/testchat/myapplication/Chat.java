@@ -7,6 +7,7 @@ package testchat.myapplication;
 public class Chat {
 
     public String email;
+    public String name;
     public String text;
 
     public Chat() {
@@ -31,5 +32,13 @@ public class Chat {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

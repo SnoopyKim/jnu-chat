@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -52,6 +53,9 @@ public class ChatActivity extends AppCompatActivity {
 
         }
 
+        Intent in = getIntent();
+        final String stChatId = in.getStringExtra("friendUid");
+
         etText = (EditText) findViewById(R.id.etText);
         btnSend = (Button) findViewById(R.id.btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -67,10 +71,11 @@ public class ChatActivity extends AppCompatActivity {
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String formattedDate = df.format(c.getTime());
 
-                    DatabaseReference myRef = database.getReference("chats").child(formattedDate);
+                    DatabaseReference myRef = database.getReference("chats").child(stChatId).child(formattedDate);
 
                     Hashtable<String, String> chat = new Hashtable<String, String>();
                     chat.put("email",email);
+                    chat.put("name","");
                     chat.put("text",stText);
                     myRef.setValue(chat);
                     etText.setText("");
@@ -83,7 +88,6 @@ public class ChatActivity extends AppCompatActivity {
         btnFinish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
                 finish();
             }
         });
@@ -103,7 +107,7 @@ public class ChatActivity extends AppCompatActivity {
         mAdapter = new MyAdapter(mChat,email, ChatActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
-        DatabaseReference myRef = database.getReference("chats");
+        DatabaseReference myRef = database.getReference("chats").child(stChatId);
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {

@@ -51,11 +51,12 @@ public class TabActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //삽입할 뷰에 fragment를 추가하고(add), 이를 적용(commit)
-        /*
+
+
         fragment = new FriendsFragment();
         fragmentTransaction.add(R.id.content, fragment);
         fragmentTransaction.commit();
-        */
+
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
