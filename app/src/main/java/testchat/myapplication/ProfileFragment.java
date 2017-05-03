@@ -1,8 +1,6 @@
 package testchat.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,11 +18,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,10 +38,12 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Hashtable;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+
+//import static android.view.View.GONE;
+//import static android.view.View.VISIBLE;
 
 
 public class ProfileFragment extends Fragment {
@@ -59,52 +63,62 @@ public class ProfileFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            stUid = user.getUid();
+            stEmail = user.getEmail();
+
+        } else {
+            Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
+        }
+        /*
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("email", Context.MODE_PRIVATE);
         stUid = sharedPreferences.getString("uid","");
         stEmail = sharedPreferences.getString("email","");
+        */
 
         pbLogin = (ProgressBar)v.findViewById(R.id.pbLogin);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference();
-        myRef.child("users").child(stUid).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference Ref = database.getReference();
+
+        ivUser = (ImageView) v.findViewById(R.id.ivUser);
+        ivUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, 1);
+
+            }
+        });
+
+        TextView tvUser = (TextView)v.findViewById(R.id.tvUser);
+        tvUser.setText(stEmail);
+
+        Ref.child("users").child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                String value = dataSnapshot.getValue().toString();
                 String stPhoto = dataSnapshot.child("photo").getValue().toString();
 
-                if(TextUtils.isEmpty(stPhoto)) {
-                    pbLogin.setVisibility(GONE);
-
+                if (TextUtils.isEmpty(stPhoto)) {
+                    pbLogin.setVisibility(View.GONE);
                 } else {
-
-                    pbLogin.setVisibility(VISIBLE);
-                    /*
-                    Picasso.with(getActivity())
-                            .load(stPhoto)
-                            .fit()
-                            .centerInside()
-                            .into(ivUser, new Callback.EmptyCallback() {
-                                @Override public void onSuccess() {
-                                    // Index 0 is the image view.
-                                    Log.d(TAG, "SUCCESS");
-                                    pbLogin.setVisibility(View.GONE);
-                                }
-                            });
-                            */
+                    //왜 안되냐 ㅠ -> 그냥 피카소쓰자
+                    Glide.with(getActivity()).load(stPhoto).into(ivUser);
+                    pbLogin.setVisibility(View.GONE);
                 }
 
 
-                Log.d(TAG, "Value is: " + value);
+                Log.d(TAG, "stPhoto is: " + stPhoto);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value", databaseError.toException());
-            }
+             @Override
+             public void onCancelled(DatabaseError databaseError) {
+                 // Failed to read value
+                 Log.w(TAG, "Failed to read value", databaseError.toException());
+             }
         });
 
         if (ContextCompat.checkSelfPermission(getActivity(),
@@ -133,23 +147,14 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-
-        ivUser = (ImageView) v.findViewById(R.id.ivUser);
-        ivUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, 1);
-
-            }
-        });
-
         Button btnLogout = (Button)v.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent in = new Intent(v.getContext(),MainActivity.class);
+                startActivity(in);
                 FirebaseAuth.getInstance().signOut();
+                LoginManager.getInstance().logOut();
                 getActivity().finish();
             }
         });
@@ -184,12 +189,14 @@ public class ProfileFragment extends Fragment {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("users");
 
+                /*
                 Hashtable<String, String> profile = new Hashtable<String, String>();
                 profile.put("email", stEmail);
+                profile.put("key",stUid);
                 profile.put("photo",  photoUri);
-
-                myRef.child(stUid).setValue(profile);
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                */
+                myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
+                myRef.child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         String s = dataSnapshot.getValue().toString();

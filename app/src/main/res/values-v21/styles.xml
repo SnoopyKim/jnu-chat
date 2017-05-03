@@ -15,4 +15,16 @@
         <item name="android:textColorHint">@color/colorHintGray</item>
         <item name="android:textColorHighlight">@color/colorBlack</item>
     </style>
+
+    <style name="FacebookLoginButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/button_big_login_facebook</item>
+        <item name="android:layout_marginLeft">@dimen/fab_margin</item>
+        <item name="android:layout_marginRight">@dimen/fab_margin</item>
+        <item name="android:layout_marginTop">@dimen/short_margin</item>
+        <item name="android:layout_marginBottom">@dimen/short_margin</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:text">페이스북으로 로그인</item>
+    </style>
 </resources>

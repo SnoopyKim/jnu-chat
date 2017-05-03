@@ -27,6 +27,16 @@
         android:background="@color/colorWhite"
         />
 
+    <TextView
+        android:id="@+id/tvUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/ivUser"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorWhite"
+        />
+
     <ProgressBar
         android:id="@+id/pbLogin"
         android:layout_width="50dp"
