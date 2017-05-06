@@ -189,12 +189,6 @@ public class ProfileFragment extends Fragment {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("users");
 
-                /*
-                Hashtable<String, String> profile = new Hashtable<String, String>();
-                profile.put("email", stEmail);
-                profile.put("key",stUid);
-                profile.put("photo",  photoUri);
-                */
                 myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
                 myRef.child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override

@@ -10,10 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.LoggingBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,9 +20,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 
@@ -40,6 +41,8 @@ public class FriendsFragment extends Fragment {
     FirebaseUser user;
     FirebaseDatabase database;
     FriendAdapter mFAdapter;
+
+    DatabaseReference myRef;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,7 +67,7 @@ public class FriendsFragment extends Fragment {
         mFAdapter = new FriendAdapter(mFriend, getActivity());
         mRecyclerView.setAdapter(mFAdapter);
         database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("users");
+        myRef = database.getReference("users");
         myRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -101,18 +104,52 @@ public class FriendsFragment extends Fragment {
             }
         });
 
-        //페이스북 Graph API 받아오기
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-        GraphRequest request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-            @Override
-            public void onCompleted(JSONObject object, GraphResponse response) {
-                Log.d("GraphRequest",object.toString() + " " + response.toString());
-            }
-        });
-        Bundle parameters = new Bundle();
-        parameters.putString("fields","id,name,link");
-        request.setParameters(parameters);
+        //FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONArrayCallback() {
+                    @Override
+                    public void onCompleted(JSONArray objects, GraphResponse response) {
+                        for(int i=0; i<objects.length(); i++) {
+                            try {
+                                JSONObject f_info = objects.getJSONObject(i);
+
+                                Hashtable<String, String> friend = new Hashtable<String, String>();
+                                friend.put("name", f_info.getString("name"));
+                                friend.put("facebook_id", f_info.getString("id"));
+                                friend.put("photo", f_info.getJSONObject("picture").getJSONObject("data").getString("url"));
+
+                                myRef.child(user.getUid()).child("friends").child(friend.get("facebook_id")).setValue(friend);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            Log.d("GraphRequest_Friends", response.toString());
+                        }
+                    }
+                });
+        Bundle param = new Bundle();
+        param.putString("fields","email,name,id");
+        request.setParameters(param);
         request.executeAsync();
+
+        //방법2
+        /*
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/me/friends",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        Log.d("GraphRequest:",response.toString());
+                    }
+                }
+        );
+        request.executeAsync();
+        */
+
+
 
         return v;
     }

@@ -17,6 +17,9 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +31,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -97,13 +103,6 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
-                    /*
-                    SharedPreferences sharedPreferences = getSharedPreferences("email", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("uid", user.getUid());
-                    editor.putString("email", user.getEmail());
-                    editor.apply();
-                    */
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     startActivity(intent);
 
@@ -111,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                    // ...
             }
         };
 
@@ -122,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                     stEmail = etEmail.getText().toString();
                     stPassword = etPassword.getText().toString();
 
-                    //Toast.makeText(MainActivity.this, stEmail+""+stPassword, Toast.LENGTH_SHORT).show();
                     if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
                         Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
                     } else {
@@ -138,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
                     stEmail = etEmail.getText().toString();
                     stPassword = etPassword.getText().toString();
 
-                    //Toast.makeText(MainActivity.this, "LOGIN", Toast.LENGTH_SHORT).show();
                     if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
                         Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
                     } else {
@@ -149,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
             callbackManager = CallbackManager.Factory.create();
             final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
-            fbtnLogin.setReadPermissions(Arrays.asList("email","user_friends"));
+            fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
             fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
@@ -259,29 +255,35 @@ public class MainActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-
                 if(task.isSuccessful()) {
-                    //user = task.getResult().getUser();
-                    Log.v(TAG,myRef.child(user.getUid()).toString());
-                    //if(mAuth.) {
-                        Hashtable<String, String> profile = new Hashtable<String, String>();
-                        profile.put("email", user.getEmail());
-                        profile.put("photo", "");
-                        profile.put("key", user.getUid());
-                        myRef.child(user.getUid()).child("profile").setValue(profile);
+                    user = task.getResult().getUser();
+                    Log.d("userUID", user.getUid());
 
-                        Hashtable<String, String> friends = new Hashtable<String, String>();
-                        friends.put("email", "email");
-                        friends.put("photo", "");
-                        friends.put("key", "Frkey");
-                        myRef.child(user.getUid()).child("friends").child(friends.get("key")).setValue(friends);
+                    FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+                    GraphRequest request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(),
+                            new GraphRequest.GraphJSONObjectCallback() {
+                                @Override
+                                public void onCompleted(JSONObject object, GraphResponse response) {
+                                    try {
+                                        Hashtable<String, String> profile = new Hashtable<String, String>();
+                                        profile.put("name", object.getString("name"));
+                                        profile.put("email", object.getString("email"));
+                                        profile.put("photo", object.getJSONObject("picture").getJSONObject("data").getString("url"));
+                                        profile.put("uid", user.getUid());
+                                        profile.put("facebook_id", object.getString("id"));
+                                        myRef.child(user.getUid()).child("profile").setValue(profile);
 
-                        Log.v(TAG,"First Facebook Login");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Log.d("GraphRequest_Me",response.toString());
+                                }
+                            });
+                    Bundle param = new Bundle();
+                    param.putString("fields","email,name,id,picture");
+                    request.setParameters(param);
+                    request.executeAsync();
 
-                    //} else {
-                        //Log.v(TAG,"Not first Facebook Login");
-
-                   //}
                     Log.v(TAG,"Facebook Login task success");
 
                 } else {

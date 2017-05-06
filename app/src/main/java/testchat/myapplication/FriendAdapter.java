@@ -67,7 +67,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.tvEmail.setText(mFriend.get(position).getEmail());
+        holder.tvEmail.setText(mFriend.get(position).getName());
 
         String stPhoto = mFriend.get(position).getPhoto();
         if(TextUtils.isEmpty(stPhoto)) {
@@ -81,7 +81,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         holder.btnChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String stFriendid = mFriend.get(position).getKey();
+                String stFriendid = mFriend.get(position).getFacebook_id();
                 Intent in = new Intent(context, ChatActivity.class);
                 in.putExtra("friendUid",stFriendid);
                 context.startActivity(in);
