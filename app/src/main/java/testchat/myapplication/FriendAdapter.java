@@ -2,7 +2,11 @@ package testchat.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -34,9 +39,14 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         public TextView tvEmail;
         public ImageView ivUser;
         public Button btnChat;
+        public LinearLayout overall;
+
+        //imageview 동그랗게
+        //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
 
         public ViewHolder(View itemView) {
             super(itemView);
+            overall = (LinearLayout) itemView.findViewById(R.id.friend_overall) ;
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
             btnChat = (Button)itemView.findViewById(R.id.btnChat);
@@ -71,13 +81,24 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
         String stPhoto = mFriend.get(position).getPhoto();
         if(TextUtils.isEmpty(stPhoto)) {
-            Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
-            holder.ivUser.setImageDrawable(defaultImg);
+            //Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+            //holder.ivUser.setImageDrawable(defaultImg);
+            Bitmap bigPictureBitmap  = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_person_black_24dp);
+            RoundedAvatarDrawable r_defaultimg = new RoundedAvatarDrawable(bigPictureBitmap);
+            holder.ivUser.setImageDrawable(r_defaultimg);
             //Glide.with(context).load(R.drawable.ic_person_black_24dp).into(holder.ivUser);
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
         }
-
+        holder.overall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String stFriendid = mFriend.get(position).getFacebook_id();
+                Intent in = new Intent(context, ChatActivity.class);
+                in.putExtra("friendUid",stFriendid);
+                context.startActivity(in);
+            }
+        });
         holder.btnChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

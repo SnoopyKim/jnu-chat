@@ -78,4 +78,5 @@ public class TabActivity extends AppCompatActivity {
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
         lastPressed = System.currentTimeMillis();
     }
+
 }
