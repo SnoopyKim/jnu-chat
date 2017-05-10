@@ -1,13 +1,52 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/fab_margin"
     tools:context="testchat.myapplication.FriendsFragment">
 
     <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:id="@+id/friend_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:orientation="horizontal"
+        >
+
+        <TextView
+            android:id="@+id/text_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="친구"
+            android:textColor="@color/colorTextGray"/>
+
+        <TextView
+            android:id="@+id/text_friend_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:paddingLeft="@dimen/short_margin"
+            android:text="100"
+            android:textColor="@color/colorTextLightGray"/>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/friend_topbar"
+        android:adjustViewBounds="false"
+        android:background="@color/colorDividerGray"
+        android:cropToPadding="true"
+        android:scaleType="center"
+        app:srcCompat="?attr/dividerHorizontal" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/Friend_view"
         android:scrollbars="vertical"
+        android:layout_below="@id/divider"
 
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -38,7 +40,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         // each data item is just a string in this case
         public TextView tvEmail;
         public ImageView ivUser;
-        public Button btnChat;
         public LinearLayout overall;
 
         //imageview 동그랗게
@@ -49,7 +50,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             overall = (LinearLayout) itemView.findViewById(R.id.friend_overall) ;
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
-            btnChat = (Button)itemView.findViewById(R.id.btnChat);
         }
     }
 
@@ -74,7 +74,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.tvEmail.setText(mFriend.get(position).getName());
@@ -90,22 +90,30 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
         }
-        holder.overall.setOnClickListener(new View.OnClickListener() {
+        holder.overall.setOnTouchListener(new View.OnTouchListener()
+        {
+
             @Override
-            public void onClick(View v) {
-                String stFriendid = mFriend.get(position).getFacebook_id();
-                Intent in = new Intent(context, ChatActivity.class);
-                in.putExtra("friendUid",stFriendid);
-                context.startActivity(in);
-            }
-        });
-        holder.btnChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String stFriendid = mFriend.get(position).getFacebook_id();
-                Intent in = new Intent(context, ChatActivity.class);
-                in.putExtra("friendUid",stFriendid);
-                context.startActivity(in);
+            public boolean onTouch(View v, MotionEvent event) {
+                // TODO Auto-generated method stub
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        //set color back to default
+                        holder.overall.setBackgroundColor(Color.WHITE);
+                        String stFriendid = mFriend.get(position).getFacebook_id();
+                        Intent in = new Intent(context, ChatActivity.class);
+                        in.putExtra("friendUid",stFriendid);
+                        context.startActivity(in);
+                        break;
+                    default:
+                        holder.overall.setBackgroundColor(Color.WHITE);
+                        break;
+                }
+                return true;
             }
         });
     }
