@@ -81,11 +81,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
         String stPhoto = mFriend.get(position).getPhoto();
         if(TextUtils.isEmpty(stPhoto)) {
-            //Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
-            //holder.ivUser.setImageDrawable(defaultImg);
-            Bitmap bigPictureBitmap  = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_person_black_24dp);
-            RoundedAvatarDrawable r_defaultimg = new RoundedAvatarDrawable(bigPictureBitmap);
-            holder.ivUser.setImageDrawable(r_defaultimg);
+            Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+            holder.ivUser.setImageDrawable(defaultImg);
             //Glide.with(context).load(R.drawable.ic_person_black_24dp).into(holder.ivUser);
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
@@ -108,9 +105,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         Intent in = new Intent(context, ChatActivity.class);
                         in.putExtra("friendUid",stFriendid);
                         context.startActivity(in);
-                        break;
-                    default:
-                        holder.overall.setBackgroundColor(Color.WHITE);
                         break;
                 }
                 return true;
