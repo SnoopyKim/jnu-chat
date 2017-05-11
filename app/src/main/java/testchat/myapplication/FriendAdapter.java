@@ -23,7 +23,6 @@ import java.util.List;
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
     List<Friend> mFriend;
-    String stEmail;
     Context context;
 
     // Provide a reference to the views for each data item
@@ -70,12 +69,13 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         holder.tvEmail.setText(mFriend.get(position).getName());
 
         String stPhoto = mFriend.get(position).getPhoto();
-        if(TextUtils.isEmpty(stPhoto)) {
+        if(TextUtils.isEmpty(stPhoto.toString())) {
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
-            //Glide.with(context).load(R.drawable.ic_person_black_24dp).into(holder.ivUser);
+
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
+
         }
 
         holder.btnChat.setOnClickListener(new View.OnClickListener() {
@@ -83,7 +83,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             public void onClick(View v) {
                 String stFriendid = mFriend.get(position).getFacebook_id();
                 Intent in = new Intent(context, ChatActivity.class);
-                in.putExtra("friendUid",stFriendid);
+                in.putExtra("friendId",stFriendid);
                 context.startActivity(in);
             }
         });

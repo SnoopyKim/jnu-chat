@@ -31,7 +31,6 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    //String[] myDataset = {"안녕","오늘","뭐했어","영화볼래?"};
     String email;
 
     EditText etText;
@@ -54,7 +53,7 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         Intent in = getIntent();
-        final String stChatId = in.getStringExtra("friendUid");
+        final String stChatId = in.getStringExtra("friendid");
 
         etText = (EditText) findViewById(R.id.etText);
         btnSend = (Button) findViewById(R.id.btnSend);

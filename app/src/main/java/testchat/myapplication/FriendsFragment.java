@@ -68,6 +68,35 @@ public class FriendsFragment extends Fragment {
         mRecyclerView.setAdapter(mFAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
+
+        //FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONArrayCallback() {
+                    @Override
+                    public void onCompleted(JSONArray objects, GraphResponse response) {
+                        for(int i=0; i<objects.length(); i++) {
+                            try {
+                                JSONObject f_info = objects.getJSONObject(i);
+
+                                Hashtable<String, String> friend = new Hashtable<String, String>();
+                                friend.put("name", f_info.getString("name"));
+                                friend.put("facebook_id", f_info.getString("id"));
+                                friend.put("photo", f_info.getJSONObject("picture").getJSONObject("data").getString("url"));
+
+                                myRef.child(user.getUid()).child("friends").child(friend.get("facebook_id")).setValue(friend);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            Log.d("GraphRequest_Friends", response.toString());
+                        }
+                    }
+                });
+        Bundle param = new Bundle();
+        param.putString("fields","name,id,picture");
+        request.setParameters(param);
+        request.executeAsync();
+
         myRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -103,51 +132,6 @@ public class FriendsFragment extends Fragment {
 
             }
         });
-
-        //FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
-                new GraphRequest.GraphJSONArrayCallback() {
-                    @Override
-                    public void onCompleted(JSONArray objects, GraphResponse response) {
-                        for(int i=0; i<objects.length(); i++) {
-                            try {
-                                JSONObject f_info = objects.getJSONObject(i);
-
-                                Hashtable<String, String> friend = new Hashtable<String, String>();
-                                friend.put("name", f_info.getString("name"));
-                                friend.put("facebook_id", f_info.getString("id"));
-                                friend.put("photo", f_info.getJSONObject("picture").getJSONObject("data").getString("url"));
-
-                                myRef.child(user.getUid()).child("friends").child(friend.get("facebook_id")).setValue(friend);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("GraphRequest_Friends", response.toString());
-                        }
-                    }
-                });
-        Bundle param = new Bundle();
-        param.putString("fields","email,name,id");
-        request.setParameters(param);
-        request.executeAsync();
-
-        //방법2
-        /*
-        GraphRequest request = new GraphRequest(
-                AccessToken.getCurrentAccessToken(),
-                "/me/friends",
-                null,
-                HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    @Override
-                    public void onCompleted(GraphResponse response) {
-                        Log.d("GraphRequest:",response.toString());
-                    }
-                }
-        );
-        request.executeAsync();
-        */
 
 
 
