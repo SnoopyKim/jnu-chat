@@ -7,7 +7,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="testchat.myapplication.TabActivity">
+    tools:context="testchat.myapplication.TabActivity"
+    android:background="@color/colorWhite">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_red_light"
+        android:minHeight="?attr/actionBarSize"/>
 
     <RelativeLayout
         android:id="@+id/content"
@@ -21,7 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:background="?android:attr/windowBackground"
-        app:menu="@menu/navigation"
-        />
+        app:itemBackground="@color/conceptRed"
+        app:layout_behavior="tech.thdev.app.view.BottomNavigationBehavior"
+        app:menu="@menu/navigation" />
 
 </LinearLayout>

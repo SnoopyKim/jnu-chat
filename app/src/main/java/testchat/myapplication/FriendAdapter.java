@@ -2,14 +2,21 @@ package testchat.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -32,13 +39,16 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         // each data item is just a string in this case
         public TextView tvEmail;
         public ImageView ivUser;
-        public Button btnChat;
+        public LinearLayout overall;
+
+        //imageview 동그랗게
+        //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
 
         public ViewHolder(View itemView) {
             super(itemView);
+            overall = (LinearLayout) itemView.findViewById(R.id.friend_overall) ;
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
-            btnChat = (Button)itemView.findViewById(R.id.btnChat);
         }
     }
 
@@ -63,28 +73,62 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.tvEmail.setText(mFriend.get(position).getName());
 
         String stPhoto = mFriend.get(position).getPhoto();
+<<<<<<< HEAD
         if(TextUtils.isEmpty(stPhoto.toString())) {
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
 
+=======
+        if(TextUtils.isEmpty(stPhoto)) {
+            //Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+            //holder.ivUser.setImageDrawable(defaultImg);
+            Bitmap bigPictureBitmap  = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_person_black_24dp);
+            RoundedAvatarDrawable r_defaultimg = new RoundedAvatarDrawable(bigPictureBitmap);
+            holder.ivUser.setImageDrawable(r_defaultimg);
+            //Glide.with(context).load(R.drawable.ic_person_black_24dp).into(holder.ivUser);
+>>>>>>> refs/remotes/origin/th-home
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
 
         }
+        holder.overall.setOnTouchListener(new View.OnTouchListener()
+        {
 
-        holder.btnChat.setOnClickListener(new View.OnClickListener() {
             @Override
+<<<<<<< HEAD
             public void onClick(View v) {
                 String stFriendid = mFriend.get(position).getFacebook_id();
                 Intent in = new Intent(context, ChatActivity.class);
                 in.putExtra("friendId",stFriendid);
                 context.startActivity(in);
+=======
+            public boolean onTouch(View v, MotionEvent event) {
+                // TODO Auto-generated method stub
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        //set color back to default
+                        holder.overall.setBackgroundColor(Color.WHITE);
+                        String stFriendid = mFriend.get(position).getFacebook_id();
+                        Intent in = new Intent(context, ChatActivity.class);
+                        in.putExtra("friendUid",stFriendid);
+                        context.startActivity(in);
+                        break;
+                    default:
+                        holder.overall.setBackgroundColor(Color.WHITE);
+                        break;
+                }
+                return true;
+>>>>>>> refs/remotes/origin/th-home
             }
         });
     }

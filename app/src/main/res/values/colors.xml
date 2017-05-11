@@ -8,4 +8,11 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorHintGray">#a6a6a6</color>
+    <color name="colorLightGray">#f2f2f2</color>
+    <color name="colorDarkGray">#7f7f7f</color>
+
+    <color name="colorTextBlack">#262626</color>
+    <color name="colorTextGray">#5d5d5d</color>
+    <color name="colorTextLightGray">#a1a1b4</color>
+    <color name="colorDividerGray">#e6e6e6</color>
 </resources>

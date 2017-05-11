@@ -10,8 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.LoggingBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -69,7 +71,7 @@ public class FriendsFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
 
-        //FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
         GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
                 new GraphRequest.GraphJSONArrayCallback() {
                     @Override
