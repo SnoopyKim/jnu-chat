@@ -9,36 +9,84 @@
     tools:context="testchat.myapplication.ChatActivity"
     tools:showIn="@layout/activity_chat">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:text="FINISH"
-        android:id="@+id/btnFinish"
-        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="100">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/my_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_above="@+id/etText"
+            android:layout_weight="92"
+            android:background="@drawable/layout_border"
+            android:clipChildren="false"
+            android:scrollbars="vertical" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:orientation="horizontal"
+            android:background="@color/colorChatBar"
+            android:weightSum="100">
+
+            <ImageButton
+                android:id="@+id/imageButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="10"
+                android:background="@color/colorChatBar"
+                android:padding="0dp"
+                app:srcCompat="@drawable/ic_photo_white_24px" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="75"
+                android:weightSum="5">
+
+                <TextView
+                    android:id="@+id/tvEmpty2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <EditText
+                    android:id="@+id/etText"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:padding="1sp"
+                    android:textSize="14sp"
+
+                    android:background="@drawable/chat_bubble"
+                    android:scrollbars="vertical" />
+
+                <TextView
+                    android:id="@+id/tvEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnSend"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="15"
+                android:background="@color/colorChatBar"
+                android:textColor="@color/colorTextGray"
+                android:text="전송"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- A RecyclerView with some commonly used attributes -->
-    <android.support.v7.widget.RecyclerView
-    android:id="@+id/my_recycler_view"
-    android:scrollbars="vertical"
-    android:layout_below="@+id/btnFinish"
-    android:layout_above="@+id/etText"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/btnSend"
-        android:id="@+id/etText"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:text="SEND"
-        android:id="@+id/btnSend"
-        />
 </RelativeLayout>

@@ -2,9 +2,15 @@ package testchat.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,7 +30,7 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
     private RecyclerView mRecyclerView;
@@ -45,6 +51,8 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
+        setSupportActionBar(toolbar);
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats");
@@ -83,13 +91,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        Button btnFinish = (Button) findViewById(R.id.btnFinish);
-        btnFinish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -143,4 +145,22 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_back_button,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.action_backbutton:
+                //Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
+                finish();
+                //Intent in = new Intent(ChatActivity.this, TabActivity.class);
+                //startActivity(in);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
