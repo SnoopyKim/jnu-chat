@@ -38,6 +38,7 @@ public class ChatActivity extends AppCompatActivity {
 
     List<Chat> mChat;
     FirebaseDatabase database;
+    DatabaseReference myRef;
 
 
     @Override
@@ -46,6 +47,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("chats");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             email = user.getEmail();
@@ -70,13 +72,11 @@ public class ChatActivity extends AppCompatActivity {
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String formattedDate = df.format(c.getTime());
 
-                    DatabaseReference myRef = database.getReference("chats").child(stChatId).child(formattedDate);
-
                     Hashtable<String, String> chat = new Hashtable<String, String>();
                     chat.put("email",email);
                     chat.put("name","");
                     chat.put("text",stText);
-                    myRef.setValue(chat);
+                    myRef.child(stChatId).child(formattedDate).setValue(chat);
                     etText.setText("");
                     //Toast.makeText(ChatActivity.this, email + "," + stText, Toast.LENGTH_SHORT).show();
                 }
