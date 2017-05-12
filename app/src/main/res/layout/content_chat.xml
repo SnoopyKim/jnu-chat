@@ -9,14 +9,6 @@
     tools:context="testchat.myapplication.ChatActivity"
     tools:showIn="@layout/activity_chat">
 
-    <Button
-        android:id="@+id/btnFinish"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_weight="1"
-        android:text="FINISH" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -30,6 +22,7 @@
             android:layout_above="@+id/etText"
             android:layout_weight="92"
             android:background="@drawable/layout_border"
+            android:clipChildren="false"
             android:scrollbars="vertical" />
 
         <LinearLayout
@@ -37,26 +30,56 @@
             android:layout_height="0dp"
             android:layout_weight="8"
             android:orientation="horizontal"
+            android:background="@color/colorChatBar"
             android:weightSum="100">
 
             <ImageButton
                 android:id="@+id/imageButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="10"
-                app:srcCompat="@android:drawable/ic_menu_report_image" />
+                android:background="@color/colorChatBar"
+                android:padding="0dp"
+                app:srcCompat="@drawable/ic_photo_white_24px" />
 
-            <EditText
-                android:id="@+id/etText"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="75" />
+                android:orientation="vertical"
+                android:layout_weight="75"
+                android:weightSum="5">
+
+                <TextView
+                    android:id="@+id/tvEmpty2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <EditText
+                    android:id="@+id/etText"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:padding="1sp"
+                    android:textSize="14sp"
+
+                    android:background="@drawable/chat_bubble"
+                    android:scrollbars="vertical" />
+
+                <TextView
+                    android:id="@+id/tvEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
 
             <Button
                 android:id="@+id/btnSend"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="15"
+                android:background="@color/colorChatBar"
+                android:textColor="@color/colorTextGray"
                 android:text="전송"
                 />
 

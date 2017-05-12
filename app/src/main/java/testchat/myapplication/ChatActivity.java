@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -91,13 +92,7 @@ public class ChatActivity extends AppCompatActivity{
             }
         });
 
-        Button btnFinish = (Button) findViewById(R.id.btnFinish);
-        btnFinish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -161,7 +156,10 @@ public class ChatActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
+                finish();
+                //Intent in = new Intent(ChatActivity.this, TabActivity.class);
+                //startActivity(in);
                 break;
         }
         return super.onOptionsItemSelected(item);
