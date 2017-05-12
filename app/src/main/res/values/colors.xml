@@ -15,4 +15,8 @@
     <color name="colorTextGray">#5d5d5d</color>
     <color name="colorTextLightGray">#a1a1b4</color>
     <color name="colorDividerGray">#e6e6e6</color>
+
+    <color name="colorChatBackgroundGray">#dfdfd5</color>
+    <color name="colorChatBar">#ededed</color>
+
 </resources>
