@@ -147,7 +147,7 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-        Button btnLogout = (Button)v.findViewById(R.id.btnLogout);
+        TextView btnLogout = (TextView)v.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
