@@ -1,79 +1,317 @@
-<LinearLayout
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="testchat.myapplication.ProfileFragment"
-    android:scrollbars="vertical"
-    android:weightSum="5">
-
-    <!-- TODO: Update blank fragment layout -->
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:background="@color/colorLightGray" >
-
-        <ProgressBar
-            android:id="@+id/pbLogin"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="120dp" />
-
-        <ImageView
-            android:id="@+id/ivUser"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="20dp"/>
-        <TextView
-            android:layout_below="@id/ivUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            
-            android:text="이름"
-            android:layout_centerHorizontal="true"
-            android:textColor="@color/colorDarkGray"/>
-    </RelativeLayout>
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="testchat.myapplication.ProfileFragment"
+        android:paddingRight="5px">
 
-        <TextView
-            android:id="@+id/tvUser"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:layout_weight="1"
-            android:textColor="@color/colorWhite" />
+        <!-- TODO: Update blank fragment layout -->
 
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1"
-            android:text="@string/title_profile"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:background="@color/colorLightGray" >
 
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
+            <ProgressBar
+                android:id="@+id/pbLogin"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="120dp" />
+
+            <ImageView
+                android:id="@+id/ivUser"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="20dp"/>
+            <TextView
+                android:layout_below="@id/ivUser"
+                android:id="@+id/tvUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="이름"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/colorDarkGray"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/optionLinear"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="50dp"
-            android:layout_weight="1"
-            android:text="Logout" />
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="계정"
+                android:layout_marginTop="@dimen/short_margin"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:textColor="@color/colorTextGray"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivAccount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_account_circle_white_24px" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvFacebookaccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="페이스북 계정"
+                        android:textColor="@color/colorTextBlack"/>
+
+                    <TextView
+                        android:id="@+id/tvUseraccount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="+82 1012345678"
+                        android:textColor="@color/colorTextLightGray"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_home_black_24dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="거주지"
+                        android:textColor="@color/colorTextBlack"/>
+
+                    <TextView
+                        android:id="@+id/tvUserAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="서울"
+                        android:textColor="@color/colorTextLightGray"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivWorkplace"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_business_black_24dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvWorkplace"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="근무지"
+                        android:textColor="@color/colorTextBlack"/>
+
+                    <TextView
+                        android:id="@+id/tvUserWorkplace"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="세종대학교"
+                        android:textColor="@color/colorTextLightGray"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivLogout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_highlight_off_black_24dp" />
+
+
+                <TextView
+                    android:id="@+id/btnLogout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:layout_marginLeft="@dimen/short_margin"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"
+                    android:clickable="true"
+                    android:padding="0dp"
+                    android:background="@color/colorWhite"
+                    android:text="페이스북 로그아웃"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorTextBlack"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="알림"
+                android:layout_marginTop="@dimen/short_margin"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:textColor="@color/colorTextGray"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivAlarm"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_alarm_on_black_24dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:weightSum="9">
+                    <TextView
+                        android:id="@+id/btnAlarm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="8"
+                        android:layout_marginLeft="@dimen/short_margin"
+                        android:text="알림 사용 설정"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorTextBlack"/>
+
+                    <Switch
+                        android:id="@+id/switchAlarm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingRight="@dimen/short_margin"
+                        android:track="@drawable/switch_track_selector"
+                        android:thumb="@drawable/switch_thumb_selector"
+                        android:text="Switch" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/layout_divider"
+                android:layout_marginTop="@dimen/short_margin"
+                android:layout_marginBottom="@dimen/fab_margin"
+                android:paddingBottom="@dimen/short_margin"
+                android:weightSum="10"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivMessage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:srcCompat="@drawable/ic_message_black_24dp" />
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:weightSum="9">
+                    <TextView
+                        android:id="@+id/btnMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="8"
+                        android:layout_marginLeft="@dimen/short_margin"
+                        android:background="@color/colorWhite"
+                        android:text="메시지 도착 팝업"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorTextBlack"/>
+
+                    <Switch
+                        android:id="@+id/switchMessage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingRight="@dimen/short_margin"
+                        android:track="@drawable/switch_track_selector"
+                        android:thumb="@drawable/switch_thumb_selector"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
