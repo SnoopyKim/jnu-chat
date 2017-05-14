@@ -106,7 +106,6 @@ public class ProfileFragment extends Fragment {
                 if (TextUtils.isEmpty(stPhoto)) {
                     pbLogin.setVisibility(View.GONE);
                 } else {
-                    //왜 안되냐 ㅠ -> 그냥 피카소쓰자
                     Glide.with(getActivity()).load(stPhoto).into(ivUser);
                     pbLogin.setVisibility(View.GONE);
                 }

@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                                 profile.put("key",user.getUid());
                                 myRef.child(user.getUid()).child("profile").setValue(profile);
                                 myRef.child(user.getUid()).child("friends").setValue(null);
+                                myRef.child(user.getUid()).child("room").setValue(null);
                             }
                         }
                     }
