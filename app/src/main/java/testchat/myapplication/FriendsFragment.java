@@ -99,7 +99,7 @@ public class FriendsFragment extends Fragment {
         request.setParameters(param);
         request.executeAsync();
 
-        myRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
+        myRef.child(user.getUid()).child("friends").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again

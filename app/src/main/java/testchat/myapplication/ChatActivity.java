@@ -2,13 +2,11 @@ package testchat.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +36,7 @@ public class ChatActivity extends AppCompatActivity{
     private RecyclerView.LayoutManager mLayoutManager;
 
     String email;
+    String name;
 
     EditText etText;
     Button btnSend;
@@ -59,11 +58,14 @@ public class ChatActivity extends AppCompatActivity{
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             email = user.getEmail();
-
+            name = user.getDisplayName();
         }
 
         Intent in = getIntent();
-        final String stChatId = in.getStringExtra("friendid");
+        final String friendId = in.getExtras().getString("friendid");
+        final String roomKey = in.getStringExtra("roomkey");
+
+        Log.d("roomKey",roomKey);
 
         etText = (EditText) findViewById(R.id.etText);
         btnSend = (Button) findViewById(R.id.btnSend);
@@ -82,10 +84,11 @@ public class ChatActivity extends AppCompatActivity{
 
                     Hashtable<String, String> chat = new Hashtable<String, String>();
                     chat.put("email",email);
-                    chat.put("name","");
+                    chat.put("name",name);
                     chat.put("text",stText);
-                    myRef.child(stChatId).child(formattedDate).setValue(chat);
+                    myRef.child(roomKey).child("chatInfo").child(formattedDate).setValue(chat);
                     etText.setText("");
+
                     //Toast.makeText(ChatActivity.this, email + "," + stText, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -108,16 +111,18 @@ public class ChatActivity extends AppCompatActivity{
         mAdapter = new MyAdapter(mChat,email, ChatActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
-        DatabaseReference myRef = database.getReference("chats").child(stChatId);
-        myRef.addChildEventListener(new ChildEventListener() {
+        DatabaseReference myRef = database.getReference("chats").child(roomKey);
+        myRef.child("chatInfo").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // A new comment has been added, add it to the displayed list
                 Chat chat = dataSnapshot.getValue(Chat.class);
 
+                Log.d("Chat",chat.toString());
                 // [START_EXCLUDE]
                 // Update RecyclerView
                 mChat.add(chat);
+                Log.d("mChat",mChat.toString());
                 mRecyclerView.scrollToPosition(mChat.size()-1);
                 mAdapter.notifyItemInserted(mChat.size() - 1);
                 // [END_EXCLUDE]
@@ -156,9 +161,10 @@ public class ChatActivity extends AppCompatActivity{
         switch(item.getItemId()){
             case R.id.action_backbutton:
                 //Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
+
+                Intent in = new Intent(ChatActivity.this, TabActivity.class);
+                startActivity(in);
                 finish();
-                //Intent in = new Intent(ChatActivity.this, TabActivity.class);
-                //startActivity(in);
                 break;
         }
         return super.onOptionsItemSelected(item);

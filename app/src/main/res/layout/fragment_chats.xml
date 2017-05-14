@@ -33,7 +33,7 @@
         android:clickable="true"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_menu_add"
-        android:backgroundTint="@color/conceptRed"
+        app:backgroundTint="@color/conceptRed"
         android:layout_gravity="bottom|end"/>
 
 </android.support.design.widget.CoordinatorLayout>
