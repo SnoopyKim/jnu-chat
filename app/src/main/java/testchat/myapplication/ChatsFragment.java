@@ -35,6 +35,8 @@ public class ChatsFragment extends Fragment {
 
     DatabaseReference myRef;
 
+    boolean myRoom;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -66,28 +68,30 @@ public class ChatsFragment extends Fragment {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 if(dataSnapshot.getValue() != null) {
-                    String value = dataSnapshot.getValue().toString();
-                    Log.d(TAG, "RoomList is: " + value);
-
                     mRoom.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
+                        myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey().toString();
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                            roomPeople.add(roomPerson.getKey());
+                            if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
+                                myRoom = true;
+                            }
+                            roomPeople.add(roomPerson.getValue().toString());
                         }
                         Room room = new Room(roomPeople,roomKey,roomText);
 
                         // [START_EXCLUDE]
                         // Update RecyclerView
-
-                        mRoom.add(room);
-                        mRAdapter.notifyItemInserted(mRoom.size() - 1);
+                        if(myRoom) {
+                            mRoom.add(room);
+                            mRAdapter.notifyItemInserted(mRoom.size() - 1);
+                        }
                     }
                 } else {
 
-                    Log.d(TAG, "FriendsList is Empty");
+                    Log.d(TAG, "ChatList is Empty");
                 }
             }
 

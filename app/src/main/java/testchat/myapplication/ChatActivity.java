@@ -62,11 +62,12 @@ public class ChatActivity extends AppCompatActivity{
         }
 
         Intent in = getIntent();
-        final String friendId = in.getExtras().getString("friendid");
+        final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomkey");
 
         Log.d("roomKey",roomKey);
 
+        getSupportActionBar().setTitle(friendName);
         etText = (EditText) findViewById(R.id.etText);
         btnSend = (Button) findViewById(R.id.btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {

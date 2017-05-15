@@ -41,6 +41,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     String stUserid;
     String stFriendid;
+    String stFriendname;
     String roomKey;
 
     boolean roomCheck;
@@ -125,6 +126,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
                         roomKey = chatReference.push().getKey();
                         stFriendid = mFriend.get(position).getFacebook_id();
+                        stFriendname = mFriend.get(position).getName();
                         userReference.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -146,9 +148,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                             roomKey = room.getKey();
 
                                                             Intent in = new Intent(context, ChatActivity.class);
-                                                            in.putExtra("userid", stUserid);
+                                                            in.putExtra("friendName",stFriendname);
                                                             in.putExtra("roomkey", roomKey);
-                                                            in.putExtra("friendid", stFriendid);
                                                             context.startActivity(in);
 
                                                             break;
@@ -168,16 +169,30 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                         roomCheck = false;
                                         //Log.d("userListener","off");
                                         if (!roomCheck) {
-                                            userReference.child(user.getUid()).child("room").child(stFriendid).setValue("");
+                                            userReference.child(user.getUid()).child("room").child(stFriendid).setValue(stFriendname);
+                                            userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    for (DataSnapshot userUid : dataSnapshot.getChildren()) {
+                                                        if(userUid.child("profile").child("facebook_id").getValue().toString().equals(stFriendid)) {
+                                                            userUid.child("room").child(stUserid).getRef().setValue(user.getDisplayName());
+                                                        }
+                                                    }
+                                                }
 
-                                            chatReference.child(roomKey).child("people").child(stUserid).setValue("");
-                                            chatReference.child(roomKey).child("people").child(stFriendid).setValue("");
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                }
+                                            });
+
+                                            chatReference.child(roomKey).child("people").child(stUserid).setValue(user.getDisplayName());
+                                            chatReference.child(roomKey).child("people").child(stFriendid).setValue(stFriendname);
                                             chatReference.child(roomKey).child("chatInfo").setValue("");
 
                                             Intent in = new Intent(context, ChatActivity.class);
-                                            in.putExtra("userid", stUserid);
+                                            in.putExtra("friendName",stFriendname);
                                             in.putExtra("roomkey", roomKey);
-                                            in.putExtra("friendid", stFriendid);
                                             context.startActivity(in);
                                         }
                                     }

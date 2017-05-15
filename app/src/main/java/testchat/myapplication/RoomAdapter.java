@@ -82,16 +82,20 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.tvName.setText(mRoom.get(position).getKey());
-
-        String stKey = mRoom.get(position).getKey();
-
         database = FirebaseDatabase.getInstance();
         userReference = database.getReference("users");
         chatReference = database.getReference("chats");
         user = FirebaseAuth.getInstance().getCurrentUser();
         roomCheck = true;
 
+        List<String> stNames = mRoom.get(position).getPeople();
+        String stName = "";
+        for (String name : stNames) {
+            if (!name.equals(user.getDisplayName()))
+                stName += name;
+        }
+
+        holder.tvName.setText(stName);
         holder.overall.setOnTouchListener(new View.OnTouchListener()
         {
 
