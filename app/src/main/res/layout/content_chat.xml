@@ -9,81 +9,71 @@
     tools:context="testchat.myapplication.ChatActivity"
     tools:showIn="@layout/activity_chat">
 
-    <LinearLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
+        android:layout_above="@+id/LLsend"
+        android:background="@drawable/layout_border"
+        android:clipChildren="false"
+        android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:id="@+id/LLsend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@color/colorChatBar"
         android:weightSum="100">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/my_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/etText"
-            android:layout_weight="92"
-            android:background="@drawable/layout_border"
-            android:clipChildren="false"
-            android:scrollbars="vertical" />
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="10"
+            android:background="@color/colorChatBar"
+            android:padding="0dp"
+            app:srcCompat="@drawable/ic_photo_white_24px" />
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="8"
-            android:orientation="horizontal"
-            android:background="@color/colorChatBar"
-            android:weightSum="100">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="75"
+            android:weightSum="5">
+            <TextView
+                android:id="@+id/tvEmpty2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
-            <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="10"
-                android:background="@color/colorChatBar"
-                android:padding="0dp"
-                app:srcCompat="@drawable/ic_photo_white_24px" />
+            <EditText
+                android:id="@+id/etText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:padding="1sp"
+                android:textSize="14sp"
+                android:background="@drawable/chat_bubble"
+                android:scrollbars="vertical" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_weight="75"
-                android:weightSum="5">
-
-                <TextView
-                    android:id="@+id/tvEmpty2"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
-
-                <EditText
-                    android:id="@+id/etText"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="3"
-                    android:padding="1sp"
-                    android:textSize="14sp"
-
-                    android:background="@drawable/chat_bubble"
-                    android:scrollbars="vertical" />
-
-                <TextView
-                    android:id="@+id/tvEmpty"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btnSend"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="15"
-                android:background="@color/colorChatBar"
-                android:textColor="@color/colorTextGray"
-                android:text="전송"
-                />
-
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="15"
+            android:background="@color/colorChatBar"
+            android:textColor="@color/colorTextGray"
+            android:text="전송"
+            />
 
     </LinearLayout>
 
