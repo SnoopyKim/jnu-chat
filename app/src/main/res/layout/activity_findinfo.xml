@@ -118,7 +118,7 @@
         android:layout_marginRight="10dp"/>
 
     <LinearLayout
-        android:id="@+id/donw_side"
+        android:id="@+id/down_side"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="49"

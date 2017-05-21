@@ -97,7 +97,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         if(TextUtils.isEmpty(stPhoto)) {
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
-            //Glide.with(context).load(R.drawable.ic_person_black_24dp).into(holder.ivUser);
         } else {
             Glide.with(context).load(stPhoto).into(holder.ivUser);
 

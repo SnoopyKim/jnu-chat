@@ -11,4 +11,8 @@
     <string name="title_profile">Profile</string>
 
     <string name="facebook_app_id" translatable="false">1206076382835831</string>
+
+    <string name="password_check_error">비밀번호 확인이 일치하지 않습니다</string>
+    <string name="title_activity_addfriend_activitiy">AddfriendActivitiy</string>
+    <string name="title_activity_addchat">AddchatActivity</string>
 </resources>
