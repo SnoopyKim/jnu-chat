@@ -29,9 +29,9 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:paddingLeft="@dimen/short_margin"
-            android:text="100"
             android:textColor="@color/colorTextLightGray"/>
     </LinearLayout>
+
     <ImageView
         android:id="@+id/divider"
         android:layout_width="match_parent"
@@ -51,5 +51,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_menu_add"
+        app:backgroundTint="@color/conceptRed"
+        android:layout_below="@+id/divider"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="450dp" />
 
 </RelativeLayout>

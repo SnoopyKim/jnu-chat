@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.FacebookSdk;
+
 public class TabActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
@@ -51,6 +53,7 @@ public class TabActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_tab);
 
         //FragmentTransaction의 인스턴스를 Activity로부터 가져옴

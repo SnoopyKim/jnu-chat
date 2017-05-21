@@ -39,8 +39,9 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     DatabaseReference chatReference;
     FirebaseUser user;
 
-    String stUserid;
-    String stFriendid;
+    String stUserEmail;
+    String stFriendEmail;
+    String stFriendname;
     String roomKey;
 
     boolean roomCheck;
@@ -93,12 +94,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
         String stPhoto = mFriend.get(position).getPhoto();
 
-        database = FirebaseDatabase.getInstance();
-        userReference = database.getReference("users");
-        chatReference = database.getReference("chats");
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        roomCheck = true;
-
         if(TextUtils.isEmpty(stPhoto)) {
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
@@ -118,37 +113,39 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                     case MotionEvent.ACTION_DOWN:
                         holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
 
+                        database = FirebaseDatabase.getInstance();
+                        userReference = database.getReference("users");
+                        chatReference = database.getReference("chats");
+                        user = FirebaseAuth.getInstance().getCurrentUser();
+
                         break;
                     case MotionEvent.ACTION_UP:
                         //set color back to default
                         holder.overall.setBackgroundColor(Color.WHITE);
 
                         roomKey = chatReference.push().getKey();
-                        stFriendid = mFriend.get(position).getFacebook_id();
-                        userReference.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        stUserEmail = user.getEmail().replace(".","|");
+                        stFriendEmail = mFriend.get(position).getEmail().replace(".","|");
+                        stFriendname = mFriend.get(position).getName();
+                        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if(dataSnapshot.getValue()!=null) {
                                     //roomCheck = false;
-                                    stUserid = dataSnapshot.child("profile").child("facebook_id").getValue().toString();
-                                    if(dataSnapshot.child("room").child(stFriendid).getValue() != null) {
-                                        //Log.d("userListener",dataSnapshot.child("room").child(stFriendid).getKey().toString());
+                                    if(dataSnapshot.child(user.getUid()).child("room").child(stFriendEmail).getValue() != null) {
                                         chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
                                                 if(dataSnapshot != null) {
-                                                    //Log.d("chatListener","on");
                                                     for (DataSnapshot room : dataSnapshot.getChildren()) {
                                                         if(room.child("people").getChildrenCount()==2 &&
-                                                                room.child("people").hasChild(stFriendid) &&
-                                                                room.child("people").hasChild(stUserid)) {
-                                                            roomCheck = true;
+                                                                room.child("people").hasChild(stFriendEmail) &&
+                                                                room.child("people").hasChild(stUserEmail)) {
                                                             roomKey = room.getKey();
 
                                                             Intent in = new Intent(context, ChatActivity.class);
-                                                            in.putExtra("userid", stUserid);
-                                                            in.putExtra("roomkey", roomKey);
-                                                            in.putExtra("friendid", stFriendid);
+                                                            in.putExtra("friendName",stFriendname);
+                                                            in.putExtra("roomKey", roomKey);
                                                             context.startActivity(in);
 
                                                             break;
@@ -165,21 +162,23 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                             }
                                         });
                                     } else {
-                                        roomCheck = false;
-                                        //Log.d("userListener","off");
-                                        if (!roomCheck) {
-                                            userReference.child(user.getUid()).child("room").child(stFriendid).setValue("");
+                                        userReference.child(user.getUid()).child("room").child(stFriendEmail).setValue(stFriendname);
 
-                                            chatReference.child(roomKey).child("people").child(stUserid).setValue("");
-                                            chatReference.child(roomKey).child("people").child(stFriendid).setValue("");
-                                            chatReference.child(roomKey).child("chatInfo").setValue("");
-
-                                            Intent in = new Intent(context, ChatActivity.class);
-                                            in.putExtra("userid", stUserid);
-                                            in.putExtra("roomkey", roomKey);
-                                            in.putExtra("friendid", stFriendid);
-                                            context.startActivity(in);
+                                        for (DataSnapshot userUid : dataSnapshot.getChildren()) {
+                                            if(userUid.child("profile").child("email").getValue().toString().equals(stFriendEmail.replace("|","."))) {
+                                                userUid.child("room").child(stUserEmail).getRef().setValue(user.getDisplayName());
+                                            }
                                         }
+
+                                        chatReference.child(roomKey).child("people").child(stUserEmail).setValue(user.getDisplayName());
+                                        chatReference.child(roomKey).child("people").child(stFriendEmail).setValue(stFriendname);
+                                        chatReference.child(roomKey).child("chatInfo").setValue("");
+
+                                        Intent in = new Intent(context, ChatActivity.class);
+                                        in.putExtra("friendName",stFriendname);
+                                        in.putExtra("roomKey", roomKey);
+                                        context.startActivity(in);
+
                                     }
                                 }
                             }

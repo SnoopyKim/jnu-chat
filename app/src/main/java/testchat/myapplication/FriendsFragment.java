@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -35,6 +37,8 @@ public class FriendsFragment extends Fragment {
 
     String TAG = getClass().getSimpleName();
 
+    TextView tvFriendcnt;
+
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
 
@@ -46,6 +50,9 @@ public class FriendsFragment extends Fragment {
 
     DatabaseReference myRef;
 
+    Intent in;
+    String providerId;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -53,6 +60,10 @@ public class FriendsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
+        in = getActivity().getIntent();
+        providerId = in.getStringExtra("providerId");
+
+        tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Friend_view);
 
@@ -70,49 +81,56 @@ public class FriendsFragment extends Fragment {
         mRecyclerView.setAdapter(mFAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
-
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
-                new GraphRequest.GraphJSONArrayCallback() {
-                    @Override
-                    public void onCompleted(JSONArray objects, GraphResponse response) {
-                        for(int i=0; i<objects.length(); i++) {
-                            try {
-                                JSONObject f_info = objects.getJSONObject(i);
-
-                                Hashtable<String, String> friend = new Hashtable<String, String>();
-                                friend.put("name", f_info.getString("name"));
-                                friend.put("facebook_id", f_info.getString("id"));
-                                friend.put("photo", f_info.getJSONObject("picture").getJSONObject("data").getString("url"));
-
-                                myRef.child(user.getUid()).child("friends").child(friend.get("facebook_id")).setValue(friend);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("GraphRequest_Friends", response.toString());
-                        }
-                    }
-                });
-        Bundle param = new Bundle();
-        param.putString("fields","name,id,picture");
-        request.setParameters(param);
-        request.executeAsync();
-
-        myRef.child(user.getUid()).child("friends").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 if(dataSnapshot.getValue() != null) {
-                    String value = dataSnapshot.getValue().toString();
-                    Log.d(TAG, "FriendsList is: " + value);
+                    if (providerId.equals("facebook")) {
+                        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+                        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                                new GraphRequest.GraphJSONArrayCallback() {
+                                    @Override
+                                    public void onCompleted(JSONArray objects, GraphResponse response) {
+                                        if (objects!=null) {
+                                            for (int i = 0; i < objects.length(); i++) {
+                                                try {
+                                                    JSONObject f_info = objects.getJSONObject(i);
+
+                                                    Hashtable<String, String> friend = new Hashtable<String, String>();
+                                                    for (DataSnapshot users : dataSnapshot.getChildren()) {
+                                                        if (users.child("profile").child("facebook_id").getValue().equals(f_info.getString("id"))) {
+                                                            String friendUid = users.getKey();
+                                                            String friendName = users.child("profile").child("name").getValue().toString();
+                                                            String friendEmail = users.child("profile").child("email").getValue().toString();
+                                                            String friendFacebookid = users.child("profile").child("facebook_id").getValue().toString();
+                                                            String friendPhoto = users.child("profile").child("photo").getValue().toString();
+
+                                                            friend.put("email", friendEmail);
+                                                            friend.put("name", friendName);
+                                                            friend.put("facebook_id", friendFacebookid);
+                                                            friend.put("photo", friendPhoto);
+                                                            myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
+                                                        }
+                                                    }
+
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                            Log.d(TAG, "GraphRequest for friend : Success");
+                                        }
+                                    }
+                                });
+                        Bundle param = new Bundle();
+                        param.putString("fields","id");
+                        request.setParameters(param);
+                        request.executeAsync();
+                    }
 
                     mFriend.clear();
-                    for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
-
-                        String value2 = dataSnapshot2.getValue().toString();
-                        Log.d(TAG, "Friend is: " + value2);
+                    for (DataSnapshot dataSnapshot2 : dataSnapshot.child(user.getUid()).child("friends").getChildren()) {
                         Friend friend = dataSnapshot2.getValue(Friend.class);
 
                         // [START_EXCLUDE]
@@ -121,9 +139,12 @@ public class FriendsFragment extends Fragment {
                         mFriend.add(friend);
                         mFAdapter.notifyItemInserted(mFriend.size() - 1);
                     }
-                } else {
+                    tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
 
+                } else {
+                    tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
                     Log.d(TAG, "FriendsList is Empty");
+
                 }
             }
 
@@ -134,7 +155,6 @@ public class FriendsFragment extends Fragment {
 
             }
         });
-
 
 
         return v;

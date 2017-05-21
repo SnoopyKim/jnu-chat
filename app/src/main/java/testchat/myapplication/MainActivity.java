@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
         myRef = database.getReference("users");
         //user = FirebaseAuth.getInstance().getCurrentUser();
 
+        //FirebaseAuth.getInstance().signOut();
+        //LoginManager.getInstance().logOut();
+
         textbtnFindinfo = (TextView) findViewById(R.id.textbtnFindinfo);
         textbtnFindinfo.setText(Html.fromHtml("<u>"+textbtnFindinfo.getText()+"</u>"));
         textbtnFindinfo.setOnClickListener(new View.OnClickListener() {
@@ -98,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //로그인 확인
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -108,8 +112,17 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
+                    //계정 제공업체 분류
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
+                    if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
+                        intent.putExtra("providerId","facebook");
+
+                    } else {
+                        intent.putExtra("providerId","email");
+
+                    }
                     startActivity(intent);
+                    finish();
 
                 } else {
                     // User is signed out
@@ -214,11 +227,13 @@ public class MainActivity extends AppCompatActivity {
                             if(user != null) {
                                 Hashtable<String, String> profile = new Hashtable<String, String>();
                                 profile.put("email", user.getEmail());
+                                profile.put("facebook_id", "");
+                                profile.put("name", "");
                                 profile.put("photo", "");
                                 profile.put("key",user.getUid());
                                 myRef.child(user.getUid()).child("profile").setValue(profile);
-                                myRef.child(user.getUid()).child("friends").setValue(null);
-                                myRef.child(user.getUid()).child("room").setValue(null);
+                                myRef.child(user.getUid()).child("friends").setValue("");
+                                myRef.child(user.getUid()).child("room").setValue("");
                             }
                         }
                     }

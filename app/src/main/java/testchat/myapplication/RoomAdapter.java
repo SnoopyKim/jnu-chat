@@ -1,6 +1,7 @@
 package testchat.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,11 +33,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     DatabaseReference chatReference;
     FirebaseUser user;
 
-    String stUserid;
-    String stFriendid;
+    String stRoomname;
     String roomKey;
-
-    boolean roomCheck;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -82,16 +80,20 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.tvName.setText(mRoom.get(position).getKey());
-
-        String stKey = mRoom.get(position).getKey();
 
         database = FirebaseDatabase.getInstance();
         userReference = database.getReference("users");
         chatReference = database.getReference("chats");
         user = FirebaseAuth.getInstance().getCurrentUser();
-        roomCheck = true;
 
+        List<String> listNames = mRoom.get(position).getPeople();
+        String stName = "";
+        for (String name : listNames) {
+            if (!name.equals(user.getDisplayName()))
+                stName += name;
+        }
+
+        holder.tvName.setText(stName);
         holder.overall.setOnTouchListener(new View.OnTouchListener()
         {
 
@@ -107,6 +109,19 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     case MotionEvent.ACTION_UP:
                         //set color back to default
                         holder.overall.setBackgroundColor(Color.WHITE);
+
+                        List<String> people = mRoom.get(position).getPeople();
+                        stRoomname = "";
+                        for (String person : people) {
+                            if(!person.equals(user.getDisplayName()))
+                                stRoomname += person;
+                        }
+                        roomKey = mRoom.get(position).getKey();
+
+                        Intent intent = new Intent(context, ChatActivity.class);
+                        intent.putExtra("friendName",stRoomname);
+                        intent.putExtra("roomKey",roomKey);
+                        context.startActivity(intent);
 
                         break;
                 }
