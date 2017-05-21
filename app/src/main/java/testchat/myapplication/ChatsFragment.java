@@ -1,6 +1,7 @@
 package testchat.myapplication;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,7 +73,7 @@ public class ChatsFragment extends Fragment {
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
-                        String roomKey = dataSnapshot2.getKey().toString();
+                        String roomKey = dataSnapshot2.getKey();
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
@@ -103,7 +104,8 @@ public class ChatsFragment extends Fragment {
             }
         });
 
-
+        //Chat Fragment 우측하단의 +버튼
+        FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
 
         return v;
     }

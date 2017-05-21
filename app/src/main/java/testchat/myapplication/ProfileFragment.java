@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -71,11 +70,6 @@ public class ProfileFragment extends Fragment {
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
         }
-        /*
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("email", Context.MODE_PRIVATE);
-        stUid = sharedPreferences.getString("uid","");
-        stEmail = sharedPreferences.getString("email","");
-        */
 
         pbLogin = (ProgressBar)v.findViewById(R.id.pbLogin);
 
@@ -214,15 +208,17 @@ public class ProfileFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Uri image = data.getData();
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), image);
-            ivUser.setImageBitmap(bitmap);
+        if(data!=null) {
+            Uri image = data.getData();
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), image);
+                ivUser.setImageBitmap(bitmap);
 
-            uploadImage();
+                uploadImage();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
