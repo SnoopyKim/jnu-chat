@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     String stEmail;
     String stPassword;
 
+    RelativeLayout RLinput;
     ProgressBar pbLogin;
 
     EditText etEmail;
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    FirebaseDatabase database;
     DatabaseReference myRef;
     FirebaseUser user;
 
@@ -72,9 +75,10 @@ public class MainActivity extends AppCompatActivity {
 
         etEmail = (EditText) findViewById(R.id.etEmail);
         etPassword = (EditText) findViewById(R.id.etPassword);
+        RLinput = (RelativeLayout) findViewById(R.id.RLinput);
         pbLogin = (ProgressBar) findViewById(R.id.pbLogin);
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         //user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -131,66 +135,53 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-            Button btnRegister = (Button) findViewById(R.id.btnRegister);
-            btnRegister.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    stEmail = etEmail.getText().toString();
-                    stPassword = etPassword.getText().toString();
+        Button btnLogin = (Button) findViewById(R.id.btnLogin);
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stEmail = etEmail.getText().toString();
+                stPassword = etPassword.getText().toString();
 
-                    if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
-                        Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
-                    } else {
-                        registerUser(stEmail, stPassword);
-                    }
+                if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
+                    Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
+                } else {
+                    userLogin(stEmail, stPassword);
                 }
-            });
+            }
+        });
 
-            Button btnLogin = (Button) findViewById(R.id.btnLogin);
-            btnLogin.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    stEmail = etEmail.getText().toString();
-                    stPassword = etPassword.getText().toString();
+        callbackManager = CallbackManager.Factory.create();
+        final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
+        fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
+        fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                handleFacebookAccessToken(loginResult.getAccessToken());
 
-                    if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
-                        Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
-                    } else {
-                        userLogin(stEmail, stPassword);
-                    }
-                }
-            });
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
+            }
 
-            callbackManager = CallbackManager.Factory.create();
-            final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
-            fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
-            fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-                @Override
-                public void onSuccess(LoginResult loginResult) {
-                    handleFacebookAccessToken(loginResult.getAccessToken());
+            @Override
+            public void onCancel() {
+                Toast.makeText(getApplicationContext(), "cancel",Toast.LENGTH_SHORT).show();
+            }
 
-                    pbLogin.setVisibility(GONE);
-                }
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(getApplicationContext(), "error",Toast.LENGTH_SHORT).show();
+            }
+        });
 
-                @Override
-                public void onCancel() {
-                    Toast.makeText(getApplicationContext(), "cancel",Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onError(FacebookException error) {
-                    Toast.makeText(getApplicationContext(), "error",Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            Button facebookBtnLogin = (Button)findViewById(R.id.btnLoginFacebook);
-            facebookBtnLogin.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    pbLogin.setVisibility(VISIBLE);
-                    fbtnLogin.performClick();
-                }
-            });
+        Button facebookBtnLogin = (Button)findViewById(R.id.btnLoginFacebook);
+        facebookBtnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RLinput.setVisibility(GONE);
+                pbLogin.setVisibility(VISIBLE);
+                fbtnLogin.performClick();
+            }
+        });
 
     }
 
@@ -207,40 +198,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void registerUser(String email, String password) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-
-                        } else {
-                            Toast.makeText(MainActivity.this, "Authentication success.",
-                                    Toast.LENGTH_SHORT).show();
-                            if(user != null) {
-                                Hashtable<String, String> profile = new Hashtable<String, String>();
-                                profile.put("email", user.getEmail());
-                                profile.put("facebook_id", "");
-                                profile.put("name", "");
-                                profile.put("photo", "");
-                                profile.put("key",user.getUid());
-                                myRef.child(user.getUid()).child("profile").setValue(profile);
-                                myRef.child(user.getUid()).child("friends").setValue("");
-                                myRef.child(user.getUid()).child("room").setValue("");
-                            }
-                        }
-                    }
-                });
-    }
-
     private void userLogin(String email, String password){
+        RLinput.setVisibility(GONE);
         pbLogin.setVisibility(VISIBLE);
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -248,25 +207,17 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                        //pbLogin.setVisibility(View.INVISIBLE);
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail", task.getException());
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            pbLogin.setVisibility(GONE);
 
-                        } else {
-
-                            Intent in = new Intent(MainActivity.this, TabActivity.class);
-                            startActivity(in);
-                            pbLogin.setVisibility(GONE);
-                            finish();
                         }
+                        pbLogin.setVisibility(GONE);
+                        RLinput.setVisibility(VISIBLE);
 
-                        // ...
                     }
                 });
     }

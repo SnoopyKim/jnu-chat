@@ -2,11 +2,13 @@ package testchat.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -153,6 +155,20 @@ public class FriendsFragment extends Fragment {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
 
+            }
+        });
+
+        //Friend Fragment 우측하단의 +버튼
+        FloatingActionButton addFriendButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
+        addFriendButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Intent intent = new Intent(v.getContext(), AddfriendActivitiy.class);
+                    getContext().startActivity(intent);
+                }
+
+                return false;
             }
         });
 

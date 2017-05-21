@@ -3,6 +3,7 @@ package testchat.myapplication;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -98,6 +99,8 @@ public class ProfileFragment extends Fragment {
                 String stPhoto = dataSnapshot.child("photo").getValue().toString();
 
                 if (TextUtils.isEmpty(stPhoto)) {
+                    Drawable defaultImg = getContext().getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                    ivUser.setImageDrawable(defaultImg);
                     pbLogin.setVisibility(View.GONE);
                 } else {
                     Glide.with(getActivity()).load(stPhoto).into(ivUser);
