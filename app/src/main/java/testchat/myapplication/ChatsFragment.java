@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -7,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -106,6 +108,17 @@ public class ChatsFragment extends Fragment {
 
         //Chat Fragment 우측하단의 +버튼
         FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
+        addRoomButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Intent intent = new Intent(v.getContext(), AddchatActivity.class);
+                    getContext().startActivity(intent);
+                }
+
+                return false;
+            }
+        });
 
         return v;
     }
