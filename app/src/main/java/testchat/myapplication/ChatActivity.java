@@ -63,7 +63,7 @@ public class ChatActivity extends AppCompatActivity{
 
         Intent in = getIntent();
         final String friendName = in.getStringExtra("friendName");
-        final String roomKey = in.getStringExtra("roomkey");
+        final String roomKey = in.getStringExtra("roomKey");
 
         Log.d("roomKey",roomKey);
 
@@ -119,11 +119,9 @@ public class ChatActivity extends AppCompatActivity{
                 // A new comment has been added, add it to the displayed list
                 Chat chat = dataSnapshot.getValue(Chat.class);
 
-                Log.d("Chat",chat.toString());
                 // [START_EXCLUDE]
                 // Update RecyclerView
                 mChat.add(chat);
-                Log.d("mChat",mChat.toString());
                 mRecyclerView.scrollToPosition(mChat.size()-1);
                 mAdapter.notifyItemInserted(mChat.size() - 1);
                 // [END_EXCLUDE]
@@ -163,8 +161,6 @@ public class ChatActivity extends AppCompatActivity{
             case R.id.action_backbutton:
                 //Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
 
-                Intent in = new Intent(ChatActivity.this, TabActivity.class);
-                startActivity(in);
                 finish();
                 break;
         }
