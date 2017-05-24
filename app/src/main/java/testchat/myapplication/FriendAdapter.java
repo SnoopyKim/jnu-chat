@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +24,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -32,6 +35,7 @@ import java.util.List;
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
     List<Friend> mFriend;
+    List<Friend> mFilter;
     Context context;
 
     FirebaseDatabase database;
@@ -69,6 +73,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     // Provide a suitable constructor (depends on the kind of dataset)
     public FriendAdapter(List<Friend> mFriend, Context context) {
         this.mFriend = mFriend;
+        this.mFilter = new ArrayList<Friend>();
+        this.mFilter.addAll(mFriend);
         this.context = context;
     }
 
@@ -197,9 +203,27 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     }
 
+    public void filter(String charText) {
+        charText = charText.toLowerCase(Locale.getDefault());
+        mFriend.clear();
+        if (charText.length() == 0) {
+            mFriend.addAll(mFilter);
+        } else {
+            for (Friend friend : mFilter) {
+                String name = friend.getName();
+                Log.d("friendName for filter:",name);
+                if (name.toLowerCase().contains(charText)) {
+                    mFriend.add(friend);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
+
         return mFriend.size();
     }
 }

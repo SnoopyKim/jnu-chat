@@ -4,14 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="@dimen/fab_margin"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context="testchat.myapplication.FriendsFragment">
 
     <!-- TODO: Update blank fragment layout -->
+
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_below="@id/toolbar"
+        android:background="@color/colorLightGray"
+        android:textColor="@color/colorTextGray"
+        />
+
     <LinearLayout
         android:id="@+id/friend_topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_below="@id/etSearch"
         android:orientation="horizontal"
         >
 

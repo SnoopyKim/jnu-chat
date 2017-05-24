@@ -6,11 +6,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatsFragment extends Fragment {
 
@@ -29,6 +33,7 @@ public class ChatsFragment extends Fragment {
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
+    EditText etSearch;
 
     List<Room> mRoom;
 
@@ -48,6 +53,8 @@ public class ChatsFragment extends Fragment {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        etSearch = (EditText) v.findViewById(R.id.etSearch);
+
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
 
         // use this setting to improve performance if you know that changes
@@ -59,9 +66,6 @@ public class ChatsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRoom = new ArrayList<>();
 
-        // specify an adapter (see also next example)
-        mRAdapter = new RoomAdapter(mRoom, getActivity());
-        mRecyclerView.setAdapter(mRAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats");
 
@@ -89,13 +93,15 @@ public class ChatsFragment extends Fragment {
                         // Update RecyclerView
                         if(myRoom) {
                             mRoom.add(room);
-                            mRAdapter.notifyItemInserted(mRoom.size() - 1);
                         }
                     }
                 } else {
 
                     Log.d(TAG, "ChatList is Empty");
                 }
+                mRAdapter = new RoomAdapter(mRoom, getActivity());
+                mRecyclerView.setAdapter(mRAdapter);
+                mRAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -103,6 +109,24 @@ public class ChatsFragment extends Fragment {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
 
+            }
+        });
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(final CharSequence s, int start, int before, int count) {
+
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mRAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 
