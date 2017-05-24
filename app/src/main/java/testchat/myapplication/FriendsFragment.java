@@ -6,11 +6,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
@@ -33,6 +36,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 
 
 public class FriendsFragment extends Fragment {
@@ -40,6 +44,7 @@ public class FriendsFragment extends Fragment {
     String TAG = getClass().getSimpleName();
 
     TextView tvFriendcnt;
+    EditText etSearch;
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
@@ -66,6 +71,7 @@ public class FriendsFragment extends Fragment {
         providerId = in.getStringExtra("providerId");
 
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
+        etSearch  = (EditText) v.findViewById(R.id.etSearch);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Friend_view);
 
@@ -79,8 +85,6 @@ public class FriendsFragment extends Fragment {
         mFriend = new ArrayList<>();
 
         // specify an adapter (see also next example)
-        mFAdapter = new FriendAdapter(mFriend, getActivity());
-        mRecyclerView.setAdapter(mFAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -131,6 +135,8 @@ public class FriendsFragment extends Fragment {
                         request.executeAsync();
                     }
 
+
+
                     mFriend.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.child(user.getUid()).child("friends").getChildren()) {
                         Friend friend = dataSnapshot2.getValue(Friend.class);
@@ -139,15 +145,20 @@ public class FriendsFragment extends Fragment {
                         // Update RecyclerView
 
                         mFriend.add(friend);
-                        mFAdapter.notifyItemInserted(mFriend.size() - 1);
                     }
-                    tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
+
+
+
 
                 } else {
-                    tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
                     Log.d(TAG, "FriendsList is Empty");
 
                 }
+
+                mFAdapter = new FriendAdapter(mFriend, getActivity());
+                mRecyclerView.setAdapter(mFAdapter);
+                mFAdapter.notifyDataSetChanged();
+                tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
             }
 
             @Override
@@ -155,6 +166,24 @@ public class FriendsFragment extends Fragment {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
 
+            }
+        });
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(final CharSequence s, int start, int before, int count) {
+
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mFAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 

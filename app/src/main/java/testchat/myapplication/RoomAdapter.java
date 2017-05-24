@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,7 +18,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -26,6 +29,7 @@ import java.util.List;
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     List<Room> mRoom;
+    List<Room> mFilter;
     Context context;
 
     FirebaseDatabase database;
@@ -59,6 +63,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     // Provide a suitable constructor (depends on the kind of dataset)
     public RoomAdapter(List<Room> mRoom, Context context) {
         this.mRoom = mRoom;
+        this.mFilter = new ArrayList<Room>();
+        this.mFilter.addAll(mRoom);
         this.context = context;
     }
 
@@ -129,6 +135,27 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
 
+    }
+
+    public void filter(String charText) {
+        charText = charText.toLowerCase(Locale.getDefault());
+        mRoom.clear();
+        if (charText.length() == 0) {
+            mRoom.addAll(mFilter);
+        } else {
+            for (Room room : mFilter) {
+                String name = "";
+                for (String fName : room.getPeople()) {
+                    if (!fName.equals(user.getDisplayName()))
+                        name += fName;
+                }
+                Log.d("RoomName for filter:",name);
+                if (name.toLowerCase().contains(charText)) {
+                    mRoom.add(room);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     // Return the size of your dataset (invoked by the layout manager)
