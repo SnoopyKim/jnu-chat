@@ -103,7 +103,7 @@ public class ProfileFragment extends Fragment {
                     ivUser.setImageDrawable(defaultImg);
                     pbLogin.setVisibility(View.GONE);
                 } else {
-                    Glide.with(getActivity()).load(stPhoto).into(ivUser);
+                    Glide.with(getContext()).load(stPhoto).into(ivUser);
                     pbLogin.setVisibility(View.GONE);
                 }
 

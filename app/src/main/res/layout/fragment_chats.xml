@@ -13,7 +13,7 @@
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="30dp"
         android:layout_gravity="top"
         android:background="@color/colorLightGray"
         android:textColor="@color/colorTextGray"

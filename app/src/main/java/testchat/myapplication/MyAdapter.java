@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-    private String[] mDataset;
+
     List<Chat> mChat;
     String stEmail;
     Context context;

@@ -48,13 +48,12 @@ public class FriendsFragment extends Fragment {
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
+    FriendAdapter mFAdapter;
 
     List<Friend> mFriend;
 
     FirebaseUser user;
     FirebaseDatabase database;
-    FriendAdapter mFAdapter;
-
     DatabaseReference myRef;
 
     Intent in;
@@ -73,26 +72,21 @@ public class FriendsFragment extends Fragment {
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
         etSearch  = (EditText) v.findViewById(R.id.etSearch);
 
+        //RecyclerView 사용하기 위한 사전 작업 (크기 고정, 어댑터 설정 등등)
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Friend_view);
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mFriend = new ArrayList<>();
 
-        // specify an adapter (see also next example)
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
+        //친구 데이터 리스트의 정보를 추가하기 위해 처음에 한번만 FirebaseDB호출
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
                 if(dataSnapshot.getValue() != null) {
+                    //만약 현유저가 페이스북 계정이면 친구 리스트를 API로 호출
                     if (providerId.equals("facebook")) {
                         FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
                         GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
@@ -104,6 +98,7 @@ public class FriendsFragment extends Fragment {
                                                 try {
                                                     JSONObject f_info = objects.getJSONObject(i);
 
+                                                    //이 앱에 동의를 한 친구들의 데이터를 Firebase내 자신의 친구 리스트에 추가
                                                     Hashtable<String, String> friend = new Hashtable<String, String>();
                                                     for (DataSnapshot users : dataSnapshot.getChildren()) {
                                                         if (users.child("profile").child("facebook_id").getValue().equals(f_info.getString("id"))) {
@@ -129,14 +124,14 @@ public class FriendsFragment extends Fragment {
                                         }
                                     }
                                 });
+                        //API 호출 인자값은 id만
                         Bundle param = new Bundle();
                         param.putString("fields","id");
                         request.setParameters(param);
                         request.executeAsync();
                     }
 
-
-
+                    //친구 데이터 리스트를 초기화 해주고 Firebase내 자신의 친구 리스트 목록을 가져와 추가
                     mFriend.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.child(user.getUid()).child("friends").getChildren()) {
                         Friend friend = dataSnapshot2.getValue(Friend.class);
@@ -147,14 +142,12 @@ public class FriendsFragment extends Fragment {
                         mFriend.add(friend);
                     }
 
-
-
-
                 } else {
                     Log.d(TAG, "FriendsList is Empty");
 
                 }
 
+                //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
                 mFAdapter = new FriendAdapter(mFriend, getActivity());
                 mRecyclerView.setAdapter(mFAdapter);
                 mFAdapter.notifyDataSetChanged();
@@ -169,6 +162,7 @@ public class FriendsFragment extends Fragment {
             }
         });
 
+        //검색 텍스트에 변화에 따른 이벤트 리스너
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -181,13 +175,14 @@ public class FriendsFragment extends Fragment {
 
             }
 
+            //검색 텍스트가 바뀌고 난 뒤 어댑터 내의 filter함수 호출
             @Override
             public void afterTextChanged(Editable s) {
                 mFAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 
-        //Friend Fragment 우측하단의 +버튼
+        //Friend Fragment 우측하단의 +버튼 누를 시 친구 추가화면으로 넘어가고 현재화면 종료
         FloatingActionButton addFriendButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
         addFriendButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -195,6 +190,7 @@ public class FriendsFragment extends Fragment {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     Intent intent = new Intent(v.getContext(), AddfriendActivitiy.class);
                     getContext().startActivity(intent);
+                    getActivity().finish();
                 }
 
                 return false;
