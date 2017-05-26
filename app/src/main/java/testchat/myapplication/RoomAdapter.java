@@ -63,7 +63,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     // Provide a suitable constructor (depends on the kind of dataset)
     public RoomAdapter(List<Room> mRoom, Context context) {
         this.mRoom = mRoom;
-        this.mFilter = new ArrayList<Room>();
+        this.mFilter = new ArrayList<>();
         this.mFilter.addAll(mRoom);
         this.context = context;
     }

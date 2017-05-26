@@ -10,14 +10,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 
 public class TabActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
     private long lastPressed;
     private Fragment fragment;
     Toolbar toolbar;
@@ -59,7 +57,6 @@ public class TabActivity extends AppCompatActivity {
         //FragmentTransaction의 인스턴스를 Activity로부터 가져옴
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //삽입할 뷰에 fragment를 추가하고(add), 이를 적용(commit)
 
         //toolbar로 activity별 이름 지정 및 icon추가 위함
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -67,7 +64,7 @@ public class TabActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("JNU chat");
         toolbar.setTitleTextColor(Color.WHITE);
 
-
+        //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit) -> 첫화면은 친구 리스트
         fragment = new FriendsFragment();
         fragmentTransaction.add(R.id.content, fragment);
         fragmentTransaction.commit();
@@ -82,13 +79,15 @@ public class TabActivity extends AppCompatActivity {
     public void switchFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
+        //Activity는 그대로, 안의 Fragment만 바꿈
         transaction.replace(R.id.content, fragment);
         transaction.commit();
     }
 
     @Override
     public void onBackPressed() {
-        if (System.currentTimeMillis() - lastPressed < 1500) {
+        //2초안에 뒤로가기 버튼을 두번 누르면 종료
+        if (System.currentTimeMillis() - lastPressed < 2000) {
             finish();
         }
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();

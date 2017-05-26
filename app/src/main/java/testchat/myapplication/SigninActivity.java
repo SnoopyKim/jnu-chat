@@ -1,6 +1,5 @@
 package testchat.myapplication;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -55,6 +54,7 @@ public class SigninActivity extends AppCompatActivity {
         myRef = database.getReference("users");
         mAuth = FirebaseAuth.getInstance();
 
+        //회원가입 버튼 클릭 시
         Button btnRegister = (Button) findViewById(R.id.button_signin);
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +63,7 @@ public class SigninActivity extends AppCompatActivity {
                 stPassword = etPassword.getText().toString();
                 stName = etName.getText().toString();
 
+                //이메일, 비밀번호, 이름 부분은 필수 입력
                 if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("") || stName.isEmpty() || stName.equals("")) {
                     Toast.makeText(SigninActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
 
@@ -75,16 +76,13 @@ public class SigninActivity extends AppCompatActivity {
 
     }
 
+    //Firebase내의 계정에 해당 정보로 등록(추가)
     public void registerUser(String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Toast.makeText(SigninActivity.this, "등록에 실패하였습니다",
                                     Toast.LENGTH_SHORT).show();
@@ -93,20 +91,20 @@ public class SigninActivity extends AppCompatActivity {
                             Toast.makeText(SigninActivity.this, "등록되셨습니다",
                                     Toast.LENGTH_SHORT).show();
 
+                            //등록에 성공하면 Firebase DB에 정보를 저장하고 MainActivity로 돌아감
                             String userUid = task.getResult().getUser().getUid();
                             Hashtable<String, String> profile = new Hashtable<String, String>();
                             profile.put("email", stEmail);
                             profile.put("facebook_id", "");
                             profile.put("name", stName);
                             profile.put("photo", "");
-                            profile.put("key",userUid);
+                            profile.put("uid",userUid);
 
                             myRef.child(userUid).child("profile").setValue(profile);
                             myRef.child(userUid).child("friends").setValue("");
                             myRef.child(userUid).child("room").setValue("");
 
-                            Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                            startActivity(intent);
+                            finish();
                         }
                     }
                 });
