@@ -26,8 +26,10 @@ import java.util.Locale;
  * Created by snoopy on 2017-04-01.
  */
 
+//채팅방 리스트 View관리 어댑터
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
+    //FriendAdapter와 동일 (두개의 채팅방 데이터 리스트)
     List<Room> mRoom;
     List<Room> mFilter;
     Context context;
@@ -40,11 +42,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     String stRoomname;
     String roomKey;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    //리스트로 된 View들을 통합적으로 보관하는 객체
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
+
         public TextView tvName;
         public ImageView ivUser;
         public LinearLayout overall;
@@ -52,6 +52,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         //imageview 동그랗게
         //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
 
+        //View에서 쓰이는 layout객체 생성
         public ViewHolder(View itemView) {
             super(itemView);
             overall = (LinearLayout) itemView.findViewById(R.id.room_overall) ;
@@ -60,7 +61,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
+    //커스텀 생성자 (리스트 초기값 설정)
     public RoomAdapter(List<Room> mRoom, Context context) {
         this.mRoom = mRoom;
         this.mFilter = new ArrayList<>();
@@ -68,7 +69,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         this.context = context;
     }
 
-    // Create new views (invoked by the layout manager)
+    //View생성 layout파일 지정
     @Override
     public RoomAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType) {
@@ -81,25 +82,25 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         return vh;
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+    //각 View마다 layout객체를 설정 | 데이터 및 이벤트 관리
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
 
         database = FirebaseDatabase.getInstance();
         userReference = database.getReference("users");
         chatReference = database.getReference("chats");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        //채팅방 이름 (참여자들 중 본인빼고 이름 이어붙임)
         List<String> listNames = mRoom.get(position).getPeople();
         String stName = "";
         for (String name : listNames) {
             if (!name.equals(user.getDisplayName()))
                 stName += name;
         }
-
         holder.tvName.setText(stName);
+
+        //View에서 각 칸을 누를 시의 이벤트
         holder.overall.setOnTouchListener(new View.OnTouchListener()
         {
 
@@ -113,9 +114,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
                         break;
                     case MotionEvent.ACTION_UP:
-                        //set color back to default
                         holder.overall.setBackgroundColor(Color.WHITE);
 
+                        //채팅방 이름과 채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
                         List<String> people = mRoom.get(position).getPeople();
                         stRoomname = "";
                         for (String person : people) {
@@ -137,6 +138,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     }
 
+    //채팅방 검색 함수 (FriendAdapter에서의 filter함수와 동일)
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
         mRoom.clear();
@@ -158,7 +160,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return mRoom.size();

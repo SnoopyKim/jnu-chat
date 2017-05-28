@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,18 +41,18 @@ import java.io.IOException;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-//import static android.view.View.GONE;
-//import static android.view.View.VISIBLE;
-
 
 public class ProfileFragment extends Fragment {
-
+    //개인정보 및 설정 Fragment 화면
     String TAG = getClass().getSimpleName();
+
     ImageView ivUser;
     private StorageReference mStorageRef;
     Bitmap bitmap;
+
     String stUid;
     String stEmail;
+
     ProgressBar pbLogin;
 
     @Override
@@ -61,6 +60,7 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
+        //Firebase 내 저장소 부분 호출
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -75,30 +75,33 @@ public class ProfileFragment extends Fragment {
         pbLogin = (ProgressBar)v.findViewById(R.id.pbLogin);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference Ref = database.getReference();
+        DatabaseReference Ref = database.getReference("users");
 
+        //프로필 사진 부분
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
         ivUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                //사진 클릭 시 기기 내의 갤러리로 연결
                 Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, 1);
 
             }
         });
-
+        //유저 이메일 설정
         TextView tvUser = (TextView)v.findViewById(R.id.tvUser);
         tvUser.setText(stEmail);
 
-        Ref.child("users").child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
+        //처음 한번만 사용자의 프로필 DB호출
+        Ref.child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 String stPhoto = dataSnapshot.child("photo").getValue().toString();
 
-                if (TextUtils.isEmpty(stPhoto)) {
+                //자신의 프로필 정보에서 사진URL 정보가 없다면 기본 Drawble로, 있다면 해당 사진으로 그림
+                if (stPhoto.equals("None")) {
                     Drawable defaultImg = getContext().getResources().getDrawable(R.drawable.ic_person_black_24dp);
                     ivUser.setImageDrawable(defaultImg);
                     pbLogin.setVisibility(View.GONE);
@@ -117,6 +120,7 @@ public class ProfileFragment extends Fragment {
              }
         });
 
+        //저장소 허용 동의 부분
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -132,7 +136,6 @@ public class ProfileFragment extends Fragment {
             } else {
 
                 // No explanation needed, we can request the permission.
-
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
                         1);
@@ -143,6 +146,7 @@ public class ProfileFragment extends Fragment {
             }
         }
 
+        //로그아웃 버튼 클릭 시 계정 로그아웃하고 MainActivity로 넘어감
         TextView btnLogout = (TextView)v.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,6 +162,7 @@ public class ProfileFragment extends Fragment {
         return v;
     }
 
+    //자신의 갤러리에서 선택한 사진을 그릴 때 DB에 해당 사진을 올림
     public void uploadImage() {
 
         StorageReference mountainRef = mStorageRef.child("users").child(stUid+".jpg");
@@ -167,6 +172,8 @@ public class ProfileFragment extends Fragment {
         byte[] data = baos.toByteArray();
 
         pbLogin.setVisibility(VISIBLE);
+
+        //가공한 사진 데이터를 Firebase 내 저장소에 등록(올리기)
         UploadTask uploadTask = mountainRef.putBytes(data);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -179,6 +186,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                //올려진 사진 데이터를 저장소에서 Uri-String형식으로 받은 후 DB에 저장
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                 String photoUri =  String.valueOf(downloadUrl);
                 Log.d("url", photoUri);
@@ -186,6 +194,7 @@ public class ProfileFragment extends Fragment {
                 DatabaseReference myRef = database.getReference("users");
 
                 myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
+                //만약 DB에 잘 저장됐으면 팝업 띄움
                 myRef.child(stUid).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -207,10 +216,12 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    //사진 클릭 시 호출되는 부분
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //저장소(갤러리)에서 선택한 사진을 bitmap형식으로 바꿔 그려주고 uploadImage함수 호출
         if(data!=null) {
             Uri image = data.getData();
             try {
@@ -226,6 +237,7 @@ public class ProfileFragment extends Fragment {
 
     }
 
+    //저장소 허용 동의 부분에서 결과 처리 부분인데 아직 아무것도 없음 (딱히 필요한 이벤트가 없을 듯?)
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {

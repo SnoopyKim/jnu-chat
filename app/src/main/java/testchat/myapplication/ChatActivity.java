@@ -28,11 +28,12 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
 
+//채팅방 화면 Activity
 public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private ChatAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     String email;
@@ -45,7 +46,7 @@ public class ChatActivity extends AppCompatActivity{
     FirebaseDatabase database;
     DatabaseReference myRef;
 
-
+    //생성 시
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +54,7 @@ public class ChatActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
         setSupportActionBar(toolbar);
 
+        //사용자의 이메일과 이름 초기화
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats");
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -61,14 +63,16 @@ public class ChatActivity extends AppCompatActivity{
             name = user.getDisplayName();
         }
 
+        //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
         final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomKey");
-
         Log.d("roomKey",roomKey);
 
         getSupportActionBar().setTitle(friendName);
         etText = (EditText) findViewById(R.id.etText);
+
+        //보내기 버튼 클릭 시 EditText에 적힌 내용을 DB로 보냄
         btnSend = (Button) findViewById(R.id.btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,7 +82,7 @@ public class ChatActivity extends AppCompatActivity{
 
                     Toast.makeText(ChatActivity.this, "내용을 입력해주세요", Toast.LENGTH_SHORT).show();
                 } else {
-
+                    //보낼 당시의 시각을 DB 내 child로 하고 채팅 정보를 업로드(추가)하고 EditText초기화
                     Calendar c = Calendar.getInstance();
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String formattedDate = df.format(c.getTime());
@@ -89,13 +93,9 @@ public class ChatActivity extends AppCompatActivity{
                     chat.put("text",stText);
                     myRef.child(roomKey).child("chatInfo").child(formattedDate).setValue(chat);
                     etText.setText("");
-
-                    //Toast.makeText(ChatActivity.this, email + "," + stText, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-
 
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
@@ -109,9 +109,10 @@ public class ChatActivity extends AppCompatActivity{
         mChat = new ArrayList<>();
 
         // specify an adapter (see also next example)
-        mAdapter = new MyAdapter(mChat,email, ChatActivity.this);
+        mAdapter = new ChatAdapter(mChat,email, ChatActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
+        //해당 고유키의 채팅방 DB에서 child가 추가될 때마다 데이터 리스트에 추가하고 어댑터로 RecyclerView에 그려짐
         DatabaseReference myRef = database.getReference("chats").child(roomKey);
         myRef.child("chatInfo").addChildEventListener(new ChildEventListener() {
             @Override
@@ -155,12 +156,11 @@ public class ChatActivity extends AppCompatActivity{
         return true;
     }
 
+    //폰에서의 뒤로가기 버튼 클릭 시 종료
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                //Toast.makeText(this,"1111",Toast.LENGTH_SHORT).show();
-
                 finish();
                 break;
         }

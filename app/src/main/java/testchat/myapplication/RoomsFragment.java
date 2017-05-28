@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ChatsFragment extends Fragment {
-
+public class RoomsFragment extends Fragment {
+    //채팅방 리스트 화면 Fragment
     String TAG = getClass().getSimpleName();
 
     RecyclerView mRecyclerView;
@@ -45,6 +45,7 @@ public class ChatsFragment extends Fragment {
 
     boolean myRoom;
 
+    //Fragment생성시 View (FriendsFragment와 동일)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -56,12 +57,8 @@ public class ChatsFragment extends Fragment {
         etSearch = (EditText) v.findViewById(R.id.etSearch);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRoom = new ArrayList<>();
@@ -69,6 +66,7 @@ public class ChatsFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats");
 
+        //Firebase에 DB 정보 호출 (처음 한번만)
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -76,10 +74,12 @@ public class ChatsFragment extends Fragment {
                 // whenever data at this location is updated.
                 if(dataSnapshot.getValue() != null) {
                     mRoom.clear();
+                    //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
+                        //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
@@ -87,6 +87,7 @@ public class ChatsFragment extends Fragment {
                             }
                             roomPeople.add(roomPerson.getValue().toString());
                         }
+                        //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         Room room = new Room(roomPeople,roomKey,roomText);
 
                         // [START_EXCLUDE]
@@ -99,6 +100,7 @@ public class ChatsFragment extends Fragment {
 
                     Log.d(TAG, "ChatList is Empty");
                 }
+                //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
                 mRecyclerView.setAdapter(mRAdapter);
                 mRAdapter.notifyDataSetChanged();
@@ -112,6 +114,7 @@ public class ChatsFragment extends Fragment {
             }
         });
 
+        //검색버튼의 텍스트 변화 시
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -126,11 +129,12 @@ public class ChatsFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
+                //텍스트가 바뀐 후 해당 텍스트로 filter함수 호출
                 mRAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 
-        //Chat Fragment 우측하단의 +버튼
+        //Chat Fragment 우측하단의 +버튼 (채팅방 추가 화면으로 넘어감)
         FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
         addRoomButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -138,6 +142,7 @@ public class ChatsFragment extends Fragment {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     Intent intent = new Intent(v.getContext(), AddchatActivity.class);
                     getContext().startActivity(intent);
+                    getActivity().finish();
                 }
 
                 return false;

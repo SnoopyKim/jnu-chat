@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -38,6 +40,7 @@ public class SigninActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseDatabase database;
     DatabaseReference myRef;
+    FirebaseAuth.AuthStateListener authListener;
     FirebaseUser user;
 
     @Override
@@ -53,6 +56,17 @@ public class SigninActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         mAuth = FirebaseAuth.getInstance();
+        authListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
+                user = firebaseAuth.getCurrentUser();
+                if(user != null) {
+
+                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+            }
+        };
 
         //회원가입 버튼 클릭 시
         Button btnRegister = (Button) findViewById(R.id.button_signin);
@@ -88,26 +102,41 @@ public class SigninActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
 
                         } else {
-                            Toast.makeText(SigninActivity.this, "등록되셨습니다",
-                                    Toast.LENGTH_SHORT).show();
+                            //작성한 이름을 Firebase 계정에 DisplayName으로 설정
+                            UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(stName).build();
+                            task.getResult().getUser().updateProfile(profileUpdate);
 
-                            //등록에 성공하면 Firebase DB에 정보를 저장하고 MainActivity로 돌아감
+                            //Firebase DB에 정보를 저장
                             String userUid = task.getResult().getUser().getUid();
                             Hashtable<String, String> profile = new Hashtable<String, String>();
                             profile.put("email", stEmail);
-                            profile.put("facebook_id", "");
+                            profile.put("facebook_id", "None");
                             profile.put("name", stName);
-                            profile.put("photo", "");
+                            profile.put("photo", "None");
                             profile.put("uid",userUid);
 
                             myRef.child(userUid).child("profile").setValue(profile);
                             myRef.child(userUid).child("friends").setValue("");
                             myRef.child(userUid).child("room").setValue("");
 
-                            finish();
+                            Toast.makeText(SigninActivity.this, "등록되셨습니다",
+                                    Toast.LENGTH_SHORT).show();
+
                         }
                     }
                 });
     }
-
+    @Override
+    public void onResume(){
+        super.onResume();
+        mAuth.addAuthStateListener(authListener);
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        if(authListener != null){
+            mAuth.removeAuthStateListener(authListener);
+        }
+    }
 }
