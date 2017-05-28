@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -95,7 +94,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
         holder.tvEmail.setText(mFriend.get(position).getName());
         String stPhoto = mFriend.get(position).getPhoto();
-        if(TextUtils.isEmpty(stPhoto)) {
+        if(stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);

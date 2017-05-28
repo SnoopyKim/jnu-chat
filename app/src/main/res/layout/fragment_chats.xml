@@ -6,7 +6,7 @@
     android:layout_marginLeft="@dimen/fab_margin"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context="testchat.myapplication.ChatsFragment">
+    tools:context="testchat.myapplication.RoomsFragment">
 
     <!-- TODO: Update blank fragment layout -->
 

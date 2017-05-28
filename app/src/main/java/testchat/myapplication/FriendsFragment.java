@@ -16,11 +16,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.LoggingBehavior;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,12 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,9 +46,6 @@ public class FriendsFragment extends Fragment {
     FirebaseDatabase database;
     DatabaseReference myRef;
 
-    Intent in;
-    String providerId;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -66,8 +53,7 @@ public class FriendsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        in = getActivity().getIntent();
-        providerId = in.getStringExtra("providerId");
+        Log.d(TAG, user.getDisplayName());
 
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
         etSearch  = (EditText) v.findViewById(R.id.etSearch);
@@ -86,51 +72,6 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
-                    //만약 현유저가 페이스북 계정이면 친구 리스트를 API로 호출
-                    if (providerId.equals("facebook")) {
-                        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-                        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
-                                new GraphRequest.GraphJSONArrayCallback() {
-                                    @Override
-                                    public void onCompleted(JSONArray objects, GraphResponse response) {
-                                        if (objects!=null) {
-                                            for (int i = 0; i < objects.length(); i++) {
-                                                try {
-                                                    JSONObject f_info = objects.getJSONObject(i);
-
-                                                    //이 앱에 동의를 한 친구들의 데이터를 Firebase내 자신의 친구 리스트에 추가
-                                                    Hashtable<String, String> friend = new Hashtable<String, String>();
-                                                    for (DataSnapshot users : dataSnapshot.getChildren()) {
-                                                        if (users.child("profile").child("facebook_id").getValue().equals(f_info.getString("id"))) {
-                                                            String friendUid = users.getKey();
-                                                            String friendName = users.child("profile").child("name").getValue().toString();
-                                                            String friendEmail = users.child("profile").child("email").getValue().toString();
-                                                            String friendFacebookid = users.child("profile").child("facebook_id").getValue().toString();
-                                                            String friendPhoto = users.child("profile").child("photo").getValue().toString();
-
-                                                            friend.put("email", friendEmail);
-                                                            friend.put("name", friendName);
-                                                            friend.put("facebook_id", friendFacebookid);
-                                                            friend.put("photo", friendPhoto);
-                                                            myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
-                                                        }
-                                                    }
-
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                            Log.d(TAG, "GraphRequest for friend : Success");
-                                        }
-                                    }
-                                });
-                        //API 호출 인자값은 id만
-                        Bundle param = new Bundle();
-                        param.putString("fields","id");
-                        request.setParameters(param);
-                        request.executeAsync();
-                    }
-
                     //친구 데이터 리스트를 초기화 해주고 Firebase내 자신의 친구 리스트 목록을 가져와 추가
                     mFriend.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.child(user.getUid()).child("friends").getChildren()) {

@@ -14,6 +14,7 @@ import com.google.firebase.database.FirebaseDatabase;
  * Created by th on 2017-04-12.
  */
 
+//비밀번호 찾기 화면
 public class FindinfoActivity extends AppCompatActivity {
 
     String TAG = this.getClass().getSimpleName();

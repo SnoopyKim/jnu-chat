@@ -31,9 +31,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
 
-        //FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
 
         //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
@@ -117,11 +121,62 @@ public class MainActivity extends AppCompatActivity {
                 //기기에서의 최근 유저가 접속중(Signed_in)이면
                 if (user != null) {
                     // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
                     //계정 제공업체 분류하고 TabActivity로 이동
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
+                        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(final DataSnapshot dataSnapshot) {
+                                //만약 현유저가 페이스북 계정이면 친구 리스트를 API로 호출
+                                FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+                                GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                                        new GraphRequest.GraphJSONArrayCallback() {
+                                            @Override
+                                            public void onCompleted(JSONArray objects, GraphResponse response) {
+                                                if (objects!=null) {
+                                                    for (int i = 0; i < objects.length(); i++) {
+                                                        try {
+                                                            JSONObject f_info = objects.getJSONObject(i);
+
+                                                            //이 앱에 동의를 한 친구들의 데이터를 Firebase내 자신의 친구 리스트에 추가
+                                                            Hashtable<String, String> friend = new Hashtable<String, String>();
+                                                            for (DataSnapshot users : dataSnapshot.getChildren()) {
+                                                                if (users.child("profile").child("facebook_id").getValue().equals(f_info.getString("id"))) {
+                                                                    String friendUid = users.getKey();
+                                                                    String friendName = users.child("profile").child("name").getValue().toString();
+                                                                    String friendEmail = users.child("profile").child("email").getValue().toString();
+                                                                    String friendPhoto = users.child("profile").child("photo").getValue().toString();
+
+                                                                    friend.put("email", friendEmail);
+                                                                    friend.put("name", friendName);
+                                                                    friend.put("photo", friendPhoto);
+                                                                    myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
+                                                                }
+                                                            }
+
+                                                        } catch (JSONException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                    Log.d(TAG, "GraphRequest for friend : Success");
+                                                }
+                                            }
+                                        });
+                                    //API 호출 인자값은 id만
+                                Bundle param = new Bundle();
+                                param.putString("fields","id");
+                                request.setParameters(param);
+                                request.executeAsync();
+                            }
+
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         intent.putExtra("providerId","facebook");
 
                     } else {

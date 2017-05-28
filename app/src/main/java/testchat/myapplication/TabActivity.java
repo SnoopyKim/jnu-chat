@@ -33,7 +33,7 @@ public class TabActivity extends AppCompatActivity {
                     getSupportActionBar().setTitle("친구");
                     return true;
                 case R.id.navigation_chats:
-                    fragment = new ChatsFragment();
+                    fragment = new RoomsFragment();
                     switchFragment(fragment);
                     getSupportActionBar().setTitle("채팅");
                     return true;

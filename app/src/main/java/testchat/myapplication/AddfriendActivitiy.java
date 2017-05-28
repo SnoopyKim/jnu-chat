@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -51,9 +50,9 @@ public class AddfriendActivitiy extends AppCompatActivity {
     String personEmail;
     String personName;
     String personPhoto;
-    String personFacebookid;
     String personUid;
 
+    String userName;
     String userPhoto;
     String userFacebookid;
 
@@ -94,8 +93,8 @@ public class AddfriendActivitiy extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //유저의 사진URL을 받음
+                        userName = dataSnapshot.child(user.getUid()).child("profile").child("name").getValue().toString();
                         userPhoto = dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString();
-                        userFacebookid = dataSnapshot.child(user.getUid()).child("profile").child("facebook_id").getValue().toString();
 
                         //모든 유저들 중 검색한 아이디와 동일한 계정을 찾음
                         for (DataSnapshot person : dataSnapshot.getChildren()) {
@@ -103,11 +102,10 @@ public class AddfriendActivitiy extends AppCompatActivity {
                             if(personEmail.equals(searchEmail)) {
                                 personName = person.child("profile").child("name").getValue().toString();
                                 personPhoto = person.child("profile").child("photo").getValue().toString();
-                                personFacebookid = person.child("profile").child("facebook_id").getValue().toString();
                                 personUid = person.child("profile").child("uid").getValue().toString();
 
                                 //동일할 시 결과창의 이미지뷰와 텍스트뷰를 설정해준 뒤 활성화
-                                if(TextUtils.isEmpty(personPhoto)) {
+                                if(personPhoto.equals("None")) {
                                     Drawable defaultImg = getResources().getDrawable(R.drawable.ic_person_black_24dp);
                                     ivUser.setImageDrawable(defaultImg);
                                 } else {
@@ -117,6 +115,8 @@ public class AddfriendActivitiy extends AppCompatActivity {
 
                                 rlResult.setVisibility(View.VISIBLE);
                                 btnAddFriend.setEnabled(true);
+
+                                break;
                             }
                         }
                     }
@@ -145,7 +145,6 @@ public class AddfriendActivitiy extends AppCompatActivity {
                 Hashtable<String, String> friend = new Hashtable<String, String>();
                 friend.put("email", personEmail);
                 friend.put("name", personName);
-                friend.put("facebook_id", personFacebookid);
                 friend.put("photo", personPhoto);
                 myRef.child(user.getUid()).child("friends").child(personUid).setValue(friend);
 
@@ -153,7 +152,6 @@ public class AddfriendActivitiy extends AppCompatActivity {
                 Hashtable<String, String> me = new Hashtable<String, String>();
                 me.put("email",user.getEmail());
                 me.put("name",user.getDisplayName());
-                me.put("facebook_id",userFacebookid);
                 me.put("photo",userPhoto);
                 myRef.child(personUid).child("friends").child(user.getUid()).setValue(me);
 
