@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
 
-        FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
 
         //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
