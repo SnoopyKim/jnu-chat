@@ -30,10 +30,12 @@
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
         android:clickable="true"
-        app:fabSize="mini"
-        app:srcCompat="@android:drawable/ic_menu_add"
         app:backgroundTint="@color/conceptRed"
-        android:layout_gravity="bottom|end"/>
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_add_white_24px" />
 
 </android.support.design.widget.CoordinatorLayout>
