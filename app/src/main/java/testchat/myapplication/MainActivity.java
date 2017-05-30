@@ -31,9 +31,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
+        //layout objects 생성 및 초기화
         etEmail = (EditText) findViewById(R.id.etEmail);
         etPassword = (EditText) findViewById(R.id.etPassword);
         RLinput = (RelativeLayout) findViewById(R.id.RLinput);
@@ -80,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
-        //user = FirebaseAuth.getInstance().getCurrentUser();
 
-        //FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
 
+        //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
         textbtnFindinfo = (TextView) findViewById(R.id.textbtnFindinfo);
         textbtnFindinfo.setText(Html.fromHtml("<u>"+textbtnFindinfo.getText()+"</u>"));
         textbtnFindinfo.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //회원가입 버튼 클릭 시 해당 Activity로 이동
         textbtnSignin = (TextView) findViewById(R.id.textbtnSignin);
         textbtnSignin.setText(Html.fromHtml("<u>"+textbtnSignin.getText()+"</u>"));
         textbtnSignin.setOnClickListener(new View.OnClickListener() {
@@ -105,20 +111,72 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //로그인 확인
+        //로그인 감지(계속 활성화되있음)
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 user = firebaseAuth.getCurrentUser();
 
+                //기기에서의 최근 유저가 접속중(Signed_in)이면
                 if (user != null) {
                     // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
-                    //계정 제공업체 분류
+                    //계정 제공업체 분류하고 TabActivity로 이동
                     Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
+                        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(final DataSnapshot dataSnapshot) {
+                                //만약 현유저가 페이스북 계정이면 친구 리스트를 API로 호출
+                                FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
+                                GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
+                                        new GraphRequest.GraphJSONArrayCallback() {
+                                            @Override
+                                            public void onCompleted(JSONArray objects, GraphResponse response) {
+                                                if (objects!=null) {
+                                                    for (int i = 0; i < objects.length(); i++) {
+                                                        try {
+                                                            JSONObject f_info = objects.getJSONObject(i);
+
+                                                            //이 앱에 동의를 한 친구들의 데이터를 Firebase내 자신의 친구 리스트에 추가
+                                                            Hashtable<String, String> friend = new Hashtable<String, String>();
+                                                            for (DataSnapshot users : dataSnapshot.getChildren()) {
+                                                                if (users.child("profile").child("facebook_id").getValue().equals(f_info.getString("id"))) {
+                                                                    String friendUid = users.getKey();
+                                                                    String friendName = users.child("profile").child("name").getValue().toString();
+                                                                    String friendEmail = users.child("profile").child("email").getValue().toString();
+                                                                    String friendPhoto = users.child("profile").child("photo").getValue().toString();
+
+                                                                    friend.put("email", friendEmail);
+                                                                    friend.put("name", friendName);
+                                                                    friend.put("photo", friendPhoto);
+                                                                    myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
+                                                                }
+                                                            }
+
+                                                        } catch (JSONException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                    Log.d(TAG, "GraphRequest for friend : Success");
+                                                }
+                                            }
+                                        });
+                                    //API 호출 인자값은 id만
+                                Bundle param = new Bundle();
+                                param.putString("fields","id");
+                                request.setParameters(param);
+                                request.executeAsync();
+                            }
+
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         intent.putExtra("providerId","facebook");
 
                     } else {
@@ -135,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //로그인 버튼 클릭 시
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
                 stEmail = etEmail.getText().toString();
                 stPassword = etPassword.getText().toString();
 
+                //빈칸이 있을 경우 로그인X, 팝업 띄움
                 if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("")) {
                     Toast.makeText(MainActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
                 } else {
@@ -150,8 +210,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //페이스북 콜백매니저(로그인 버튼 관련)
         callbackManager = CallbackManager.Factory.create();
         final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
+        //페이스북 로그인하는 유저의 정보 동의를 얻는 부분 (이메일, 친구리스트)
         fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
         fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -173,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //보여지는 페이스북 로그인 버튼 클릭 시 숨겨져있는 진짜 페이스북 로그인 버튼 실행
         Button facebookBtnLogin = (Button)findViewById(R.id.btnLoginFacebook);
         facebookBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //계정 로그인 감지의 시작과 종료 호출 함수
     @Override
     public void onStart() {
         super.onStart();
@@ -198,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //로그인 버튼 클릭 시 Firebase에 해당 계정 로그인 on
     private void userLogin(String email, String password){
         RLinput.setVisibility(GONE);
         pbLogin.setVisibility(VISIBLE);
@@ -222,7 +287,9 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    //페이스북 로그인에 성공할 시
     private void handleFacebookAccessToken(AccessToken accessToken) {
+        //credential로 페이스북에서 token을 얻어 Firebase에 해당 계정 로그인 on
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
@@ -231,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
                     user = task.getResult().getUser();
                     Log.d("userUID", user.getUid());
 
+                    //로그인 on되면 자신의 정보를 API로 불러와 Firebase내 DB에 저장
                     FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
                     GraphRequest request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(),
                             new GraphRequest.GraphJSONObjectCallback() {
@@ -251,9 +319,11 @@ public class MainActivity extends AppCompatActivity {
                                     Log.d("GraphRequest_Me",response.toString());
                                 }
                             });
+                    //API 호출 시 필요한 인자들 설정 (이메일, 이름, id, 프로필 사진)
                     Bundle param = new Bundle();
                     param.putString("fields","email,name,id,picture");
                     request.setParameters(param);
+                    //API 호출
                     request.executeAsync();
 
                     Log.v(TAG,"Facebook Login task success");
@@ -265,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //페이스북 로그인 결과
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
