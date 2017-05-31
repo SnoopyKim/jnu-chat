@@ -1,15 +1,25 @@
 package testchat.myapplication;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,7 +34,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 public class AddfriendActivitiy extends AppCompatActivity {
     String TAG = getClass().getSimpleName();
@@ -33,10 +45,12 @@ public class AddfriendActivitiy extends AppCompatActivity {
 
     EditText etSearch;
     Button btnSearch;
+    Toolbar toolbar;
 
     RelativeLayout rlResult;
     ImageView ivUser;
     TextView tvUser;
+    TextView tvUsermail;
     Button btnAddFriend;
 
     RelativeLayout rlConfirm;
@@ -56,12 +70,18 @@ public class AddfriendActivitiy extends AppCompatActivity {
     String userPhoto;
     String userFacebookid;
 
+    //th ver.
+    Context mContext;
+    //th fin
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addfriend);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("친구 검색");
+        toolbar.setTitleTextColor(Color.WHITE);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
@@ -74,12 +94,16 @@ public class AddfriendActivitiy extends AppCompatActivity {
         rlResult = (RelativeLayout) findViewById(R.id.searchResult);
         ivUser = (ImageView) findViewById(R.id.ivUser);
         tvUser = (TextView) findViewById(R.id.tvUser);
+        tvUsermail = (TextView) findViewById(R.id.tvUsermail);
         btnAddFriend = (Button) findViewById(R.id.btnAddFriend);
         btnAddFriend.setEnabled(false);
 
         rlConfirm = (RelativeLayout) findViewById(R.id.confirmPop);
         btnYes = (Button) findViewById(R.id.btnYes);
         btnNo = (Button) findViewById(R.id.btnNo);
+        //th ver.
+        mContext = this;
+        //th fin
 
         //검색 버튼 클릭 이벤트
         btnSearch.setOnClickListener(new View.OnClickListener() {
@@ -139,7 +163,67 @@ public class AddfriendActivitiy extends AppCompatActivity {
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rlConfirm.setVisibility(View.VISIBLE);
+                //th ver.
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+                // 제목셋팅
+                alertDialogBuilder.setTitle("프로그램 종료");
+
+
+                // AlertDialog 셋팅
+                alertDialogBuilder
+                        .setMessage("프로그램을 종료할 것입니까?")
+                        .setCancelable(false)
+                        //right side button
+                        .setPositiveButton("아니오",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // 다이얼로그를 취소한다
+                                        dialog.cancel();
+                                    }
+                                })
+                        //left side button
+                        .setNegativeButton("예",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Hashtable<String, String> friend = new Hashtable<String, String>();
+                                        friend.put("email", personEmail);
+                                        friend.put("name", personName);
+                                        friend.put("photo", personPhoto);
+                                        myRef.child(user.getUid()).child("friends").child(personUid).setValue(friend);
+
+                                        //해당 유저의 친구리스트DB에 자신을 추가
+                                        Hashtable<String, String> me = new Hashtable<String, String>();
+                                        me.put("email",user.getEmail());
+                                        me.put("name",user.getDisplayName());
+                                        me.put("photo",userPhoto);
+                                        myRef.child(personUid).child("friends").child(user.getUid()).setValue(me);
+
+                                        //팝업과 함께 전체화면 초기화
+                                        Toast.makeText(AddfriendActivitiy.this,"추가 되었습니다", Toast.LENGTH_SHORT).show();
+                                        rlConfirm.setVisibility(View.GONE);
+                                        rlResult.setVisibility(View.INVISIBLE);
+                                        btnAddFriend.setEnabled(false);
+                                        etSearch.setText("");
+                                    }
+                                });
+
+                // 다이얼로그 생성
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                //back button || touch other screen -> close dialog
+                alertDialog.setCancelable(true);
+                alertDialog.setCanceledOnTouchOutside(true);
+
+                // 다이얼로그 보여주기
+                alertDialog.show();
+
+                Button rightBtn = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+              //  rightBtn.setBackground(R.color.conceptRed);
+
+
+                //thfin
+                //rlConfirm.setVisibility(View.VISIBLE);
             }
         });
 
@@ -200,5 +284,4 @@ public class AddfriendActivitiy extends AppCompatActivity {
 
         finish();
     }
-
 }

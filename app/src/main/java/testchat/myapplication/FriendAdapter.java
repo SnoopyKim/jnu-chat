@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -56,6 +57,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         public TextView tvEmail;
         public ImageView ivUser;
         public LinearLayout overall;
+
 
         //imageview 동그랗게
         //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
