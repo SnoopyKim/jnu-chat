@@ -23,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,9 +45,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     DatabaseReference chatReference;
     FirebaseUser user;
 
-    String stUserEmail;
+    String stFriendUid;
     String stFriendEmail;
     String stFriendname;
+    String stFriendPhoto;
     String roomKey;
 
     //리스트로 된 View들을 통합적으로 보관하는 객체
@@ -128,16 +130,17 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
                         //변수들의 값을 설정
                         roomKey = chatReference.push().getKey();
-                        stUserEmail = user.getEmail().replace(".","|");
-                        stFriendEmail = mFriend.get(position).getEmail().replace(".","|");
+                        stFriendUid = mFriend.get(position).getUid();
+                        stFriendEmail = mFriend.get(position).getEmail();
                         stFriendname = mFriend.get(position).getName();
+                        stFriendPhoto = mFriend.get(position).getPhoto();
                         //Firebase에 users 부분 데이터 불러오기
                         userReference.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if(dataSnapshot.getValue()!=null) {
                                     //만약 내가 해당 칸의 친구랑 채팅을 한적이 있다면
-                                    if(dataSnapshot.child(user.getUid()).child("room").child(stFriendEmail).getValue() != null) {
+                                    if(dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
                                         //Firebase에 chats 부분 데이터 불러오기
                                         chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
@@ -146,8 +149,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                     //DB에 저장된 채팅방들 중 해당 칸의 친구와 자신만 있는 방을 찾아 그 방의 고유키를 가지고 ChatActivity로 이동
                                                     for (DataSnapshot room : dataSnapshot.getChildren()) {
                                                         if(room.child("people").getChildrenCount()==2 &&
-                                                                room.child("people").hasChild(stFriendEmail) &&
-                                                                room.child("people").hasChild(stUserEmail)) {
+                                                                room.child("people").hasChild(stFriendUid) &&
+                                                                room.child("people").hasChild(user.getUid())) {
                                                             roomKey = room.getKey();
 
                                                             Intent in = new Intent(context, ChatActivity.class);
@@ -158,8 +161,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                                             break;
                                                         }
                                                     }
-                                                } else {
-                                                    //Log.d("chatListener","off");
                                                 }
                                             }
 
@@ -170,17 +171,20 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                         });
                                     } else {
                                         //채팅을 한적이 없다면 양쪽 사람에게 표시를하고
-                                        userReference.child(user.getUid()).child("room").child(stFriendEmail).setValue(stFriendname);
-
-                                        for (DataSnapshot userUid : dataSnapshot.getChildren()) {
-                                            if(userUid.child("profile").child("email").getValue().toString().equals(stFriendEmail.replace("|","."))) {
-                                                userUid.child("room").child(stUserEmail).getRef().setValue(user.getDisplayName());
-                                            }
-                                        }
+                                        userReference.child(user.getUid()).child("room").child(stFriendUid).setValue(stFriendname);
+                                        userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(user.getDisplayName());
 
                                         //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
-                                        chatReference.child(roomKey).child("people").child(stUserEmail).setValue(user.getDisplayName());
-                                        chatReference.child(roomKey).child("people").child(stFriendEmail).setValue(stFriendname);
+                                        Hashtable<String, String> myInfo = new Hashtable<String, String>();
+                                        myInfo.put("name",user.getDisplayName());
+                                        myInfo.put("photo",dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString());
+                                        chatReference.child(roomKey).child("people").child(user.getUid()).setValue(myInfo);
+
+                                        Hashtable<String, String> friendInfo = new Hashtable<String, String>();
+                                        friendInfo.put("name",stFriendname);
+                                        friendInfo.put("photo",stFriendPhoto);
+                                        chatReference.child(roomKey).child("people").child(stFriendUid).setValue(friendInfo);
+
                                         chatReference.child(roomKey).child("chatInfo").setValue("");
 
                                         Intent in = new Intent(context, ChatActivity.class);

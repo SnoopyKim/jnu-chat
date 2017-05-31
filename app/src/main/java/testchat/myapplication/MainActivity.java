@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
 
-        FirebaseAuth.getInstance().signOut();
+        //FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
 
         //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getDisplayName());
 
                     //계정 제공업체 분류하고 TabActivity로 이동
-                    Intent intent = new Intent(MainActivity.this, TabActivity.class);
+                    final Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
                         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -169,6 +169,10 @@ public class MainActivity extends AppCompatActivity {
                                 param.putString("fields","id");
                                 request.setParameters(param);
                                 request.executeAsync();
+
+                                intent.putExtra("providerId","facebook");
+                                startActivity(intent);
+                                finish();
                             }
 
 
@@ -177,19 +181,20 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
-                        intent.putExtra("providerId","facebook");
 
                     } else {
                         intent.putExtra("providerId","email");
 
+                        startActivity(intent);
+                        finish();
                     }
-                    startActivity(intent);
-                    finish();
 
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
             }
         };
 
@@ -220,8 +225,6 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
 
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
             }
 
             @Override
@@ -280,9 +283,6 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
 
                         }
-                        pbLogin.setVisibility(GONE);
-                        RLinput.setVisibility(VISIBLE);
-
                     }
                 });
     }
@@ -296,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
                     user = task.getResult().getUser();
-                    Log.d("userUID", user.getUid());
 
                     //로그인 on되면 자신의 정보를 API로 불러와 Firebase내 DB에 저장
                     FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
@@ -305,6 +304,8 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onCompleted(JSONObject object, GraphResponse response) {
                                     try {
+                                        Log.d("GraphRequest_Me",response.toString());
+
                                         Hashtable<String, String> profile = new Hashtable<String, String>();
                                         profile.put("name", object.getString("name"));
                                         profile.put("email", object.getString("email"));
@@ -316,7 +317,6 @@ public class MainActivity extends AppCompatActivity {
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
-                                    Log.d("GraphRequest_Me",response.toString());
                                 }
                             });
                     //API 호출 시 필요한 인자들 설정 (이메일, 이름, id, 프로필 사진)
@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //페이스북 로그인 결과
+    //페이스북 화면에서 돌아올 때 사용
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
