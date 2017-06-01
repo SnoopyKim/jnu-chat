@@ -5,12 +5,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="100">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_light"
-        android:minHeight="?attr/actionBarSize"/>
+        android:background="@color/conceptRed"
+        android:minHeight="?attr/actionBarSize" />
 
     <LinearLayout
         android:id="@+id/upper_side"
