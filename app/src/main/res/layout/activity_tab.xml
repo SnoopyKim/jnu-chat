@@ -9,28 +9,69 @@
     android:orientation="vertical"
     tools:context="testchat.myapplication.TabActivity"
     android:background="@color/colorWhite">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_light"
+        android:background="@color/conceptRed"
         android:minHeight="?attr/actionBarSize"
-        android:title="hello"/>
+        android:elevation="0dp"/>
 
-    <RelativeLayout
-        android:id="@+id/content"
-        android:layout_weight="1"
+    <LinearLayout
+        android:id="@+id/searchbox_ll"
         android:layout_width="match_parent"
-        android:layout_height="0dp"></RelativeLayout>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/toolbar"
+        android:background="@android:color/holo_red_light"
+        android:weightSum="100"
+        >
 
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginTop="@dimen/short_margin"
+            android:orientation="horizontal"
+            android:background="@color/colorWhite"
+            android:layout_weight="10">
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:background="@drawable/ic_search_black_24px" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="@dimen/short_margin"
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:layout_weight="90"
+            android:singleLine="true"
+            android:background="@color/colorWhite"
+            android:textColor="@color/colorBlack" />
+    </LinearLayout>
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:background="?android:attr/windowBackground"
         app:itemBackground="@color/conceptRed"
         app:layout_behavior="tech.thdev.app.view.BottomNavigationBehavior"
+        android:elevation="1dp"
         app:menu="@menu/navigation" />
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"></RelativeLayout>
 
 </LinearLayout>

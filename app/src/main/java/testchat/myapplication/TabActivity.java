@@ -9,16 +9,25 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
+
+import java.util.Locale;
+
+import static java.sql.Types.NULL;
 
 public class TabActivity extends AppCompatActivity {
 
     private long lastPressed;
     private Fragment fragment;
     Toolbar toolbar;
+    EditText etSearch;
 
     //Navigation에서 Icon클릭시 해당 fragment로 이동
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -54,9 +63,11 @@ public class TabActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_tab);
 
+        etSearch = (EditText) findViewById(R.id.etSearch);
+
         //FragmentTransaction의 인스턴스를 Activity로부터 가져옴
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         //toolbar로 activity별 이름 지정 및 icon추가 위함
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -73,6 +84,19 @@ public class TabActivity extends AppCompatActivity {
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        //검색 텍스트에 변화에 따른 이벤트 리스너
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(final CharSequence s, int start, int before, int count) {}
+            //검색 텍스트 바뀔때마다 fragment에 string 보내기
+            @Override
+            public void afterTextChanged(Editable s) {
+                ((FriendsFragment) fragment).ChangeET(s.toString());
+            }
+        });
     }
 
     //fragment 이동 함수(transaction 수행)

@@ -262,5 +262,6 @@ public class ProfileFragment extends Fragment {
             // permissions this app might request
         }
     }
+    public void ChangeET(String s){}
 }
 
