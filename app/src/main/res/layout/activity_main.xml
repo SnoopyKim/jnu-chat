@@ -35,9 +35,9 @@
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:hint="아이디를 입력해주세요."
+            android:inputType="textWebEmailAddress"
             android:maxLines="1"
-            android:theme="@style/EditTextStyle"
-            />
+            android:theme="@style/EditTextStyle" />
 
         <EditText
             android:id="@+id/etPassword"
@@ -48,9 +48,9 @@
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:hint="비밀번호를 입력해주세요."
+            android:inputType="textPassword"
             android:maxLines="1"
-            android:theme="@style/EditTextStyle"
-            />
+            android:theme="@style/EditTextStyle" />
 
         <Button
             android:id="@+id/btnLogin"

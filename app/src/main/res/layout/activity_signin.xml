@@ -124,6 +124,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="10"
+        android:layout_marginTop="@dimen/short_margin"
         android:paddingLeft="@dimen/short_margin"
         android:paddingRight="@dimen/fab_margin"
         android:orientation="horizontal">
@@ -175,6 +176,7 @@
             android:layout_weight="7"
             android:paddingLeft="8sp"
             android:paddingTop="0dp"
+            android:visibility="invisible"
             android:text="@string/password_check_error"
             android:textSize="13sp"
             android:textColor="#ff0900" />
@@ -253,13 +255,14 @@
             android:layout_width="0dp"
             android:layout_height="25sp"
             android:layout_weight="7"
-            android:paddingLeft="8sp"
-            android:ems="8"
-            android:maxLength="20"
             android:background="@drawable/edit_gray_box"
-            android:inputType="number"
-            android:textSize="16sp"
-            android:textColor="@color/colorDarkGray"/>
+            android:ems="8"
+            android:hint="ex) 19000101"
+            android:inputType="number|date"
+            android:maxLength="20"
+            android:paddingLeft="8sp"
+            android:textColor="@color/colorDarkGray"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
@@ -268,6 +271,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="10"
+        android:layout_marginTop="@dimen/short_margin"
         android:paddingLeft="@dimen/short_margin"
         android:paddingRight="@dimen/fab_margin"
         android:orientation="horizontal">
@@ -277,30 +281,35 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
+            android:layout_marginRight="8dp"
             android:text="성별"
             android:textColor="@color/colorDarkGray"
             android:textSize="16sp" />
 
-        <Button
+        <ToggleButton
             android:id="@+id/button_gender_m"
+            style="@style/noMarginToggleButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
             android:layout_marginLeft="@dimen/short_margin"
             android:background="@drawable/button_light_gray"
             android:padding="0dp"
-            android:text="남"
+            android:textOn="남"
+            android:textOff="남"
             android:textStyle="bold"
             android:textColor="@color/colorDarkGray"/>
-        <Button
+        <ToggleButton
             android:id="@+id/button_gender_f"
+            style="@style/noMarginToggleButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
             android:layout_marginLeft="@dimen/fab_margin"
             android:background="@drawable/button_light_gray"
             android:padding="0dp"
-            android:text="여"
+            android:textOn="여"
+            android:textOff="여"
             android:textStyle="bold"
             android:textColor="@color/colorDarkGray"/>
 
@@ -361,6 +370,7 @@
         android:orientation="horizontal"
         android:paddingLeft="@dimen/short_margin"
         android:paddingRight="@dimen/fab_margin"
+        android:layout_marginTop="@dimen/short_margin"
         android:weightSum="10"
         >
 
@@ -417,7 +427,7 @@
             android:layout_marginTop="50dp"
             android:background="@drawable/button_dark_gray"
             android:padding="0dp"
-            android:text="회원가입"
+            android:text="가입완료"
             android:textAlignment="center"
             android:textColor="@color/colorWhite"
             android:textSize="18sp"
