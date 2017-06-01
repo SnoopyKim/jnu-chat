@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
 
-        //FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
 
         //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
@@ -178,13 +178,15 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                         intent.putExtra("providerId","facebook");
+                        startActivity(intent);
+                        finish();
 
                     } else {
                         intent.putExtra("providerId","email");
+                        startActivity(intent);
+                        finish();
 
                     }
-                    startActivity(intent);
-                    finish();
 
                 } else {
                     // User is signed out

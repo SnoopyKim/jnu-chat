@@ -93,6 +93,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/fab_margin"
             android:text="친구추가"
+            android:maxHeight="64dp"
             style="?android:attr/borderlessButtonStyle"
             android:textColor="@color/colorWhite"
             android:textSize="16sp"
