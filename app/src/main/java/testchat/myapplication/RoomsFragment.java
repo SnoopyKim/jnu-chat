@@ -6,8 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -111,26 +109,6 @@ public class RoomsFragment extends Fragment {
             }
         });
 
-        //검색버튼의 텍스트 변화 시
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(final CharSequence s, int start, int before, int count) {
-
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //텍스트가 바뀐 후 해당 텍스트로 filter함수 호출
-                mRAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
-            }
-        });
-
         //Chat Fragment 우측하단의 +버튼 (채팅방 추가 화면으로 넘어감)
         FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
         addRoomButton.setOnTouchListener(new View.OnTouchListener() {
@@ -150,6 +128,12 @@ public class RoomsFragment extends Fragment {
     }
 
     public void ChangeET(String s){
-
+        if(s.length()==0)
+        {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
     }
 }

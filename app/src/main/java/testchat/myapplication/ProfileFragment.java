@@ -248,7 +248,5 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    public void ChangeET(String s){}
-
 }
 

@@ -11,16 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
-
-import java.util.Locale;
-
-import static java.sql.Types.NULL;
 
 public class TabActivity extends AppCompatActivity {
 
@@ -38,16 +34,22 @@ public class TabActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_friends:
                     fragment = new FriendsFragment();
+                    findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
+                    etSearch.setVisibility(View.VISIBLE);
                     switchFragment(fragment);
                     getSupportActionBar().setTitle("친구");
                     return true;
                 case R.id.navigation_chats:
                     fragment = new RoomsFragment();
+                    findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
+                    etSearch.setVisibility(View.VISIBLE);
                     switchFragment(fragment);
                     getSupportActionBar().setTitle("채팅");
                     return true;
                 case R.id.navigation_profile:
                     fragment = new ProfileFragment();
+                    findViewById(R.id.searchbox_ll).setVisibility(View.GONE);
+                    etSearch.setVisibility(View.GONE);
                     switchFragment(fragment);
                     getSupportActionBar().setTitle("프로필");
                     return true;
@@ -94,7 +96,15 @@ public class TabActivity extends AppCompatActivity {
             //검색 텍스트 바뀔때마다 fragment에 string 보내기
             @Override
             public void afterTextChanged(Editable s) {
-                ((FriendsFragment) fragment).ChangeET(s.toString());
+                String current = getSupportActionBar().getTitle().toString();
+                switch (current) {
+                    case "친구":
+                        ((FriendsFragment) fragment).ChangeET(s.toString()); break;
+                    case "채팅":
+                        ((RoomsFragment) fragment).ChangeET(s.toString()); break;
+                    default:
+                        break;
+                }
             }
         });
     }

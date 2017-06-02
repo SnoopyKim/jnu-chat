@@ -1,17 +1,13 @@
 package testchat.myapplication;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -31,8 +27,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class AddfriendActivitiy extends AppCompatActivity {
@@ -171,66 +165,6 @@ public class AddfriendActivitiy extends AppCompatActivity {
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                //th ver.
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
-//
-//                // 제목셋팅
-//                alertDialogBuilder.setTitle("프로그램 종료");
-//
-//
-//                // AlertDialog 셋팅
-//                alertDialogBuilder
-//                        .setMessage("프로그램을 종료할 것입니까?")
-//                        .setCancelable(false)
-//                        //right side button
-//                        .setPositiveButton("아니오",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        // 다이얼로그를 취소한다
-//                                        dialog.cancel();
-//                                    }
-//                                })
-//                        //left side button
-//                        .setNegativeButton("예",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        Hashtable<String, String> friend = new Hashtable<String, String>();
-//                                        friend.put("email", personEmail);
-//                                        friend.put("name", personName);
-//                                        friend.put("photo", personPhoto);
-//                                        myRef.child(user.getUid()).child("friends").child(personUid).setValue(friend);
-//
-//                                        //해당 유저의 친구리스트DB에 자신을 추가
-//                                        Hashtable<String, String> me = new Hashtable<String, String>();
-//                                        me.put("email",user.getEmail());
-//                                        me.put("name",user.getDisplayName());
-//                                        me.put("photo",userPhoto);
-//                                        myRef.child(personUid).child("friends").child(user.getUid()).setValue(me);
-//
-//                                        //팝업과 함께 전체화면 초기화
-//                                        Toast.makeText(AddfriendActivitiy.this,"추가 되었습니다", Toast.LENGTH_SHORT).show();
-//                                        rlConfirm.setVisibility(View.GONE);
-//                                        rlResult.setVisibility(View.INVISIBLE);
-//                                        btnAddFriend.setEnabled(false);
-//                                        etSearch.setText("");
-//                                    }
-//                                });
-//
-//                // 다이얼로그 생성
-//                AlertDialog alertDialog = alertDialogBuilder.create();
-//
-//                //back button || touch other screen -> close dialog
-//                alertDialog.setCancelable(true);
-//                alertDialog.setCanceledOnTouchOutside(true);
-//
-//                // 다이얼로그 보여주기
-//                alertDialog.show();
-//
-//                Button rightBtn = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-//              //  rightBtn.setBackground(R.color.conceptRed);
-//
-//
-//                //thfin
                 TextView tvConfirmName = (TextView) findViewById(R.id.tvConfirmUser);
                 tvConfirmName.setText(tvUser.getText().toString());
                 ImageView ivConfirmImage = (ImageView) findViewById(R.id.ivConfirmUser);

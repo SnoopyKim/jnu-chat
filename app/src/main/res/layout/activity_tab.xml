@@ -16,6 +16,8 @@
         android:layout_height="wrap_content"
         android:background="@color/conceptRed"
         android:minHeight="?attr/actionBarSize"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:elevation="0dp"/>
 
     <LinearLayout
