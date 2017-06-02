@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +37,8 @@ public class FriendsFragment extends Fragment {
     String TAG = getClass().getSimpleName();
 
     TextView tvFriendcnt;
-    EditText etSearch;
+    TextView tvNoFriend;
+    TextView tvFriend;
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
@@ -55,7 +59,8 @@ public class FriendsFragment extends Fragment {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
-        etSearch  = (EditText) v.findViewById(R.id.etSearch);
+        tvNoFriend = (TextView) v.findViewById(R.id.text_noFriend);
+        tvFriend = (TextView) v.findViewById(R.id.text_friend);
 
         //RecyclerView 사용하기 위한 사전 작업 (크기 고정, 어댑터 설정 등등)
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Friend_view);
@@ -88,7 +93,7 @@ public class FriendsFragment extends Fragment {
 
                 } else {
                     Log.d(TAG, "FriendsList is Empty");
-
+                    tvNoFriend.setVisibility(View.VISIBLE);
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
@@ -96,6 +101,8 @@ public class FriendsFragment extends Fragment {
                 mRecyclerView.setAdapter(mFAdapter);
                 mFAdapter.notifyDataSetChanged();
                 tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
+                if(mFAdapter.getItemCount()==0)
+                    tvNoFriend.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -103,26 +110,6 @@ public class FriendsFragment extends Fragment {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
 
-            }
-        });
-
-        //검색 텍스트에 변화에 따른 이벤트 리스너
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(final CharSequence s, int start, int before, int count) {
-
-
-            }
-
-            //검색 텍스트가 바뀌고 난 뒤 어댑터 내의 filter함수 호출
-            @Override
-            public void afterTextChanged(Editable s) {
-                mFAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 
@@ -143,6 +130,19 @@ public class FriendsFragment extends Fragment {
 
 
         return v;
+    }
+    public void ChangeET(String s){
+        if(s.length()==0)
+        {
+            tvFriend.setText("친구");
+            tvFriendcnt.setVisibility(View.VISIBLE);
+            mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            tvFriend.setText("검색 결과");
+            tvFriendcnt.setVisibility(View.GONE);
+            mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
     }
 
 

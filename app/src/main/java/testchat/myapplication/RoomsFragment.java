@@ -149,4 +149,7 @@ public class RoomsFragment extends Fragment {
         return v;
     }
 
+    public void ChangeET(String s){
+
+    }
 }

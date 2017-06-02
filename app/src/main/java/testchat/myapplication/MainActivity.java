@@ -183,9 +183,9 @@ public class MainActivity extends AppCompatActivity {
 
                     } else {
                         intent.putExtra("providerId","email");
-
                         startActivity(intent);
                         finish();
+
                     }
 
                 } else {
