@@ -82,17 +82,14 @@ public class RoomsFragment extends Fragment {
                         //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                            if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
+                            if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
                             }
-                            roomPeople.add(roomPerson.getValue().toString());
+                            roomPeople.add(roomPerson.child("name").getValue().toString());
                         }
                         //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
-                        Room room = new Room(roomPeople,roomKey,roomText);
-
-                        // [START_EXCLUDE]
-                        // Update RecyclerView
                         if(myRoom) {
+                            Room room = new Room(roomPeople,roomKey,roomText);
                             mRoom.add(room);
                         }
                     }

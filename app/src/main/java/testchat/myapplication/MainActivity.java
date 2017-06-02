@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 //기기에서의 최근 유저가 접속중(Signed_in)이면
                 if (user != null) {
                     // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getDisplayName());
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
 
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
@@ -340,5 +339,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode,resultCode,data);
+        finish();
     }
 }

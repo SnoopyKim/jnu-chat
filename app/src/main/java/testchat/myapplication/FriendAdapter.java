@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -179,7 +178,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                         //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
                                         Hashtable<String, String> myInfo = new Hashtable<String, String>();
                                         myInfo.put("name",user.getDisplayName());
-                                        myInfo.put("photo",dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString());
+                                        myInfo.put("photo",user.getPhotoUrl().toString());
                                         chatReference.child(roomKey).child("people").child(user.getUid()).setValue(myInfo);
 
                                         Hashtable<String, String> friendInfo = new Hashtable<String, String>();

@@ -53,7 +53,6 @@ public class FriendsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d(TAG, user.getDisplayName());
 
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
         etSearch  = (EditText) v.findViewById(R.id.etSearch);
