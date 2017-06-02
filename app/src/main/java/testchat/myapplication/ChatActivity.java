@@ -36,15 +36,13 @@ public class ChatActivity extends AppCompatActivity{
     private ChatAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    String email;
-    String name;
-
     EditText etText;
     Button btnSend;
 
     List<Chat> mChat;
     FirebaseDatabase database;
     DatabaseReference myRef;
+    FirebaseUser user;
 
     //생성 시
     @Override
@@ -54,22 +52,19 @@ public class ChatActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
         setSupportActionBar(toolbar);
 
-        //사용자의 이메일과 이름 초기화
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("chats");
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            email = user.getEmail();
-            name = user.getDisplayName();
-        }
-
         //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
         final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomKey");
         Log.d("roomKey",roomKey);
 
+        //사용자의 이메일과 이름 초기화
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("chats").child(roomKey);
+        user = FirebaseAuth.getInstance().getCurrentUser();
+
         getSupportActionBar().setTitle(friendName);
+
         etText = (EditText) findViewById(R.id.etText);
 
         //보내기 버튼 클릭 시 EditText에 적힌 내용을 DB로 보냄
@@ -88,10 +83,10 @@ public class ChatActivity extends AppCompatActivity{
                     String formattedDate = df.format(c.getTime());
 
                     Hashtable<String, String> chat = new Hashtable<String, String>();
-                    chat.put("email",email);
-                    chat.put("name",name);
+                    chat.put("uid",user.getUid());
+                    chat.put("name",user.getDisplayName());
                     chat.put("text",stText);
-                    myRef.child(roomKey).child("chatInfo").child(formattedDate).setValue(chat);
+                    myRef.child("chatInfo").child(formattedDate).setValue(chat);
                     etText.setText("");
                 }
             }
@@ -107,18 +102,19 @@ public class ChatActivity extends AppCompatActivity{
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mChat = new ArrayList<>();
-
-        // specify an adapter (see also next example)
-        mAdapter = new ChatAdapter(mChat,email, ChatActivity.this);
+        mAdapter = new ChatAdapter(mChat,user.getUid(),ChatActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
         //해당 고유키의 채팅방 DB에서 child가 추가될 때마다 데이터 리스트에 추가하고 어댑터로 RecyclerView에 그려짐
-        DatabaseReference myRef = database.getReference("chats").child(roomKey);
         myRef.child("chatInfo").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // A new comment has been added, add it to the displayed list
-                Chat chat = dataSnapshot.getValue(Chat.class);
+                String uid = dataSnapshot.child("uid").getValue().toString();
+                String name = dataSnapshot.child("name").getValue().toString();
+                String text = dataSnapshot.child("text").getValue().toString();
+                String time = dataSnapshot.getKey();
+                Chat chat = new Chat(uid,name,text,time);
 
                 // [START_EXCLUDE]
                 // Update RecyclerView

@@ -57,7 +57,6 @@ public class FriendsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d(TAG, user.getDisplayName());
 
         tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
         tvNoFriend = (TextView) v.findViewById(R.id.text_noFriend);
@@ -73,14 +72,18 @@ public class FriendsFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         //친구 데이터 리스트의 정보를 추가하기 위해 처음에 한번만 FirebaseDB호출
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child(user.getUid()).child("friends").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
                     //친구 데이터 리스트를 초기화 해주고 Firebase내 자신의 친구 리스트 목록을 가져와 추가
                     mFriend.clear();
-                    for (DataSnapshot dataSnapshot2 : dataSnapshot.child(user.getUid()).child("friends").getChildren()) {
-                        Friend friend = dataSnapshot2.getValue(Friend.class);
+                    for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
+                        String uid = dataSnapshot2.getKey();
+                        String email = dataSnapshot2.child("email").getValue().toString();
+                        String name = dataSnapshot2.child("name").getValue().toString();
+                        String photo = dataSnapshot2.child("photo").getValue().toString();
+                        Friend friend = new Friend(uid,email,name,photo);
 
                         // [START_EXCLUDE]
                         // Update RecyclerView

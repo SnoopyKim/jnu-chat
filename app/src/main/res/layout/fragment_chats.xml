@@ -10,15 +10,6 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <EditText
-        android:id="@+id/etSearch"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_gravity="top"
-        android:background="@color/colorLightGray"
-        android:textColor="@color/colorTextGray"
-        />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/Chat_view"
         android:scrollbars="vertical"
