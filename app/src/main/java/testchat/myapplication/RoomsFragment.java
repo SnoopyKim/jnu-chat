@@ -6,8 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -82,17 +80,14 @@ public class RoomsFragment extends Fragment {
                         //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                            if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
+                            if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
                             }
-                            roomPeople.add(roomPerson.getValue().toString());
+                            roomPeople.add(roomPerson.child("name").getValue().toString());
                         }
                         //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
-                        Room room = new Room(roomPeople,roomKey,roomText);
-
-                        // [START_EXCLUDE]
-                        // Update RecyclerView
                         if(myRoom) {
+                            Room room = new Room(roomPeople,roomKey,roomText);
                             mRoom.add(room);
                         }
                     }
@@ -111,26 +106,6 @@ public class RoomsFragment extends Fragment {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
 
-            }
-        });
-
-        //검색버튼의 텍스트 변화 시
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(final CharSequence s, int start, int before, int count) {
-
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //텍스트가 바뀐 후 해당 텍스트로 filter함수 호출
-                mRAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
             }
         });
 
@@ -153,6 +128,12 @@ public class RoomsFragment extends Fragment {
     }
 
     public void ChangeET(String s){
-
+        if(s.length()==0)
+        {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
     }
 }

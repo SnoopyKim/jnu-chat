@@ -4,11 +4,19 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/ivUser"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/tvName"
+        android:src="@drawable/ic_account_circle_white_24px"
+        android:layout_alignParentRight="true"/>
+
     <TextView
         android:id="@+id/tvChatTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="오전 9:46"
         android:textColor="@color/colorTextGray"
         android:layout_alignBottom="@id/mTextView"
         android:layout_toLeftOf="@id/mTextView"
@@ -18,9 +26,11 @@
         android:id="@+id/mTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/tvName"
+        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:layout_marginEnd="10dp"
-        android:layout_toLeftOf="@id/imageView"
+        android:layout_toLeftOf="@id/ivUser"
         android:background="@drawable/chat_bubble"
         android:maxWidth="200dp"
         android:paddingBottom="5dp"
@@ -29,12 +39,13 @@
         android:paddingTop="5dp"
         android:textSize="15sp" />
 
-    <ImageView
-        android:id="@+id/imageView"
+    <TextView
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_account_circle_white_24px"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:textSize="10sp"
+        android:textColor="@color/colorBlack"/>
 
 
 <!--

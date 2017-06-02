@@ -98,14 +98,15 @@ public class SigninActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         mAuth = FirebaseAuth.getInstance();
+        //등록이 완료되면 Main으로 돌아감
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
                 user = firebaseAuth.getCurrentUser();
                 if(user != null) {
-
                     Intent intent = new Intent(SigninActivity.this, MainActivity.class);
                     startActivity(intent);
+                    finish();
                 }
             }
         };
