@@ -23,9 +23,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -50,16 +53,14 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     String stFriendname;
     String stFriendPhoto;
     String roomKey;
+    String beforeFirstName;
 
     //리스트로 된 View들을 통합적으로 보관하는 객체
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvEmail;
         public ImageView ivUser;
         public LinearLayout overall;
-
-
-        //imageview 동그랗게
-        //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
+        public TextView tvFristname;
 
         //순서대로 칸, 이름, 이미지를 레이아웃에서 불러와 생성
         public ViewHolder(View itemView) {
@@ -67,15 +68,35 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             overall = (LinearLayout) itemView.findViewById(R.id.friend_overall) ;
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
+            tvFristname = (TextView) itemView.findViewById(R.id.tvFirstname);
         }
     }
 
     // 커스텀 생성자로 친구 데이터 리스트를 받음
-    public FriendAdapter(List<Friend> mFriend, Context context) {
-        this.mFriend = mFriend;
+    public FriendAdapter(List<Friend> aFriend, Context context) {
+        Comparator<Friend> cmpAsc = new Comparator<Friend>() {
+            @Override
+            public int compare(Friend o1, Friend o2) {
+                //korean -> english sort
+                /*String left = o1.getName();
+                String right = o2.getName();
+                boolean isKoreanLeft=Pattern.matches("[가-힣]",left.substring(0,1));
+                boolean isKoreanRight=Pattern.matches("[가-힣]",right.substring(0,1));
+
+                if(isKoreanLeft & isKoreanRight) return o1.getName().compareTo(o2.getName());
+                else if(isKoreanLeft)           return o1.getName().compareTo(o2.getName())-10000;
+                else if(isKoreanRight)           return o1.getName().compareTo(o2.getName())+10000;
+                else                            return o1.getName().compareTo(o2.getName());*/
+                return o1.getName().compareTo(o2.getName());
+            }
+        };
+        Collections.sort(aFriend,cmpAsc);
+        this.mFriend = aFriend;
         this.mFilter = new ArrayList<>();
-        this.mFilter.addAll(mFriend);
+        this.mFilter.addAll(aFriend);
         this.context = context;
+
+        beforeFirstName = new String("");
     }
 
     //VIew생성 및 레이아웃 설정
@@ -96,6 +117,14 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
         holder.tvEmail.setText(mFriend.get(position).getName());
+        holder.tvFristname.setText(mFriend.get(position).getName().substring(0,1));
+        if(beforeFirstName.equals(holder.tvFristname.getText())){
+            holder.tvFristname.setVisibility(View.GONE);
+        }
+        else{
+            beforeFirstName = holder.tvFristname.getText().toString();
+            holder.tvFristname.setVisibility(View.VISIBLE);
+        }
         String stPhoto = mFriend.get(position).getPhoto();
         if(stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
@@ -209,8 +238,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
-    public int getItemCount() {
+    public int getItemCount() {return mFriend.size();}
 
-        return mFriend.size();
-    }
+
 }
