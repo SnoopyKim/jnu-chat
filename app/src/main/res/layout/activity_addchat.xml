@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,6 +7,7 @@
     tools:context="testchat.myapplication.AddchatActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppBarOverlay">
@@ -16,8 +17,74 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/conceptRed"
-            app:popupTheme="@style/PopupOverlay" />
+            app:popupTheme="@style/PopupOverlay"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
+
+        <LinearLayout
+            android:id="@+id/searchbox_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/toolbar"
+            android:background="@android:color/holo_red_light"
+            android:weightSum="100">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="25dp"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:layout_marginLeft="@dimen/short_margin"
+                android:layout_marginTop="@dimen/short_margin"
+                android:orientation="horizontal"
+                android:background="@color/colorWhite"
+                android:layout_weight="10">
+
+                <Button
+                    android:id="@+id/btnSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/ic_search_black_24px" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="25dp"
+                android:layout_marginTop="@dimen/short_margin"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:layout_marginRight="@dimen/short_margin"
+                android:layout_weight="90"
+                android:singleLine="true"
+                android:background="@color/colorWhite"
+                android:textColor="@color/colorBlack" />
+        </LinearLayout>
 
     </android.support.design.widget.AppBarLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+    <TextView
+        android:id="@+id/tvAdded"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/appBar"
+        android:layout_toLeftOf="@+id/btnAddChat"
+        android:hint="대화할 친구를 추가하세요"
+        android:textSize="30dp"/>
+    <Button
+        android:id="@id/btnAddChat"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/appBar"
+        android:layout_alignParentRight="true"
+        android:text="채팅방 추가"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/Friend_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tvAdded"/>
+
+
+
+</RelativeLayout>

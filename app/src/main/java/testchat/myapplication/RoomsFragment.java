@@ -116,8 +116,7 @@ public class RoomsFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     Intent intent = new Intent(v.getContext(), AddchatActivity.class);
-                    getContext().startActivity(intent);
-                    getActivity().finish();
+                    startActivityForResult(intent, 0);
                 }
 
                 return false;

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -126,6 +125,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         roomKey = mRoom.get(position).getKey();
 
                         Intent intent = new Intent(context, ChatActivity.class);
+                        intent.putExtra("pre",1);
                         intent.putExtra("friendName",stRoomname);
                         intent.putExtra("roomKey",roomKey);
                         context.startActivity(intent);
@@ -151,7 +151,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     if (!fName.equals(user.getDisplayName()))
                         name += fName;
                 }
-                Log.d("RoomName for filter:",name);
                 if (name.toLowerCase().contains(charText)) {
                     mRoom.add(room);
                 }
