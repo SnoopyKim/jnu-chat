@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@+id/toolbar"
-        android:background="@android:color/holo_red_light"
+        android:background="@color/conceptRed"
         android:weightSum="100">
 
         <LinearLayout

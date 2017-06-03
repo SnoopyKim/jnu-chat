@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.support.v4.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,9 +14,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -128,6 +131,13 @@ public class FriendsFragment extends Fragment {
             }
         });
 
+        Button btn = (Button) v.findViewById(R.id.tempbtn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInfoDialog(v);
+            }
+        });
 
         return v;
     }
@@ -144,6 +154,9 @@ public class FriendsFragment extends Fragment {
             mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
         }
     }
-
-
+    public void showInfoDialog(View view)
+    {
+        InfoDialogFragment infoDialog = new InfoDialogFragment();
+        infoDialog.show(getFragmentManager(), "infoDialog");
+    }
 }

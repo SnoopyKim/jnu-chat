@@ -4,21 +4,29 @@
     android:orientation="vertical"
     android:layout_width="match_parent"  android:layout_height="wrap_content"
     android:background="@color/colorWhite"
+    android:paddingTop="@dimen/short_margin"
+    android:paddingBottom="@dimen/short_margin"
     >
+
+    <TextView
+        android:id="@+id/tvFirstname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextBlack"
+        android:layout_alignParentTop="true"
+        android:text="김" />
 
     <LinearLayout
         android:id="@+id/friend_overall"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="10"
         android:clickable="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/tvFirstname"
         android:layout_alignParentEnd="true"
         android:paddingRight="@dimen/fab_margin"
-        android:paddingLeft="0dp"
-        android:paddingTop="@dimen/short_margin"
-        android:paddingBottom="@dimen/short_margin">
+        android:paddingLeft="0dp">
 
         <ImageView
             android:id="@+id/ivUser"
@@ -37,15 +45,30 @@
             android:layout_marginLeft="@dimen/short_margin"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvEmail"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="48"
-                android:layout_marginTop="10dp"
-                android:padding="0dp"
                 android:layout_toEndOf="@+id/ivUser"
-                android:textColor="@color/colorTextBlack" />
+                android:padding="0dp"
+                android:layout_marginTop="10dp">
+                <TextView
+                    android:id="@+id/tvEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="0dp"
+                    android:gravity="left"
+                    android:textColor="@color/colorTextBlack" />
+                <TextView
+                    android:id="@+id/tvAccessTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="0dp"
+                    android:text="23:06"
+                    android:gravity="right"
+                    android:textColor="@color/colorTextBlack"/>
+
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/friend_divider"
