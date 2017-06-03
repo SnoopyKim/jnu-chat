@@ -32,6 +32,8 @@ import java.util.List;
 public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
+    int pre;
+
     private RecyclerView mRecyclerView;
     private ChatAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -54,6 +56,7 @@ public class ChatActivity extends AppCompatActivity{
 
         //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
+        pre = in.getIntExtra("pre",0);
         final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomKey");
         Log.d("roomKey",roomKey);
@@ -157,9 +160,16 @@ public class ChatActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
+                setResult(pre);
                 finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+    //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
+    @Override
+    public void onBackPressed() {
+        setResult(pre);
+        finish();
     }
 }
