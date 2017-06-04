@@ -1,6 +1,5 @@
 package testchat.myapplication;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,8 +24,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.w3c.dom.Text;
 
 import java.util.Hashtable;
 import java.util.regex.Pattern;
@@ -104,8 +101,6 @@ public class SigninActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
                 user = firebaseAuth.getCurrentUser();
                 if(user != null) {
-                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                    startActivity(intent);
                     finish();
                 }
             }

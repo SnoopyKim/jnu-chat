@@ -159,7 +159,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         holder.overall.setBackgroundColor(Color.WHITE);
 
                         //변수들의 값을 설정
-                        roomKey = chatReference.push().getKey();
                         stFriendUid = mFriend.get(position).getUid();
                         stFriendEmail = mFriend.get(position).getEmail();
                         stFriendname = mFriend.get(position).getName();
@@ -169,60 +168,38 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if(dataSnapshot.getValue()!=null) {
-                                    //만약 내가 해당 칸의 친구랑 채팅을 한적이 있다면
+                                    //해당 칸의 친구와 대화를 한적이 있는지 없는지
                                     if(dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
-                                        //Firebase에 chats 부분 데이터 불러오기
-                                        chatReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                if(dataSnapshot != null) {
-                                                    //DB에 저장된 채팅방들 중 해당 칸의 친구와 자신만 있는 방을 찾아 그 방의 고유키를 가지고 ChatActivity로 이동
-                                                    for (DataSnapshot room : dataSnapshot.getChildren()) {
-                                                        if(room.child("people").getChildrenCount()==2 &&
-                                                                room.child("people").hasChild(stFriendUid) &&
-                                                                room.child("people").hasChild(user.getUid())) {
-                                                            roomKey = room.getKey();
+                                        roomKey = dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue().toString();
 
-                                                            Intent in = new Intent(context, ChatActivity.class);
-                                                            in.putExtra("friendName",stFriendname);
-                                                            in.putExtra("roomKey", roomKey);
-                                                            context.startActivity(in);
-
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
-
-                                            }
-                                        });
                                     } else {
+                                        roomKey = chatReference.push().getKey();
+                                    }
+                                    if (roomKey !=null) {
                                         //채팅을 한적이 없다면 양쪽 사람에게 표시를하고
-                                        userReference.child(user.getUid()).child("room").child(stFriendUid).setValue(stFriendname);
-                                        userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(user.getDisplayName());
+                                        userReference.child(user.getUid()).child("room").child(stFriendUid).setValue(roomKey);
+                                        userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(roomKey);
 
                                         //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
                                         Hashtable<String, String> myInfo = new Hashtable<String, String>();
-                                        myInfo.put("name",user.getDisplayName());
-                                        myInfo.put("photo",user.getPhotoUrl().toString());
+                                        myInfo.put("name", user.getDisplayName());
+                                        myInfo.put("photo", dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString());
                                         chatReference.child(roomKey).child("people").child(user.getUid()).setValue(myInfo);
 
                                         Hashtable<String, String> friendInfo = new Hashtable<String, String>();
-                                        friendInfo.put("name",stFriendname);
-                                        friendInfo.put("photo",stFriendPhoto);
+                                        friendInfo.put("name", stFriendname);
+                                        friendInfo.put("photo", stFriendPhoto);
                                         chatReference.child(roomKey).child("people").child(stFriendUid).setValue(friendInfo);
 
                                         chatReference.child(roomKey).child("chatInfo").setValue("");
 
                                         Intent in = new Intent(context, ChatActivity.class);
-                                        in.putExtra("friendName",stFriendname);
+                                        in.putExtra("pre",0);
+                                        in.putExtra("friendName", stFriendname);
                                         in.putExtra("roomKey", roomKey);
                                         context.startActivity(in);
-
                                     }
+
                                 }
                             }
 

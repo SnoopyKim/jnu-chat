@@ -82,10 +82,10 @@ public class ProfileFragment extends Fragment {
             if (uriPhoto == null) {
                 Drawable defaultImg = getContext().getResources().getDrawable(R.drawable.ic_person_black_24dp);
                 ivUser.setImageDrawable(defaultImg);
+                pbLogin.setVisibility(View.GONE);
             } else {
                 Glide.with(getContext()).load(user.getPhotoUrl()).into(ivUser);
                 pbLogin.setVisibility(View.GONE);
-                ivUser.setVisibility(View.VISIBLE);
             }
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();

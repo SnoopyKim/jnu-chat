@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -78,10 +79,12 @@ public class TabActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
 
         //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit) -> 첫화면은 친구 리스트
-        fragment = new FriendsFragment();
-        fragmentTransaction.add(R.id.content, fragment);
-        fragmentTransaction.commit();
-        getSupportActionBar().setTitle("친구");
+        if(fragment == null) {
+            fragment = new FriendsFragment();
+            fragmentTransaction.add(R.id.content, fragment);
+            fragmentTransaction.commit();
+            getSupportActionBar().setTitle("친구");
+        }
 
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -128,4 +131,24 @@ public class TabActivity extends AppCompatActivity {
         lastPressed = System.currentTimeMillis();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(resultCode) {
+            case 0:
+                fragment = new FriendsFragment();
+                findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
+                etSearch.setVisibility(View.VISIBLE);
+                switchFragment(fragment);
+                getSupportActionBar().setTitle("친구");
+                break;
+            case 1:
+                fragment = new RoomsFragment();
+                findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
+                etSearch.setVisibility(View.VISIBLE);
+                switchFragment(fragment);
+                getSupportActionBar().setTitle("채팅");
+                break;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package testchat.myapplication;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,12 +14,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import org.w3c.dom.Text;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.regex.Pattern;
 
@@ -45,14 +48,15 @@ public class FindinfoActivity extends AppCompatActivity {
     String TAG = this.getClass().getSimpleName();
 
     FirebaseAuth mAuth;
-    FirebaseDatabase database;
     DatabaseReference myRef;
-    FirebaseUser user;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_findinfo);
+
+        mAuth = FirebaseAuth.getInstance();
+        myRef = FirebaseDatabase.getInstance().getReference("users");
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,13 +84,30 @@ public class FindinfoActivity extends AppCompatActivity {
                 else if(!checkBirthForm(stBirth))
                     tvIdError.setText("생년월일을 확인해주세요");
                 else{
-                    Toast.makeText(FindinfoActivity.this, "당신의 id는 ******입니다", Toast.LENGTH_SHORT).show();
+                    myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot user : dataSnapshot.getChildren()) {
+                                if (user.child("profile").child("name").getValue().toString().equals(stName)
+                                        && user.child("profile").child("facebook_id").getValue().toString().equals("None")) {
+                                    Toast.makeText(FindinfoActivity.this, "당신의 아이디는"
+                                            + user.child("profile").child("email").getValue().toString() + "입니다", Toast.LENGTH_LONG).show();
+                                    etName.setText("");
+                                    etBirth.setText("");
+                                }
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
 
             }
         });
         Button btnFindPW = (Button) findViewById(R.id.button_passwordfind);
-        btnFindID.setOnClickListener(new View.OnClickListener() {
+        btnFindPW.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stID = etID.getText().toString();
@@ -95,7 +116,16 @@ public class FindinfoActivity extends AppCompatActivity {
                 if(stID.isEmpty() || stID.equals("") || stPhone.isEmpty() || stPhone.equals(""))
                     tvPwError.setText("아이디와 휴대폰 번호를 입력해주세요");
                 else{
-                    Toast.makeText(FindinfoActivity.this, "당신의 비밀번호는는 ******입니다", Toast.LENGTH_SHORT).show();
+                    //비밀번호 찾기는 안되고 재설정은 가능함 (문제는 재설정 작업이 이메일로 링크를 보내는 식이라 계정이 없는 이메일이면 받지를 못함...)
+                    mAuth.sendPasswordResetEmail(stID).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()) {
+                                Toast.makeText(FindinfoActivity.this, "당신의 비밀번호가 초기화 됐습니다\n" +
+                                        "메일을 확인하세요", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 }
 
             }

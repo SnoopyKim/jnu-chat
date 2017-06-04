@@ -1,7 +1,6 @@
 package testchat.myapplication;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -219,10 +218,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                Intent intent = new Intent(AddfriendActivitiy.this, TabActivity.class);
-                startActivity(intent);
-
-                finish();
+                setResult(0);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -230,8 +226,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AddfriendActivitiy.this, TabActivity.class);
-        startActivity(intent);
+        setResult(0);
 
         finish();
     }
