@@ -1,19 +1,24 @@
 package testchat.myapplication;
 
+import android.support.v4.app.DialogFragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.LoggingBehavior;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,28 +27,27 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 
 
 public class FriendsFragment extends Fragment {
 
     String TAG = getClass().getSimpleName();
 
+    TextView tvFriendcnt;
+    TextView tvNoFriend;
+    TextView tvFriend;
+
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
+    FriendAdapter mFAdapter;
 
     List<Friend> mFriend;
 
     FirebaseUser user;
     FirebaseDatabase database;
-    FriendAdapter mFAdapter;
-
     DatabaseReference myRef;
 
     @Override
@@ -54,77 +58,51 @@ public class FriendsFragment extends Fragment {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        tvFriendcnt = (TextView) v.findViewById(R.id.text_friend_num);
+        tvNoFriend = (TextView) v.findViewById(R.id.text_noFriend);
+        tvFriend = (TextView) v.findViewById(R.id.text_friend);
+
+        //RecyclerView 사용하기 위한 사전 작업 (크기 고정, 어댑터 설정 등등)
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Friend_view);
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mFriend = new ArrayList<>();
 
-        // specify an adapter (see also next example)
-        mFAdapter = new FriendAdapter(mFriend, getActivity());
-        mRecyclerView.setAdapter(mFAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
-
-        FacebookSdk.addLoggingBehavior(LoggingBehavior.REQUESTS);
-        GraphRequest request = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(),
-                new GraphRequest.GraphJSONArrayCallback() {
-                    @Override
-                    public void onCompleted(JSONArray objects, GraphResponse response) {
-                        for(int i=0; i<objects.length(); i++) {
-                            try {
-                                JSONObject f_info = objects.getJSONObject(i);
-
-                                Hashtable<String, String> friend = new Hashtable<String, String>();
-                                friend.put("name", f_info.getString("name"));
-                                friend.put("facebook_id", f_info.getString("id"));
-                                friend.put("photo", f_info.getJSONObject("picture").getJSONObject("data").getString("url"));
-
-                                myRef.child(user.getUid()).child("friends").child(friend.get("facebook_id")).setValue(friend);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("GraphRequest_Friends", response.toString());
-                        }
-                    }
-                });
-        Bundle param = new Bundle();
-        param.putString("fields","name,id,picture");
-        request.setParameters(param);
-        request.executeAsync();
-
+        //친구 데이터 리스트의 정보를 추가하기 위해 처음에 한번만 FirebaseDB호출
         myRef.child(user.getUid()).child("friends").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
-                    String value = dataSnapshot.getValue().toString();
-                    Log.d(TAG, "FriendsList is: " + value);
-
+                    //친구 데이터 리스트를 초기화 해주고 Firebase내 자신의 친구 리스트 목록을 가져와 추가
                     mFriend.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
-
-                        String value2 = dataSnapshot2.getValue().toString();
-                        Log.d(TAG, "Friend is: " + value2);
-                        Friend friend = dataSnapshot2.getValue(Friend.class);
+                        String uid = dataSnapshot2.getKey();
+                        String email = dataSnapshot2.child("email").getValue().toString();
+                        String name = dataSnapshot2.child("name").getValue().toString();
+                        String photo = dataSnapshot2.child("photo").getValue().toString();
+                        Friend friend = new Friend(uid,email,name,photo);
 
                         // [START_EXCLUDE]
                         // Update RecyclerView
 
                         mFriend.add(friend);
-                        mFAdapter.notifyItemInserted(mFriend.size() - 1);
                     }
-                } else {
 
+                } else {
                     Log.d(TAG, "FriendsList is Empty");
+                    tvNoFriend.setVisibility(View.VISIBLE);
                 }
+
+                //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
+                mFAdapter = new FriendAdapter(mFriend, getActivity());
+                mRecyclerView.setAdapter(mFAdapter);
+                mFAdapter.notifyDataSetChanged();
+                tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
+                if(mFAdapter.getItemCount()==0)
+                    tvNoFriend.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -135,10 +113,46 @@ public class FriendsFragment extends Fragment {
             }
         });
 
+        //Friend Fragment 우측하단의 +버튼 누를 시 친구 추가화면으로 넘어가고 현재화면 종료
+        FloatingActionButton addFriendButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
+        addFriendButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Intent intent = new Intent(v.getContext(), AddfriendActivitiy.class);
+                    startActivityForResult(intent, 0);
+                }
 
+                return false;
+            }
+        });
+
+        Button btn = (Button) v.findViewById(R.id.tempbtn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInfoDialog(v);
+            }
+        });
 
         return v;
     }
-
-
+    public void ChangeET(String s){
+        if(s.length()==0)
+        {
+            tvFriend.setText("친구");
+            tvFriendcnt.setVisibility(View.VISIBLE);
+            mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            tvFriend.setText("검색 결과");
+            tvFriendcnt.setVisibility(View.GONE);
+            mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+    }
+    public void showInfoDialog(View view)
+    {
+        InfoDialogFragment infoDialog = new InfoDialogFragment();
+        infoDialog.show(getFragmentManager(), "infoDialog");
+    }
 }

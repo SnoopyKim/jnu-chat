@@ -21,8 +21,21 @@
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/conceptRed</item>
     </style>
+
     <style name="FindInfoTextStyle" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/conceptRed</item>
+    </style>
+
+    <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="noMarginToggleButton" parent="Base.Widget.AppCompat.Button">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:padding">0dp</item>
     </style>
 
 </resources>

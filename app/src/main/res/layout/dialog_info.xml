@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="testchat.myapplication.AddfriendActivitiy"
+    android:background="@drawable/chat_bubble"
+    >
+
+
+    <ImageView
+        android:id="@+id/ivUser"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+    <TextView
+        android:id="@+id/tvUser"
+        android:layout_below="@id/ivUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_centerHorizontal="true"
+        android:text="강길동"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorTextGray"/>
+    <TextView
+        android:id="@+id/tvUsermail"
+        android:layout_below="@id/tvUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_centerHorizontal="true"
+        android:textSize="16sp"
+        android:textColor="@color/colorDarkGray"/>
+    <Button
+        android:id="@+id/btnAddFriend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvUsermail"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:text="친구추가"
+        android:maxHeight="64dp"
+        style="?android:attr/borderlessButtonStyle"
+        android:textColor="@color/colorWhite"
+        android:textSize="16sp"
+        android:background="@drawable/button_concept_red"/>
+
+</RelativeLayout>

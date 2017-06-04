@@ -15,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/pbLogin">
+        android:layout_below="@+id/pbLogin"
+        android:visibility="visible">
 
         <TextView
             android:id="@+id/imgLogo"
@@ -34,9 +35,9 @@
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:hint="아이디를 입력해주세요."
+            android:inputType="textWebEmailAddress"
             android:maxLines="1"
-            android:theme="@style/EditTextStyle"
-            />
+            android:theme="@style/EditTextStyle" />
 
         <EditText
             android:id="@+id/etPassword"
@@ -47,24 +48,16 @@
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:hint="비밀번호를 입력해주세요."
+            android:inputType="textPassword"
             android:maxLines="1"
-            android:theme="@style/EditTextStyle"
-            />
-
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/etPassword"
-            android:layout_centerHorizontal="true"
-            android:text="REGISTER" />
+            android:theme="@style/EditTextStyle" />
 
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:layout_below="@+id/btnRegister"
+            android:layout_below="@+id/etPassword"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="@dimen/short_margin"
             android:layout_marginLeft="@dimen/fab_margin"

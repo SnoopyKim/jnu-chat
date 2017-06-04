@@ -1,13 +1,17 @@
 package testchat.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,13 +23,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-public class ChatsFragment extends Fragment {
-
+public class RoomsFragment extends Fragment {
+    //채팅방 리스트 화면 Fragment
     String TAG = getClass().getSimpleName();
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
+    EditText etSearch;
 
     List<Room> mRoom;
 
@@ -37,6 +43,7 @@ public class ChatsFragment extends Fragment {
 
     boolean myRoom;
 
+    //Fragment생성시 View (FriendsFragment와 동일)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,23 +52,19 @@ public class ChatsFragment extends Fragment {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
+        etSearch = (EditText) v.findViewById(R.id.etSearch);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
         mRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRoom = new ArrayList<>();
 
-        // specify an adapter (see also next example)
-        mRAdapter = new RoomAdapter(mRoom, getActivity());
-        mRecyclerView.setAdapter(mRAdapter);
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats");
 
+        //Firebase에 DB 정보 호출 (처음 한번만)
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -69,30 +72,33 @@ public class ChatsFragment extends Fragment {
                 // whenever data at this location is updated.
                 if(dataSnapshot.getValue() != null) {
                     mRoom.clear();
+                    //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
-                        String roomKey = dataSnapshot2.getKey().toString();
+                        String roomKey = dataSnapshot2.getKey();
+                        //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                            if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
+                            if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
                             }
-                            roomPeople.add(roomPerson.getValue().toString());
+                            roomPeople.add(roomPerson.child("name").getValue().toString());
                         }
-                        Room room = new Room(roomPeople,roomKey,roomText);
-
-                        // [START_EXCLUDE]
-                        // Update RecyclerView
+                        //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         if(myRoom) {
+                            Room room = new Room(roomPeople,roomKey,roomText);
                             mRoom.add(room);
-                            mRAdapter.notifyItemInserted(mRoom.size() - 1);
                         }
                     }
                 } else {
 
                     Log.d(TAG, "ChatList is Empty");
                 }
+                //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
+                mRAdapter = new RoomAdapter(mRoom, getActivity());
+                mRecyclerView.setAdapter(mRAdapter);
+                mRAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -103,9 +109,30 @@ public class ChatsFragment extends Fragment {
             }
         });
 
+        //Chat Fragment 우측하단의 +버튼 (채팅방 추가 화면으로 넘어감)
+        FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
+        addRoomButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Intent intent = new Intent(v.getContext(), AddchatActivity.class);
+                    startActivityForResult(intent, 0);
+                }
 
+                return false;
+            }
+        });
 
         return v;
     }
 
+    public void ChangeET(String s){
+        if(s.length()==0)
+        {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+    }
 }

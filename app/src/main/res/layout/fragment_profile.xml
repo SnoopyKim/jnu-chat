@@ -38,8 +38,6 @@
                 android:id="@+id/tvUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:text="이름"
                 android:layout_centerHorizontal="true"
                 android:textColor="@color/colorDarkGray"/>
         </RelativeLayout>
