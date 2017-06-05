@@ -3,6 +3,7 @@ package testchat.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +40,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     DatabaseReference chatReference;
     FirebaseUser user;
 
+    private String stFriendname;
+    private String stFriendPhoto;
     String stRoomname;
     String roomKey;
 
@@ -47,7 +51,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         public TextView tvName;
         public ImageView ivUser;
         public LinearLayout overall;
-
+        public TextView tvChatTime;
+        public TextView tvLastChat;
         //imageview 동그랗게
         //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
 
@@ -57,6 +62,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             overall = (LinearLayout) itemView.findViewById(R.id.room_overall) ;
             tvName = (TextView) itemView.findViewById(R.id.tvName);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
+            tvChatTime = (TextView) itemView.findViewById(R.id.tvChattime);
+            tvLastChat = (TextView) itemView.findViewById(R.id.tvLatestChat);
         }
     }
 
@@ -95,9 +102,20 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         String stName = "";
         for (String name : listNames) {
             if (!name.equals(user.getDisplayName()))
-                stName += name;
+                stName += (name+", ");
         }
-        holder.tvName.setText(stName);
+        if(stName.equals(""))
+            holder.tvName.setText("");
+        else
+            holder.tvName.setText(stName.substring(0,(stName.length()-2)));
+        final String stPhoto = mRoom.get(position).getPhoto();
+        if (stPhoto.equals("None")) {
+            //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
+            Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+            holder.ivUser.setImageDrawable(defaultImg);
+        } else {
+            Glide.with(context).load(stPhoto).into(holder.ivUser);
+        }
 
         //View에서 각 칸을 누를 시의 이벤트
         holder.overall.setOnTouchListener(new View.OnTouchListener()

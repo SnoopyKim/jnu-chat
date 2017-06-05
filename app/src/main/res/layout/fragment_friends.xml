@@ -13,7 +13,6 @@
         android:id="@+id/friend_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/etSearch"
         android:orientation="vertical">
 
         <!-- TODO: Update blank fragment layout -->
@@ -62,7 +61,6 @@
             android:id="@+id/Friend_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/divider"
             android:background="@color/colorWhite"
             android:scrollbars="vertical" />
 

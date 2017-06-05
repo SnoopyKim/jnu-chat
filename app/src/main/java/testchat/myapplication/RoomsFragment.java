@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,6 +43,9 @@ public class RoomsFragment extends Fragment {
     DatabaseReference myRef;
 
     boolean myRoom;
+    String photo;
+    TextView tvChat;
+    TextView tvNoChat;
 
     //Fragment생성시 View (FriendsFragment와 동일)
     @Override
@@ -53,6 +57,8 @@ public class RoomsFragment extends Fragment {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         etSearch = (EditText) v.findViewById(R.id.etSearch);
+        //tvNoChat = (TextView) v.findViewById(R.id.text_noFriend);
+        tvChat = (TextView) v.findViewById(R.id.text_Room);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
         mRecyclerView.setHasFixedSize(true);
@@ -79,15 +85,17 @@ public class RoomsFragment extends Fragment {
                         String roomKey = dataSnapshot2.getKey();
                         //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
                         boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
+                        boolean roomTextTime = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
                             }
                             roomPeople.add(roomPerson.child("name").getValue().toString());
+                            photo = roomPerson.child("photo").getValue().toString();
                         }
                         //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         if(myRoom) {
-                            Room room = new Room(roomPeople,roomKey,roomText);
+                            Room room = new Room(roomPeople,roomKey,roomText,photo,roomTextTime);
                             mRoom.add(room);
                         }
                     }
@@ -129,9 +137,11 @@ public class RoomsFragment extends Fragment {
     public void ChangeET(String s){
         if(s.length()==0)
         {
+            tvChat.setText("대화");
             mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
         }
         else {
+            tvChat.setText("검색 결과");
             mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
         }
     }

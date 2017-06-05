@@ -57,10 +57,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     DatabaseReference chatReference;
     FirebaseUser user;
 
-    private static String stFriendUid;
-    private static String stFriendEmail;
-    private static String stFriendname;
-    private static String stFriendPhoto;
+    private String stFriendUid;
+    private String stFriendEmail;
+    private String stFriendname;
+    private String stFriendPhoto;
     String roomKey;
     String beforeFirstName;
 
