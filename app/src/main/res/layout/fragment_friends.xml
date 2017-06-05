@@ -9,12 +9,6 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <Button
-        android:id="@+id/tempbtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button" />
-
     <LinearLayout
         android:id="@+id/friend_content"
         android:layout_width="match_parent"

@@ -97,7 +97,7 @@ public class FriendsFragment extends Fragment {
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
-                mFAdapter = new FriendAdapter(mFriend, getActivity());
+                mFAdapter = new FriendAdapter(mFriend, getActivity(),getFragmentManager());
                 mRecyclerView.setAdapter(mFAdapter);
                 mFAdapter.notifyDataSetChanged();
                 tvFriendcnt.setText(mFAdapter.getItemCount()+"명");
@@ -127,14 +127,6 @@ public class FriendsFragment extends Fragment {
             }
         });
 
-        Button btn = (Button) v.findViewById(R.id.tempbtn);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showInfoDialog(v);
-            }
-        });
-
         return v;
     }
     public void ChangeET(String s){
@@ -150,6 +142,7 @@ public class FriendsFragment extends Fragment {
             mFAdapter.filter(s.toLowerCase(Locale.getDefault()));
         }
     }
+
     public void showInfoDialog(View view)
     {
         InfoDialogFragment infoDialog = new InfoDialogFragment();
