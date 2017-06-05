@@ -13,8 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/colorTextBlack"
+        android:layout_marginLeft="@dimen/short_margin"
         android:layout_alignParentTop="true"
-        android:text="김" />
+        android:text="" />
 
     <LinearLayout
         android:id="@+id/friend_overall"
