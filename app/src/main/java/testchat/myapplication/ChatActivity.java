@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,19 +29,23 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 
 //채팅방 화면 Activity
 public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
     int pre;
+    String allFriendName;
 
     private RecyclerView mRecyclerView;
     private ChatAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     EditText etText;
+    EditText etSearch;
     Button btnSend;
+    Button btnSearch;
 
     List<Chat> mChat;
     FirebaseDatabase database;
@@ -57,18 +63,37 @@ public class ChatActivity extends AppCompatActivity{
         //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
         pre = in.getIntExtra("pre",0);
+        allFriendName = in.getStringExtra("allfriendName");
         final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomKey");
         Log.d("roomKey",roomKey);
+        if(allFriendName.equals(""))
+            getSupportActionBar().setTitle("나");
+        else
+            getSupportActionBar().setTitle(allFriendName.substring(0,(allFriendName.length()-2)));
 
         //사용자의 이메일과 이름 초기화
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("chats").child(roomKey);
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        getSupportActionBar().setTitle(friendName);
-
         etText = (EditText) findViewById(R.id.etText);
+        etSearch = (EditText) findViewById(R.id.etSearch);
+        btnSearch = (Button) findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String searchString = etSearch.getText().toString();
+                if(searchString.length()==0)
+                {
+                    Toast.makeText(ChatActivity.this, "검색할 내용을 입력해주세요", Toast.LENGTH_SHORT).show();
+                    //mAdapter.filter(searchString.toLowerCase(Locale.getDefault()));
+                }
+                else {
+                    mAdapter.filter(searchString.toLowerCase(Locale.getDefault()));
+                }
+            }
+        });
 
         //보내기 버튼 클릭 시 EditText에 적힌 내용을 DB로 보냄
         btnSend = (Button) findViewById(R.id.btnSend);

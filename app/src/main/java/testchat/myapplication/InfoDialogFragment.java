@@ -99,7 +99,7 @@ public class InfoDialogFragment  extends DialogFragment
             return;
 
         int dialogWidth = 900; // specify a value here
-        int dialogHeight = 1500; // specify a value here
+        int dialogHeight = 1600; // specify a value here
 
         getDialog().getWindow().setLayout(dialogWidth, dialogHeight);
     }

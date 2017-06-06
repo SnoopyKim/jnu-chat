@@ -72,7 +72,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         app:fabSize="mini"
-        app:srcCompat="@drawable/ic_person_add_black_24dp"
+        app:srcCompat="@drawable/ic_person_add_black_24px"
         app:backgroundTint="@color/conceptRed"
         android:layout_alignParentEnd="true"
         android:layout_gravity="bottom|end"

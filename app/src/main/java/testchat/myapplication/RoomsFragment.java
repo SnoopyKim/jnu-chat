@@ -91,7 +91,8 @@ public class RoomsFragment extends Fragment {
                                 myRoom = true;
                             }
                             roomPeople.add(roomPerson.child("name").getValue().toString());
-                            photo = roomPerson.child("photo").getValue().toString();
+                            if(!roomPerson.child("name").getValue().toString().equals(user.getDisplayName().toString()))
+                                photo = roomPerson.child("photo").getValue().toString();
                         }
                         //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         if(myRoom) {

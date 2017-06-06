@@ -3,6 +3,7 @@ package testchat.myapplication;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -25,8 +28,11 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     List<Chat> mChat;
+    List<Chat> mFilter;
+
     String stUid;
     Context context;
+    boolean isYou;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -47,8 +53,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChatAdapter(List<Chat> mChat, String uid, Context context) {
-        this.mChat = mChat;
+    public ChatAdapter(List<Chat> aChat, String uid, Context context) {
+        this.mChat = aChat;
+        this.mFilter = new ArrayList<>();
+        this.mFilter.addAll(aChat);
         this.stUid = uid;
         this.context = context;
     }
@@ -70,9 +78,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         //만약 자신의 말풍선이면 오른쪽으로 보이는 layout, 아니면 왼쪽으로 보이는 layout로 설정
         View v;
         if (viewType == 1) {
+            isYou=true;
             v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.right_text_view, parent, false);
         } else {
+            isYou=false;
             v = LayoutInflater.from(parent.getContext()).
                     inflate(R.layout.left_text_view, parent, false);
         }
@@ -87,7 +97,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이미지, 텍스트, 이름, 시간 layout에 값 설정
         holder.mTextView.setText(mChat.get(position).getText());
-        holder.tvName.setText(mChat.get(position).getName());
+        if(isYou)
+            holder.tvName.setText("나");
+        else
+            holder.tvName.setText(mChat.get(position).getName());
         holder.tvTime.setText(mChat.get(position).getTime().substring(11,16));
         FirebaseDatabase.getInstance().getReference("users").child(mChat.get(position).getUid()).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -112,6 +125,25 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     }
 
+    //채팅방 검색 함수 (FriendAdapter에서의 filter함수와 동일)
+    public void filter(String charText) {
+        this.mFilter.addAll(mChat);
+        charText = charText.toLowerCase(Locale.getDefault());
+        Log.d("atext",charText);
+        mChat.clear();
+        if (charText.length() == 0) {
+            mChat.addAll(mFilter);
+        } else {
+            for (Chat chat : mFilter) {
+                String text = chat.getText();
+                Log.d("text",text);
+                if (text.toLowerCase().contains(charText)) {
+                    mChat.add(chat);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {

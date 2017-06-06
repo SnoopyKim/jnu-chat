@@ -53,6 +53,7 @@ public class AddchatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_addchat);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("채팅 초대");
 
         etSearch = (EditText) findViewById(R.id.etSearch);
         tvAdded = (TextView) findViewById(R.id.tvAdded);

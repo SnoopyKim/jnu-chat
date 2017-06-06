@@ -105,9 +105,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 stName += (name+", ");
         }
         if(stName.equals(""))
-            holder.tvName.setText("");
+            holder.tvName.setText("나");
         else
             holder.tvName.setText(stName.substring(0,(stName.length()-2)));
+        final String allFriendName = stName;
         final String stPhoto = mRoom.get(position).getPhoto();
         if (stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
@@ -145,6 +146,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         Intent intent = new Intent(context, ChatActivity.class);
                         intent.putExtra("pre",1);
                         intent.putExtra("friendName",stRoomname);
+                        intent.putExtra("allfriendName",allFriendName);
                         intent.putExtra("roomKey",roomKey);
                         context.startActivity(intent);
 
