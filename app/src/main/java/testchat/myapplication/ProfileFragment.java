@@ -76,7 +76,7 @@ public class ProfileFragment extends Fragment {
             stUid = user.getUid();
             stEmail = user.getEmail();
             //유저 이메일 설정
-            tvUser.setText(stEmail);
+            tvUser.setText(user.getDisplayName());
             //자신의 프로필 정보에서 사진URL 정보가 없다면 기본 Drawble로, 있다면 해당 사진으로 그림
             uriPhoto = user.getPhotoUrl();
             if (uriPhoto == null) {

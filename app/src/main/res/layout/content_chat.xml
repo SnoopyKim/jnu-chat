@@ -14,7 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/LLsend"
-        android:background="@drawable/layout_border"
+        android:background="@color/colorWhite"
+        android:layout_marginLeft="@dimen/short_margin"
+        android:layout_marginRight="@dimen/short_margin"
         android:clipChildren="false"
         android:scrollbars="vertical" />
 
@@ -24,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="@color/colorChatBar"
+        android:background="@color/conceptRed"
         android:weightSum="100">
 
         <ImageButton
@@ -32,7 +34,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="10"
-            android:background="@color/colorChatBar"
+            android:background="@color/conceptRed"
             android:padding="0dp"
             app:srcCompat="@drawable/ic_photo_white_24px" />
 
@@ -70,8 +72,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="15"
-            android:background="@color/colorChatBar"
-            android:textColor="@color/colorTextGray"
+            android:background="@color/conceptRed"
+            android:textColor="@color/conceptRedHint"
             android:text="전송"
             />
 

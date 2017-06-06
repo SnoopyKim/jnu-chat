@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorLightGray"
     tools:context="testchat.myapplication.AddchatActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -63,27 +64,43 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <TextView
-        android:id="@+id/tvAdded"
+    <LinearLayout
+        android:id="@+id/selectBar"
+        android:layout_below="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_below="@+id/appBar"
-        android:layout_toLeftOf="@+id/btnAddChat"
-        android:hint="대화할 친구를 추가하세요"
-        android:textSize="30dp"/>
-    <Button
-        android:id="@id/btnAddChat"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/appBar"
-        android:layout_alignParentRight="true"
-        android:text="채팅방 추가"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="100">
+        <TextView
+            android:id="@+id/tvAdded"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="80"
+            android:hint="대화할 친구를 선택하세요"
+            android:textColorHint="@color/colorTextLightGray"
+            android:textColor="@color/colorTextGray"
+            android:textStyle="bold"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:textSize="16sp"/>
+        <Button
+            android:id="@+id/btnAddChat"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="20"
+            android:background="@color/conceptRed"
+            android:padding="0dp"
+            android:layout_margin="0dp"
+            style="@style/Base.TextAppearance.AppCompat.Widget.Button.Borderless.Colored"
+            android:textStyle="bold"
+            android:text="확인"
+            android:textColor="@color/colorWhite"/>
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/Friend_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tvAdded"/>
+        android:layout_below="@+id/selectBar"/>
 
 
 
