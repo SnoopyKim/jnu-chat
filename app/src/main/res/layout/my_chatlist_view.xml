@@ -42,19 +42,24 @@
                 android:layout_weight="48"
                 android:layout_toEndOf="@+id/ivUser"
                 android:padding="0dp"
+                android:weightSum="100"
                 android:layout_marginTop="10dp">
                 <TextView
                     android:id="@+id/tvName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="80"
                     android:padding="0dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:gravity="left"
                     android:textColor="@color/colorTextBlack" />
 
                 <TextView
                     android:id="@+id/tvChattime"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="20"
                     android:gravity="right"
                     android:padding="0dp"
                     android:text="23:06"

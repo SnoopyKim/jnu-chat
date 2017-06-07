@@ -58,6 +58,7 @@
         <CheckBox
             android:id="@+id/cbAdd"
             android:layout_width="50dp"
+            android:buttonTint="@color/conceptRed"
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
