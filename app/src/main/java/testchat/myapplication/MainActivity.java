@@ -192,8 +192,6 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
             }
         };
 
@@ -223,12 +221,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
 
             }
 
             @Override
             public void onCancel() {
                 Toast.makeText(getApplicationContext(), "cancel",Toast.LENGTH_SHORT).show();
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
             }
 
             @Override

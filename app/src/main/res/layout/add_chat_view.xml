@@ -59,7 +59,7 @@
             android:id="@+id/cbAdd"
             android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
     </LinearLayout>
 

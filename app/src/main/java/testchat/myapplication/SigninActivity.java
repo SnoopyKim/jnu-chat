@@ -22,8 +22,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Hashtable;
 import java.util.regex.Pattern;
@@ -37,8 +40,10 @@ public class SigninActivity extends AppCompatActivity {
     String stEmail;
     String stPassword;
     String stName;
-    //gender = -1 : not select , gender = 0 : male , gender = 1 : female
-    int gender;
+    //gender =  : not select , gender = 0 : male , gender = 1 : female
+    String gender = "None";
+    //id_check = 1 : 중복없음, = -1 : 중복
+    int id_check;
 
     EditText etEmail;
     EditText etPassword;
@@ -74,24 +79,6 @@ public class SigninActivity extends AppCompatActivity {
         etBirth = (EditText) findViewById(R.id.edit_birth);
         tvPasswordError = (TextView) findViewById(R.id.text_error);
 
-        //select gender toggle
-        tb_f = (ToggleButton) findViewById(R.id.button_gender_f);
-        tb_f.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gender=1;
-                toggleButtonProcess(tb_f,tb_m);
-            }
-        });
-        tb_m = (ToggleButton) findViewById(R.id.button_gender_m);
-        tb_m.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gender=0;
-                toggleButtonProcess(tb_m,tb_f);
-            }
-        });
-
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         mAuth = FirebaseAuth.getInstance();
@@ -105,6 +92,54 @@ public class SigninActivity extends AppCompatActivity {
                 }
             }
         };
+
+        //ID 중복확인
+        Button btnIdcheck = (Button) findViewById(R.id.button_check);
+        btnIdcheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot user : dataSnapshot.getChildren()) {
+                            if (etEmail.getText().toString().equals(user.child("profile").child("email").getValue().toString())) {
+                                id_check = -1;
+                                break;
+                            } else {
+                                id_check = 1;
+                            }
+                        }
+                        if (id_check == 1)
+                            Toast.makeText(SigninActivity.this,"사용 가능한 이메일입니다",Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(SigninActivity.this,"중복된 이메일입니다",Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+
+        //select gender toggle
+        tb_f = (ToggleButton) findViewById(R.id.button_gender_f);
+        tb_f.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gender="Female";
+                toggleButtonProcess(tb_f,tb_m);
+            }
+        });
+        tb_m = (ToggleButton) findViewById(R.id.button_gender_m);
+        tb_m.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gender="Male";
+                toggleButtonProcess(tb_m,tb_f);
+            }
+        });
 
         //회원가입 버튼 클릭 시
         Button btnRegister = (Button) findViewById(R.id.button_signin);
@@ -122,7 +157,11 @@ public class SigninActivity extends AppCompatActivity {
                 else if (stEmail.isEmpty() || stEmail.equals("") || stPassword.isEmpty() || stPassword.equals("") || stName.isEmpty() || stName.equals("")) {
                     Toast.makeText(SigninActivity.this, "이메일이나 비밀번호를 입력해주세요", Toast.LENGTH_SHORT).show();
 
-                } else {
+                }
+                else if (id_check != 1) {
+                    Toast.makeText(SigninActivity.this, "이메일을 확인하세요", Toast.LENGTH_SHORT).show();
+                }
+                else {
                     if(stPassword.equals(etPasswordCheck.getText().toString()))
                         registerUser(stEmail, stPassword);
                     else
@@ -159,6 +198,7 @@ public class SigninActivity extends AppCompatActivity {
                             profile.put("name", stName);
                             profile.put("photo", "None");
                             profile.put("uid",userUid);
+                            profile.put("gender",gender);
 
                             myRef.child(userUid).child("profile").setValue(profile);
                             myRef.child(userUid).child("friends").setValue("");
@@ -210,20 +250,20 @@ public class SigninActivity extends AppCompatActivity {
                 tb_checking.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_dark_gray));
                 tb_checking.setTextColor(getResources().getColor(R.color.colorLightGray));
                 tb_checking.setPadding(0,0,0,0);
-                gender=1;
+                gender="Female";
             }
             else {
                 tb_checking.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_dark_gray));
                 tb_checking.setTextColor(getResources().getColor(R.color.colorLightGray));
                 tb_checking.setPadding(0,0,0,0);
-                gender=1;
+                gender="Female";
             }
         }
         else{
             tb_checking.setBackgroundDrawable(getResources().getDrawable(R.drawable.button_light_gray));
             tb_checking.setTextColor(getResources().getColor(R.color.colorDarkGray));
             tb_checking.setPadding(0,0,0,0);
-            gender=-1;
+            gender="None";
         }
     }
     public boolean checkBirthForm(String str){
