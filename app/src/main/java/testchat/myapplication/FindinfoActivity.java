@@ -122,7 +122,7 @@ public class FindinfoActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()) {
                                 Toast.makeText(FindinfoActivity.this, "당신의 비밀번호가 초기화 됐습니다\n" +
-                                        "메일을 확인하세요", Toast.LENGTH_SHORT).show();
+                                        "메일을 확인하세요", Toast.LENGTH_LONG).show();
                             }
                         }
                     });

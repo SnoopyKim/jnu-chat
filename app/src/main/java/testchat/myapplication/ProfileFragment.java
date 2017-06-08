@@ -45,6 +45,10 @@ public class ProfileFragment extends Fragment {
 
     ImageView ivUser;
     TextView tvUser;
+    TextView tvEmail;
+    TextView tvBirth;
+    TextView tvPhone;
+
     private StorageReference mStorageRef;
     FirebaseUser user;
     Bitmap bitmap;
@@ -63,9 +67,12 @@ public class ProfileFragment extends Fragment {
 
         pbLogin = (ProgressBar)v.findViewById(R.id.pbLogin);
 
-        //프로필 사진과 이름 layout 객체 지정
+        //프로필 관련 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
         tvUser = (TextView)v.findViewById(R.id.tvUser);
+        tvEmail = (TextView)v.findViewById(R.id.tvUseraccount);
+        tvPhone = (TextView)v.findViewById(R.id.tvUserPhone);
+        tvBirth = (TextView)v.findViewById(R.id.tvUserBirth);
 
         //Firebase 내 저장소 부분 호출
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -87,6 +94,27 @@ public class ProfileFragment extends Fragment {
                 Glide.with(getContext()).load(user.getPhotoUrl()).into(ivUser);
                 pbLogin.setVisibility(View.GONE);
             }
+            tvEmail.setText(stEmail);
+            /*
+            FirebaseDatabase.getInstance().getReference("users").child(stUid)
+                    .child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        if (dataSnapshot.child("phone").getValue().equals("None")) {
+                            tvPhone.setText("정보 없음");
+                        } else {
+                            tvPhone.setText(dataSnapshot.child("phone").getValue().toString());
+                        }
+                        tvBirth.setText(dataSnapshot.child("birth").getValue().toString());
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            */
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
         }

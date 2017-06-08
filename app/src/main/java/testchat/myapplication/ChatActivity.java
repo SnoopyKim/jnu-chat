@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,7 +34,6 @@ public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
     int pre;
-    String allFriendName;
 
     private RecyclerView mRecyclerView;
     private ChatAdapter mAdapter;
@@ -62,15 +59,15 @@ public class ChatActivity extends AppCompatActivity{
 
         //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
-        pre = in.getIntExtra("pre",0);
-        allFriendName = in.getStringExtra("allfriendName");
+        pre = in.getIntExtra("pre",1);
+        Log.d(TAG,"intent:pre:"+pre);
         final String friendName = in.getStringExtra("friendName");
         final String roomKey = in.getStringExtra("roomKey");
         Log.d("roomKey",roomKey);
-        if(allFriendName.equals(""))
+        if(friendName.equals(""))
             getSupportActionBar().setTitle("나");
         else
-            getSupportActionBar().setTitle(allFriendName.substring(0,(allFriendName.length()-2)));
+            getSupportActionBar().setTitle(friendName);
 
         //사용자의 이메일과 이름 초기화
         database = FirebaseDatabase.getInstance();

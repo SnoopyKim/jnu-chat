@@ -131,7 +131,7 @@ public class AddchatActivity extends AppCompatActivity {
                     String roomKey = chatRef.push().getKey();
                     String roomName = "";
                     for (Friend friend : mResult) {
-                        roomName.concat(friend.getName());
+                        roomName += (friend.getName()+", ");
                     }
 
                     Hashtable<String, String> myInfo = new Hashtable<String, String>();
@@ -166,6 +166,7 @@ public class AddchatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
+                setResult(1);
                 finish();
                 break;
         }
@@ -174,6 +175,7 @@ public class AddchatActivity extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
+        setResult(1);
         finish();
     }
 

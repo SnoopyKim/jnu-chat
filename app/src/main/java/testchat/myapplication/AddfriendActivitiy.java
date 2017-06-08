@@ -150,6 +150,9 @@ public class AddfriendActivitiy extends AppCompatActivity {
                                 }
                             }
                         }
+                        if (personName == null) {
+                            Toast.makeText(AddfriendActivitiy.this,"해당 이메일의 친구가 없습니다",Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override

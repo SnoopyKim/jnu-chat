@@ -1,6 +1,5 @@
 package testchat.myapplication;
 
-import android.support.v4.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -12,12 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -72,7 +66,7 @@ public class FriendsFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         //친구 데이터 리스트의 정보를 추가하기 위해 처음에 한번만 FirebaseDB호출
-        myRef.child(user.getUid()).child("friends").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -143,9 +137,11 @@ public class FriendsFragment extends Fragment {
         }
     }
 
+    /*
     public void showInfoDialog(View view)
     {
         InfoDialogFragment infoDialog = new InfoDialogFragment();
         infoDialog.show(getFragmentManager(), "infoDialog");
     }
+    */
 }

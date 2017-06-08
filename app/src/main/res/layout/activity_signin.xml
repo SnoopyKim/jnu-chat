@@ -416,8 +416,6 @@
         android:paddingTop="@dimen/short_margin"
         android:weightSum="10">
 
-
-
         <Button
             android:id="@+id/button_signin"
             android:layout_width="match_parent"
@@ -432,6 +430,15 @@
             android:textColor="@color/colorWhite"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/pbRegister"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginRight="120dp"
+            android:layout_marginTop="50dp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </LinearLayout>

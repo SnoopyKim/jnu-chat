@@ -17,6 +17,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/conceptRed"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
         <LinearLayout
             android:id="@+id/searchbox_ll"
