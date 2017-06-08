@@ -83,9 +83,6 @@ public class RoomsFragment extends Fragment {
                         myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
-                        //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
-                        boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
-                        boolean roomTextTime = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
@@ -94,9 +91,9 @@ public class RoomsFragment extends Fragment {
                             if(!roomPerson.child("name").getValue().toString().equals(user.getDisplayName().toString()))
                                 photo = roomPerson.child("photo").getValue().toString();
                         }
-                        //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
+                        //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         if(myRoom) {
-                            Room room = new Room(roomPeople,roomKey,roomText,photo,roomTextTime);
+                            Room room = new Room(roomPeople,roomKey,photo);
                             mRoom.add(room);
                         }
                     }
@@ -107,7 +104,19 @@ public class RoomsFragment extends Fragment {
                 //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
                 mRecyclerView.setAdapter(mRAdapter);
-                mRAdapter.notifyDataSetChanged();
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {
+                            mRAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("Notify:","Failed");
+                    }
+                });
             }
 
             @Override

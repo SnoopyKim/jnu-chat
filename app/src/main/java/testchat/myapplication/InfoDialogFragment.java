@@ -2,26 +2,19 @@ package testchat.myapplication;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
 
 /**
  * Created by TH-home on 2017-06-03.
@@ -40,6 +33,7 @@ public class InfoDialogFragment  extends DialogFragment
     TextView tvEmail;
     ImageView ivUser;
     Button btnMessage;
+    Button btnDelete;
 
     private DialogDismissListener onDismissListener=null;
     @Override
@@ -60,6 +54,7 @@ public class InfoDialogFragment  extends DialogFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_info, null);
+        context = getContext();
         tvName = (TextView) view.findViewById(R.id.tvUser);         tvName.setText(stFriendName);
         tvEmail = (TextView) view.findViewById(R.id.tvUsermail);   tvEmail.setText(stFriendEmail);
         ivUser = (ImageView) view.findViewById(R.id.ivUser);
@@ -69,11 +64,23 @@ public class InfoDialogFragment  extends DialogFragment
             public void onClick(View v) {
                 if(onDismissListener!=null){
                     onDismissListener.setValue("MESSAGE",true);
+                    onDismissListener.setValue("Delete",false);
                 }
                 dismiss();
             }
         });
-        context = getContext();
+        btnDelete = (Button) view.findViewById(R.id.btnDelete);
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(onDismissListener!=null) {
+                    onDismissListener.setValue("MESSAGE",false);
+                    onDismissListener.setValue("Delete",true);
+                    onDismissListener.setValue("friendUID",stFriendUID);
+                }
+                dismiss();
+            }
+        });
 
         if(stFriendPhoto.equals("None")) {
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);

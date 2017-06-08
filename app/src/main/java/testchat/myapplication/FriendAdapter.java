@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,7 +32,6 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -42,9 +40,7 @@ import java.util.regex.Pattern;
 //FriendsFragment에서 RecyclerView의 커스텀Adapter (View에서 한 row마다의 데이터나 이벤트 적용)
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
-    //th
     FragmentManager mFragmentManager;
-    //th fin
 
     //친구 데이터 리스트 두개 (하나는 백업용)
     List<Friend> mFriend;
@@ -188,7 +184,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         stFriendname = mFriend.get(position).getName();
                         stFriendPhoto = mFriend.get(position).getPhoto();
 
-                        infoDialog = showInfoDialog(v, stFriendUid, stFriendEmail, stFriendname, stFriendPhoto);
+                        infoDialog = showInfoDialog(v, position, stFriendUid, stFriendEmail, stFriendname, stFriendPhoto);
                         break;
                 }
                 return true;
@@ -221,7 +217,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     }
 
     //send user info to dialog fragment
-    public InfoDialogFragment newInstance(String aID, String aEmail, String aName, String aPhoto) {
+    public InfoDialogFragment newInstance(final int position, final String aID, final String aEmail, final String aName, final String aPhoto) {
         Bundle args = new Bundle();
         args.putString("paramID", aID);
         args.putString("paramEmail", aEmail);
@@ -233,6 +229,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         fragment.setDissmissListner(new DialogDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
+                Log.d("FriendAdapter:","DissmissListener");
                 if (getValueForBool("MESSAGE", true)) {
                     //Firebase에 users 부분 데이터 불러오기
                     userReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -262,8 +259,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     friendInfo.put("photo", stFriendPhoto);
                                     chatReference.child(roomKey).child("people").child(stFriendUid).setValue(friendInfo);
 
-                                    //chatReference.child(roomKey).child("chatInfo").setValue("");
-
                                     Intent in = new Intent(context, ChatActivity.class);
                                     in.putExtra("pre", 0);
                                     in.putExtra("friendName", stFriendname);
@@ -280,14 +275,19 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         }
                     });
                 }
+                else if (getValueForBool("Delete",true)) {
+                    String friendUID = getValueForStr("friendUID");
+                    userReference.child(user.getUid()).child("friends").child(friendUID).removeValue();
+                    userReference.child(friendUID).child("friends").child(user.getUid()).removeValue();
+                }
             }
         });
         return fragment;
     }
 
     //show dialog
-    public InfoDialogFragment showInfoDialog(View view, String aID, String aEmail, String aName, String aPhoto) {
-        InfoDialogFragment infoDialog = newInstance(aID, aEmail, aName, aPhoto);
+    public InfoDialogFragment showInfoDialog(View view, int position, String aID, String aEmail, String aName, String aPhoto) {
+        InfoDialogFragment infoDialog = newInstance(position, aID, aEmail, aName, aPhoto);
         infoDialog.show(mFragmentManager, "infoDialog");
         return infoDialog;
     }
