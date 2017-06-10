@@ -36,6 +36,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FirebaseMessaging.getInstance().subscribeToTopic("notice");
     }
 
     //계정 로그인 감지의 시작과 종료 호출 함수

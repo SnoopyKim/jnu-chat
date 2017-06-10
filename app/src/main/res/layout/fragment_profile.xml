@@ -33,24 +33,33 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_centerInParent="true"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp"/>
+                android:layout_marginBottom="32dp"
+                android:layout_marginTop="16dp" />
+
             <TextView
-                android:layout_below="@id/ivUser"
                 android:id="@+id/tvUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/ivUser"
                 android:layout_centerHorizontal="true"
-                android:textColor="@color/colorTextBlack"
-                android:background="@drawable/user_info_line"/>
+                android:background="@drawable/user_info_line"
+                android:textColor="@color/colorTextBlack" />
+
+
             <ImageView
                 android:id="@+id/icPencil"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:layout_toRightOf="@id/tvUser"
                 android:layout_alignBottom="@id/tvUser"
-                android:src="@drawable/ic_pencil"
-                />
+                android:layout_toRightOf="@id/tvUser"
+                android:src="@drawable/ic_pencil" />
+            <Button
+                android:id="@+id/btnImage"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_photo_camera_white_24px"
+                android:layout_above="@+id/icPencil"
+                android:layout_toEndOf="@+id/ivUser" />
         </RelativeLayout>
 
         <LinearLayout
