@@ -150,7 +150,7 @@
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
-                        android:id="@+id/tvUserAddress"
+                        android:id="@+id/tvUserBirth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="서울"
@@ -190,7 +190,7 @@
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
-                        android:id="@+id/tvUserWorkplace"
+                        android:id="@+id/tvUserPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="세종대학교"

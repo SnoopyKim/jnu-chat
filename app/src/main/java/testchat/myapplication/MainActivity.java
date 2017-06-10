@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this,SigninActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 0);
             }
         });
 
@@ -123,6 +123,9 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    if (mAuthListener != null) {
+                        mAuth.removeAuthStateListener(mAuthListener);
+                    }
 
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
@@ -153,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                                                                     friend.put("email", friendEmail);
                                                                     friend.put("name", friendName);
                                                                     friend.put("photo", friendPhoto);
+
                                                                     myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
                                                                 }
                                                             }
@@ -173,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 intent.putExtra("providerId","facebook");
                                 startActivity(intent);
+
                                 finish();
                             }
 
@@ -193,10 +198,9 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
             }
         };
+        mAuth.addAuthStateListener(mAuthListener);
 
         //로그인 버튼 클릭 시
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
@@ -224,12 +228,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
 
             }
 
             @Override
             public void onCancel() {
                 Toast.makeText(getApplicationContext(), "cancel",Toast.LENGTH_SHORT).show();
+                pbLogin.setVisibility(GONE);
+                RLinput.setVisibility(VISIBLE);
             }
 
             @Override
@@ -256,14 +264,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
     }
     @Override
     public void onStop() {
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     //로그인 버튼 클릭 시 Firebase에 해당 계정 로그인 on
@@ -309,10 +313,27 @@ public class MainActivity extends AppCompatActivity {
 
                                         Hashtable<String, String> profile = new Hashtable<String, String>();
                                         profile.put("name", object.getString("name"));
-                                        profile.put("email", object.getString("email"));
+                                        if (object.getString("email")!=null) {
+                                            profile.put("email", object.getString("email"));
+                                        } else {
+                                            profile.put("email", "None");
+                                        }
                                         profile.put("photo", object.getJSONObject("picture").getJSONObject("data").getString("url"));
                                         profile.put("uid", user.getUid());
                                         profile.put("facebook_id", object.getString("id"));
+                                        if (object.get("birthday")!=null) {
+                                            profile.put("birth", object.getString("birthday"));
+                                        } else {
+                                            profile.put("birth", "None");
+                                        }
+                                        if (object.get("gender")!=null) {
+                                            profile.put("gender", object.getString("gender"));
+                                        } else {
+                                            profile.put("gender", "None");
+                                        }
+                                        profile.put("phone","None");
+                                        Log.d(TAG,profile.toString());
+
                                         myRef.child(user.getUid()).child("profile").setValue(profile);
 
                                     } catch (JSONException e) {
@@ -322,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                     //API 호출 시 필요한 인자들 설정 (이메일, 이름, id, 프로필 사진)
                     Bundle param = new Bundle();
-                    param.putString("fields","email,name,id,picture");
+                    param.putString("fields","email,name,id,picture,gender,birthday");
                     request.setParameters(param);
                     //API 호출
                     request.executeAsync();
@@ -340,6 +361,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode,resultCode,data);
+        switch (resultCode) {
+            case 1:
+                if (mAuthListener != null) {
+                    mAuth.removeAuthStateListener(mAuthListener);
+                } break;
+            default:
+                callbackManager.onActivityResult(requestCode, resultCode, data); break;
+        }
     }
 }

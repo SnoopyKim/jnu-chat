@@ -87,8 +87,16 @@
                 android:text="최근 채팅"
                 android:textColor="@color/colorTextBlack"/>
 
+
         </LinearLayout>
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_below="@id/room_overall"
+        android:background="@color/conceptRed"/>
 
 </RelativeLayout>
