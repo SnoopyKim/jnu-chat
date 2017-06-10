@@ -123,8 +123,11 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //사진 클릭 시 기기 내의 갤러리로 연결
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i,1);
+                Intent imageIntent = new Intent();
+                imageIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                imageIntent.setType("image/*");
+                imageIntent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(imageIntent, "사진을 선택하세요"), 0);
 
             }
         });

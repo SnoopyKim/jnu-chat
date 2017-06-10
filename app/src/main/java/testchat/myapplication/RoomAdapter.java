@@ -174,6 +174,12 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
                         //채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
                         roomKey = mRoom.get(position).getKey();
+
+                        if (user.getPhotoUrl()!=null)
+                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue(user.getPhotoUrl().toString());
+                        else
+                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue("None");
+
                         Intent intent = new Intent(context, ChatActivity.class);
                         intent.putExtra("pre",1);
                         intent.putExtra("friendName",allFriendName);

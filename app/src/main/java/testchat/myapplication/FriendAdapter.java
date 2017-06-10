@@ -148,7 +148,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             beforeFirstName = holder.tvFristname.getText().toString();
             holder.tvFristname.setVisibility(View.VISIBLE);
         }
-        final String stPhoto = mFriend.get(position).getPhoto();
+        String stPhoto = mFriend.get(position).getPhoto();
         if (stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);

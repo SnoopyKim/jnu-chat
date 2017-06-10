@@ -39,6 +39,7 @@
             app:srcCompat="@drawable/ic_photo_white_24px" />
 
         <LinearLayout
+            android:id="@+id/LLtext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -78,6 +79,48 @@
             />
 
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/RLadd"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentBottom="true"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:background="@color/conceptRed"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/etAdd"
+            android:layout_width="match_parent"
+            android:layout_height="30sp"
+            android:layout_toStartOf="@+id/btnAdd"
+            android:padding="3sp"
+            android:textSize="15sp"
+            android:hint="추가할 친구를 검색하세요"
+            android:background="@color/colorWhite"/>
+
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="100dp"
+            android:layout_height="30sp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:padding="1sp"
+            android:background="@color/conceptRedHint"
+            android:text="추가"
+            android:textSize="15sp"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/add_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/etAdd"
+            android:background="@color/colorWhite"
+            android:layout_marginTop="8dp"
+            android:scrollbars="vertical"
+            />
+    </RelativeLayout>
 
     <!-- A RecyclerView with some commonly used attributes -->
 

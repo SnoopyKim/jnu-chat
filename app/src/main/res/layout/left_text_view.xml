@@ -24,11 +24,19 @@
         android:textSize="10sp" />
 
     <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:textSize="15sp"
+        android:textColor="@color/colorBlack"/>
+
+    <TextView
         android:id="@+id/mTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvName"
-        android:layout_toRightOf="@+id/ivUser"
+        android:layout_toEndOf="@+id/ivUser"
         android:layout_marginLeft="@dimen/short_margin"
         android:layout_marginRight="@dimen/short_margin"
         android:paddingLeft="2dp"
@@ -37,13 +45,27 @@
         android:maxWidth="200dp"
         android:textSize="15sp" />
 
-    <TextView
-        android:id="@+id/tvName"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/ivDownload"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="48dp"
-        android:textSize="15sp"
-        android:textColor="@color/colorBlack"/>
+        android:layout_below="@+id/tvName"
+        android:layout_toStartOf="@+id/ivUser"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/btnDownload"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/mTextView"
+        android:layout_toEndOf="@+id/ivUser"
+        android:layout_marginLeft="@dimen/short_margin"
+        android:layout_marginRight="@dimen/short_margin"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:background="@color/conceptRedHint"
+        android:text="다운로드"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>
