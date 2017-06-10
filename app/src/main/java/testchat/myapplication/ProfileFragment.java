@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -45,6 +46,8 @@ public class ProfileFragment extends Fragment {
 
     ImageView ivUser;
     TextView tvUser;
+    Button btnImage;
+
     private StorageReference mStorageRef;
     FirebaseUser user;
     Bitmap bitmap;
@@ -66,6 +69,7 @@ public class ProfileFragment extends Fragment {
         //프로필 사진과 이름 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
         tvUser = (TextView)v.findViewById(R.id.tvUser);
+        btnImage = (Button) v.findViewById(R.id.btnImage);
 
         //Firebase 내 저장소 부분 호출
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -90,7 +94,15 @@ public class ProfileFragment extends Fragment {
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
         }
+        btnImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //사진 클릭 시 기기 내의 갤러리로 연결
+                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i,1);
 
+            }
+        });
         ivUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
