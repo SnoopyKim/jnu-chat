@@ -150,10 +150,10 @@ public class AddchatActivity extends AppCompatActivity {
                     }
 
                     Intent intent = new Intent(AddchatActivity.this, ChatActivity.class);
-                    intent.putExtra("pre",1);
                     intent.putExtra("friendName", roomName);
                     intent.putExtra("roomKey", roomKey);
                     startActivity(intent);
+                    setResult(2);
                     finish();
 
                 }
@@ -166,7 +166,7 @@ public class AddchatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                setResult(1);
+                setResult(2);
                 finish();
                 break;
         }
@@ -175,7 +175,7 @@ public class AddchatActivity extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        setResult(1);
+        setResult(2);
         finish();
     }
 

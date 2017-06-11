@@ -2,23 +2,34 @@ package testchat.myapplication;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -28,11 +39,12 @@ import java.util.Locale;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     List<Chat> mChat;
-    List<Chat> mFilter;
 
     String stUid;
     Context context;
     boolean isYou;
+
+    String roomKey;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -43,21 +55,25 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public TextView tvName;
         public TextView tvTime;
         public ImageView ivUser;
+        public ImageView ivDownload;
+        public Button btnDownload;
+
         public ViewHolder(View itemView) {
             super(itemView);
             mTextView = (TextView) itemView.findViewById(R.id.mTextView);
             tvName = (TextView) itemView.findViewById(R.id.tvName);
             tvTime = (TextView) itemView.findViewById(R.id.tvChatTime);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
+            ivDownload = (ImageView) itemView.findViewById(R.id.ivDownload);
+            btnDownload = (Button) itemView.findViewById(R.id.btnDownload);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChatAdapter(List<Chat> aChat, String uid, Context context) {
+    public ChatAdapter(List<Chat> aChat, String uid, String roomKey, Context context) {
         this.mChat = aChat;
-        this.mFilter = new ArrayList<>();
-        this.mFilter.addAll(aChat);
         this.stUid = uid;
+        this.roomKey = roomKey;
         this.context = context;
     }
 
@@ -96,12 +112,36 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이미지, 텍스트, 이름, 시간 layout에 값 설정
-        holder.mTextView.setText(mChat.get(position).getText());
+        if (mChat.get(position).getFile().equals("false")) {
+            holder.mTextView.setVisibility(View.VISIBLE);
+            holder.ivDownload.setVisibility(View.GONE);
+            holder.btnDownload.setVisibility(View.GONE);
+
+            holder.mTextView.setText(mChat.get(position).getText());
+
+        } else if (mChat.get(position).getFile().contains("image")) {
+            holder.mTextView.setVisibility(View.GONE);
+            holder.ivDownload.setVisibility(View.VISIBLE);
+            holder.btnDownload.setVisibility(View.GONE);
+            Glide.with(context).load(Uri.parse(mChat.get(position).getText()))
+                    .override(800,800)
+                    .fitCenter()
+                    .into(holder.ivDownload);
+
+        } else {
+            holder.mTextView.setVisibility(View.GONE);
+            holder.ivDownload.setVisibility(View.GONE);
+            holder.btnDownload.setVisibility(View.VISIBLE);
+
+            holder.btnDownload.setText(mChat.get(position).getText());
+        }
+
         if(isYou)
             holder.tvName.setText("나");
         else
             holder.tvName.setText(mChat.get(position).getName());
         holder.tvTime.setText(mChat.get(position).getTime().substring(11,16));
+
         FirebaseDatabase.getInstance().getReference("users").child(mChat.get(position).getUid()).child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -122,28 +162,100 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             }
         });
+        //이미지 파일 클릭 시 다운로드 수행
+        holder.ivDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String fileName = mChat.get(position).getTime();
+                StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
+                        .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
+
+                storageReference.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        File path = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
+                        if (!path.exists())
+                            path.mkdirs();
+
+                        File dir = new File(path,fileName+".jpg");
+
+                        try {
+                            FileOutputStream fos = new FileOutputStream(dir);
+                            fos.write(bytes);
+                            fos.close();
+                            Toast.makeText(context,"다운로드 성공",Toast.LENGTH_SHORT).show();
+
+                        } catch (FileNotFoundException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+                /*
+                File storagePath = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
+                if (!storagePath.exists())
+                    storagePath.mkdirs();
+
+                final File image = new File(storagePath, UUID.randomUUID().toString()+".jpg");
+                storageReference.getFile(image).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                        try {
+
+                            FileOutputStream fos = new FileOutputStream(image);
+                            fos.write((int) taskSnapshot.getBytesTransferred());
+                            fos.close();
+
+
+                            Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+
+                        } catch (FileNotFoundException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+
+                        Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                });
+                */
+            }
+        });
+        //그 외 파일 클릭 시 다운로드 수행행
+        holder.btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Condition",position + mChat.get(position).getFile());
+            }
+        });
 
     }
 
-    //채팅방 검색 함수 (FriendAdapter에서의 filter함수와 동일)
-    public void filter(String charText) {
-        this.mFilter.addAll(mChat);
-        charText = charText.toLowerCase(Locale.getDefault());
-        Log.d("atext",charText);
-        mChat.clear();
-        if (charText.length() == 0) {
-            mChat.addAll(mFilter);
-        } else {
-            for (Chat chat : mFilter) {
-                String text = chat.getText();
-                Log.d("text",text);
-                if (text.toLowerCase().contains(charText)) {
-                    mChat.add(chat);
-                }
+    public void uploaded(String stFile, boolean success) {
+        for (Chat chat : mChat) {
+            if (stFile.equals(chat.getText())) {
+
             }
         }
-        notifyDataSetChanged();
     }
+
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {

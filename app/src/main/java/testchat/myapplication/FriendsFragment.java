@@ -91,7 +91,7 @@ public class FriendsFragment extends Fragment {
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
-                mFAdapter = new FriendAdapter(mFriend, getActivity(),getFragmentManager());
+                mFAdapter = new FriendAdapter(mFriend, getActivity(), getFragmentManager());
                 mRecyclerView.setAdapter(mFAdapter);
                 mFAdapter.notifyDataSetChanged();
                 tvFriendcnt.setText(mFAdapter.getItemCount()+"명");

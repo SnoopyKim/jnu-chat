@@ -111,7 +111,7 @@ public class TabActivity extends AppCompatActivity {
                 }
             }
         });
-        String token = PushFirebaseInstanceID.getInstance.getToken();
+        //String token = PushFirebaseInstanceID.getInstance.getToken();
     }
 
     //fragment 이동 함수(transaction 수행)
@@ -127,7 +127,7 @@ public class TabActivity extends AppCompatActivity {
     public void onBackPressed() {
         //2초안에 뒤로가기 버튼을 두번 누르면 종료
         if (System.currentTimeMillis() - lastPressed < 2000) {
-            finish();
+            moveTaskToBack(true);
         }
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
         lastPressed = System.currentTimeMillis();
@@ -138,20 +138,28 @@ public class TabActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d("onActivityResult:","resultCode:"+resultCode);
         switch(resultCode) {
-            case 0:
+            case 1:
                 fragment = new FriendsFragment();
                 findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
                 etSearch.setVisibility(View.VISIBLE);
                 switchFragment(fragment);
                 getSupportActionBar().setTitle("친구");
                 break;
-            case 1:
+            case 2:
                 fragment = new RoomsFragment();
                 findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
                 etSearch.setVisibility(View.VISIBLE);
                 switchFragment(fragment);
                 getSupportActionBar().setTitle("채팅");
                 break;
+            default:
+                fragment = new ProfileFragment();
+                findViewById(R.id.searchbox_ll).setVisibility(View.GONE);
+                etSearch.setVisibility(View.GONE);
+                switchFragment(fragment);
+                getSupportActionBar().setTitle("프로필");
+                break;
+
         }
     }
 }

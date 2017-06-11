@@ -10,16 +10,18 @@ public class Chat {
     public String uid;
     public String name;
     public String text;
+    public String file;
     public String time;
 
     public Chat() {
         //기본 생성자 (데이터를 Chat.class로 변환할라면 꼭 필요)
     }
 
-    public Chat(String uid, String name, String text, String time) {
+    public Chat(String uid, String name, String text, String file, String time) {
         this.uid = uid;
         this.name = name;
         this.text = text;
+        this.file = file;
         this.time = time;
     }
 
@@ -41,10 +43,17 @@ public class Chat {
     public void setName(String name) {
         this.name = name;
     }
+    public String getFile() {
+        return file;
+    }
+    public void setFile(String file) {
+        this.file = file;
+    }
     public String getTime() {
         return time;
     }
     public void setTime(String time) {
         this.time = time;
     }
+
 }
