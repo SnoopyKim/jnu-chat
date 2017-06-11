@@ -1,22 +1,34 @@
 package testchat.myapplication;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -32,7 +44,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     Context context;
     boolean isYou;
 
-    Bitmap newBitmap;
+    String roomKey;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -58,9 +70,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ChatAdapter(List<Chat> aChat, String uid, Context context) {
+    public ChatAdapter(List<Chat> aChat, String uid, String roomKey, Context context) {
         this.mChat = aChat;
         this.stUid = uid;
+        this.roomKey = roomKey;
         this.context = context;
     }
 
@@ -100,19 +113,27 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이미지, 텍스트, 이름, 시간 layout에 값 설정
         if (mChat.get(position).getFile().equals("false")) {
+            holder.mTextView.setVisibility(View.VISIBLE);
+            holder.ivDownload.setVisibility(View.GONE);
+            holder.btnDownload.setVisibility(View.GONE);
+
             holder.mTextView.setText(mChat.get(position).getText());
 
         } else if (mChat.get(position).getFile().contains("image")) {
             holder.mTextView.setVisibility(View.GONE);
             holder.ivDownload.setVisibility(View.VISIBLE);
-            Glide.with(context).load(mChat.get(position).getText())
+            holder.btnDownload.setVisibility(View.GONE);
+            Glide.with(context).load(Uri.parse(mChat.get(position).getText()))
                     .override(800,800)
                     .fitCenter()
                     .into(holder.ivDownload);
 
         } else {
-            holder.mTextView.setText(mChat.get(position).getText());
+            holder.mTextView.setVisibility(View.GONE);
+            holder.ivDownload.setVisibility(View.GONE);
             holder.btnDownload.setVisibility(View.VISIBLE);
+
+            holder.btnDownload.setText(mChat.get(position).getText());
         }
 
         if(isYou)
@@ -141,7 +162,98 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             }
         });
+        //이미지 파일 클릭 시 다운로드 수행
+        holder.ivDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String fileName = mChat.get(position).getTime();
+                StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
+                        .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
 
+                storageReference.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        File path = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
+                        if (!path.exists())
+                            path.mkdirs();
+
+                        File dir = new File(path,fileName+".jpg");
+
+                        try {
+                            FileOutputStream fos = new FileOutputStream(dir);
+                            fos.write(bytes);
+                            fos.close();
+                            Toast.makeText(context,"다운로드 성공",Toast.LENGTH_SHORT).show();
+
+                        } catch (FileNotFoundException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                });
+                /*
+                File storagePath = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
+                if (!storagePath.exists())
+                    storagePath.mkdirs();
+
+                final File image = new File(storagePath, UUID.randomUUID().toString()+".jpg");
+                storageReference.getFile(image).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                        try {
+
+                            FileOutputStream fos = new FileOutputStream(image);
+                            fos.write((int) taskSnapshot.getBytesTransferred());
+                            fos.close();
+
+
+                            Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+
+                        } catch (FileNotFoundException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+
+                        Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                    }
+                });
+                */
+            }
+        });
+        //그 외 파일 클릭 시 다운로드 수행행
+        holder.btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Condition",position + mChat.get(position).getFile());
+            }
+        });
+
+    }
+
+    public void uploaded(String stFile, boolean success) {
+        for (Chat chat : mChat) {
+            if (stFile.equals(chat.getText())) {
+
+            }
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -55,4 +55,5 @@ public class Chat {
     public void setTime(String time) {
         this.time = time;
     }
+
 }

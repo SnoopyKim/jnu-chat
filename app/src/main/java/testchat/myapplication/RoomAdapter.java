@@ -105,17 +105,22 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         //채팅방 이름 (참여자들 중 본인빼고 이름 이어붙임)
         List<String> listNames = mRoom.get(position).getPeople();
+        final String allFriendName;
+        final String stPhoto = mRoom.get(position).getPhoto();
+
         String stName = "";
         for (String name : listNames) {
             if (!name.equals(user.getDisplayName()))
                 stName += (name+", ");
         }
-        if(stName.equals(""))
+        if(stName.equals("")) {
+            allFriendName = "";
             holder.tvName.setText("나");
-        else
-            holder.tvName.setText(stName.substring(0,(stName.length()-2)));
-        final String allFriendName = stName.substring(0,(stName.length()-2));
-        final String stPhoto = mRoom.get(position).getPhoto();
+        } else {
+            allFriendName = stName.substring(0,(stName.length()-2));
+            holder.tvName.setText(allFriendName);
+        }
+
         if (stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
@@ -181,7 +186,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                             chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue("None");
 
                         Intent intent = new Intent(context, ChatActivity.class);
-                        intent.putExtra("pre",1);
                         intent.putExtra("friendName",allFriendName);
                         intent.putExtra("roomKey",roomKey);
                         context.startActivity(intent);

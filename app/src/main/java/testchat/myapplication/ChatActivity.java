@@ -1,9 +1,14 @@
 package testchat.myapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +25,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -28,7 +35,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +53,6 @@ import static testchat.myapplication.R.drawable.ic_photo_white_24px;
 public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
-    int pre;
     boolean onebyone = false;
     boolean addMode = false;
 
@@ -84,10 +92,39 @@ public class ChatActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
         setSupportActionBar(toolbar);
 
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+        }
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+        }
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.MANAGE_DOCUMENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.MANAGE_DOCUMENTS)) {
+
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.MANAGE_DOCUMENTS}, 1);
+            }
+        }
+
         //전 화면에서 넘겨준 데이터(채팅방 고유키, 상대방 이름)를 받음
         Intent in = getIntent();
-        pre = in.getIntExtra("pre",1);
-        Log.d(TAG,"intent:pre:"+pre);
         final String friendName = in.getStringExtra("friendName");
         roomKey = in.getStringExtra("roomKey");
         Log.d("roomKey",roomKey);
@@ -151,10 +188,10 @@ public class ChatActivity extends AppCompatActivity{
                     etText.setText("");
 
                 } else {
-                    Intent imageIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    imageIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                    imageIntent.setType("*/*");
-                    startActivityForResult(Intent.createChooser(imageIntent, "파일을 선택하세요"), 0);
+                    Intent fileIntent = new Intent();
+                    fileIntent.setType("*/*");
+                    fileIntent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(fileIntent, "파일을 선택하세요"), 0);
                 }
             }
         });
@@ -167,8 +204,8 @@ public class ChatActivity extends AppCompatActivity{
                 stText = etText.getText().toString();
 
                 if (stText.equals("") || stText.isEmpty()){
-
                     Toast.makeText(ChatActivity.this, "내용을 입력해주세요", Toast.LENGTH_SHORT).show();
+
                 } else {
                     //보낼 당시의 시각을 DB 내 child로 하고 채팅 정보를 업로드(추가)하고 EditText초기화
                     Calendar c = Calendar.getInstance();
@@ -182,9 +219,15 @@ public class ChatActivity extends AppCompatActivity{
                     chat.put("file",fileSelected);
                     myRef.child("chatInfo").child(formattedDate).setValue(chat);
 
-                    fileSelected = "false";
-                    btnFile.setImageResource(ic_photo_white_24px);
-                    etText.setEnabled(true);
+                    if (!fileSelected.equals("false")) {
+
+                        uploadFile(stText, formattedDate);
+
+                        fileSelected = "false";
+                        btnFile.setImageResource(ic_photo_white_24px);
+                        etText.setEnabled(true);
+
+                    }
                     etText.setText("");
                 }
             }
@@ -200,7 +243,7 @@ public class ChatActivity extends AppCompatActivity{
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mChat = new ArrayList<>();
-        mAdapter = new ChatAdapter(mChat,user.getUid(),ChatActivity.this);
+        mAdapter = new ChatAdapter(mChat,user.getUid(),roomKey,ChatActivity.this);
         mRecyclerView.setAdapter(mAdapter);
 
         //해당 고유키의 채팅방 DB에서 child가 추가될 때마다 데이터 리스트에 추가하고 어댑터로 RecyclerView에 그려짐
@@ -241,6 +284,26 @@ public class ChatActivity extends AppCompatActivity{
             }
         });
 
+    }
+
+    public void uploadFile(String stFile, final String stDate) {
+        Uri file = Uri.parse(stFile);
+        storageRef = FirebaseStorage.getInstance().getReference("chats")
+                .child(roomKey).child(user.getUid()).child(stDate);
+        UploadTask uploadTask = storageRef.putFile(file);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri fileUri = taskSnapshot.getDownloadUrl();
+                myRef.child("chatInfo").child(stDate).child("text").setValue(fileUri.toString());
+
+            }
+        });
     }
 
     @Override
@@ -294,7 +357,6 @@ public class ChatActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                setResult(pre);
                 finish();
                 break;
             case R.id.action_addbutton:
@@ -397,10 +459,34 @@ public class ChatActivity extends AppCompatActivity{
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        setResult(pre);
         finish();
     }
 }

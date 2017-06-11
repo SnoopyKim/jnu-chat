@@ -67,7 +67,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         public TextView tvEmail;
         public ImageView ivUser;
         public LinearLayout overall;
-        public TextView tvFristname;
+        public TextView tvFirstname;
 
         //순서대로 칸, 이름, 이미지를 레이아웃에서 불러와 생성
         public ViewHolder(View itemView) {
@@ -75,27 +75,11 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             overall = (LinearLayout) itemView.findViewById(R.id.friend_overall);
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
-            tvFristname = (TextView) itemView.findViewById(R.id.tvFirstname);
+            tvFirstname = (TextView) itemView.findViewById(R.id.tvFirstname);
         }
     }
 
     // 커스텀 생성자로 친구 데이터 리스트를 받음
-    public FriendAdapter(List<Friend> aFriend, Context context) {
-        Comparator<Friend> cmpAsc = new Comparator<Friend>() {
-            @Override
-            public int compare(Friend o1, Friend o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        };
-        Collections.sort(aFriend, cmpAsc);
-        this.mFriend = aFriend;
-        this.mFilter = new ArrayList<>();
-        this.mFilter.addAll(aFriend);
-        this.context = context;
-
-        beforeFirstName = new String("");
-    }    // 커스텀 생성자로 친구 데이터 리스트를 받음
-
     public FriendAdapter(List<Friend> aFriend, Context context, FragmentManager aFragmentManager) {
         Comparator<Friend> cmpAsc = new Comparator<Friend>() {
             @Override
@@ -141,12 +125,12 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
         holder.tvEmail.setText(mFriend.get(position).getName());
-        holder.tvFristname.setText(mFriend.get(position).getName().substring(0, 1));
-        if (beforeFirstName.equals(holder.tvFristname.getText())) {
-            holder.tvFristname.setVisibility(View.GONE);
+        holder.tvFirstname.setText(mFriend.get(position).getName().substring(0, 1));
+        if (beforeFirstName.equals(holder.tvFirstname.getText())) {
+            holder.tvFirstname.setVisibility(View.GONE);
         } else {
-            beforeFirstName = holder.tvFristname.getText().toString();
-            holder.tvFristname.setVisibility(View.VISIBLE);
+            beforeFirstName = holder.tvFirstname.getText().toString();
+            holder.tvFirstname.setVisibility(View.VISIBLE);
         }
         String stPhoto = mFriend.get(position).getPhoto();
         if (stPhoto.equals("None")) {
@@ -154,7 +138,9 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
         } else {
-            Glide.with(context).load(stPhoto).into(holder.ivUser);
+            Glide.with(context).load(stPhoto)
+                    .placeholder(R.drawable.ic_person_black_24dp)
+                    .into(holder.ivUser);
         }
         //View(칸) 클릭 시
         holder.overall.setOnTouchListener(new View.OnTouchListener() {
@@ -260,7 +246,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     chatReference.child(roomKey).child("people").child(stFriendUid).setValue(friendInfo);
 
                                     Intent in = new Intent(context, ChatActivity.class);
-                                    in.putExtra("pre", 0);
                                     in.putExtra("friendName", stFriendname);
                                     in.putExtra("roomKey", roomKey);
                                     context.startActivity(in);

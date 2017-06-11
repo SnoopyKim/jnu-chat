@@ -221,7 +221,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                setResult(0);
+                setResult(1);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -229,7 +229,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        setResult(0);
+        setResult(1);
 
         finish();
     }

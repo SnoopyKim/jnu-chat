@@ -1,23 +1,19 @@
 package testchat.myapplication;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,14 +41,12 @@ public class ProfileFragment extends Fragment {
     String TAG = getClass().getSimpleName();
 
     ImageView ivUser;
-    TextView tvUser;
-<<<<<<< HEAD
     Button btnImage;
-=======
+
+    TextView tvUser;
     TextView tvEmail;
     TextView tvBirth;
     TextView tvPhone;
->>>>>>> refs/remotes/origin/master
 
     private StorageReference mStorageRef;
     FirebaseUser user;
@@ -62,26 +56,20 @@ public class ProfileFragment extends Fragment {
     String stEmail;
     Uri uriPhoto;
 
-    ProgressBar pbLogin;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        pbLogin = (ProgressBar)v.findViewById(R.id.pbLogin);
-
         //프로필 관련 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
-        tvUser = (TextView)v.findViewById(R.id.tvUser);
-<<<<<<< HEAD
         btnImage = (Button) v.findViewById(R.id.btnImage);
-=======
+
+        tvUser = (TextView)v.findViewById(R.id.tvUser);
         tvEmail = (TextView)v.findViewById(R.id.tvUseraccount);
         tvPhone = (TextView)v.findViewById(R.id.tvUserPhone);
         tvBirth = (TextView)v.findViewById(R.id.tvUserBirth);
->>>>>>> refs/remotes/origin/master
 
         //Firebase 내 저장소 부분 호출
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -98,10 +86,12 @@ public class ProfileFragment extends Fragment {
             if (uriPhoto == null) {
                 Drawable defaultImg = getContext().getResources().getDrawable(R.drawable.ic_person_black_24dp);
                 ivUser.setImageDrawable(defaultImg);
-                pbLogin.setVisibility(View.GONE);
+
             } else {
-                Glide.with(getContext()).load(user.getPhotoUrl()).into(ivUser);
-                pbLogin.setVisibility(View.GONE);
+                Glide.with(getContext()).load(user.getPhotoUrl())
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .into(ivUser);
+
             }
             tvEmail.setText(stEmail);
             /*
@@ -131,11 +121,15 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //사진 클릭 시 기기 내의 갤러리로 연결
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i,1);
+                Intent imageIntent = new Intent();
+                imageIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                imageIntent.setType("image/*");
+                imageIntent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(imageIntent, "사진을 선택하세요"), 0);
 
             }
         });
+        /*
         ivUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,32 +142,7 @@ public class ProfileFragment extends Fragment {
 
             }
         });
-
-        //저장소 허용 동의 부분
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                        1);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
+        */
 
         //로그아웃 버튼 클릭 시 계정 로그아웃하고 MainActivity로 넘어감
         TextView btnLogout = (TextView)v.findViewById(R.id.btnLogout);
@@ -200,12 +169,9 @@ public class ProfileFragment extends Fragment {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
-        final LinearLayout container = (LinearLayout) getActivity().findViewById(R.id.container);
-        final LinearLayout option = (LinearLayout) getView().findViewById(R.id.optionLinear);
-        container.setEnabled(false);
-        option.setEnabled(false);
-        ivUser.setVisibility(View.INVISIBLE);
-        pbLogin.setVisibility(View.VISIBLE);
+        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setTitle("업로드중...");
+        progressDialog.show();
 
         //가공한 사진 데이터를 Firebase 내 저장소에 등록(올리기)
         UploadTask uploadTask = mountainRef.putBytes(data);
@@ -234,13 +200,15 @@ public class ProfileFragment extends Fragment {
                 user.updateProfile(profileUpdate).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            Glide.with(getContext()).load(user.getPhotoUrl()).into(ivUser);
-                            container.setEnabled(true);
-                            option.setEnabled(true);
-                            pbLogin.setVisibility(View.GONE);
-                            ivUser.setVisibility(View.VISIBLE);
-                            Toast.makeText(getContext(), "사진 업로드가 잘 됐습니다.", Toast.LENGTH_SHORT).show();
+                            Glide.with(getContext()).load(user.getPhotoUrl())
+                                    .placeholder(R.drawable.ic_person_black_24dp)
+                                    .into(ivUser);
+                            Toast.makeText(getContext(), "사진 업로드가 잘 됐습니다", Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            Toast.makeText(getContext(), "사진 업로드에 실패했습니다", Toast.LENGTH_SHORT).show();
 
                         }
                     }
@@ -259,7 +227,6 @@ public class ProfileFragment extends Fragment {
             Uri image = data.getData();
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), image);
-                ivUser.setImageBitmap(bitmap);
 
                 uploadImage();
 
@@ -268,32 +235,6 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-    }
-
-    //저장소 허용 동의 부분에서 결과 처리 부분인데 아직 아무것도 없음 (딱히 필요한 이벤트가 없을 듯?)
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
     }
 
 }
