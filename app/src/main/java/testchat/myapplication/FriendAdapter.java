@@ -226,11 +226,19 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                 if (dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
                                     roomKey = dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue().toString();
 
+                                    chatReference.child(roomKey).child("people").child(user.getUid()).child("photo")
+                                            .setValue(dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString());
+
+                                    Intent in = new Intent(context, ChatActivity.class);
+                                    in.putExtra("friendName", stFriendname);
+                                    in.putExtra("roomKey", roomKey);
+                                    context.startActivity(in);
+
                                 } else {
+                                    //한 적이 없다면 입장 당시 시간 표시
                                     roomKey = chatReference.push().getKey();
                                 }
                                 if (roomKey != null) {
-                                    //채팅을 한적이 없다면 양쪽 사람에게 표시를하고
                                     userReference.child(user.getUid()).child("room").child(stFriendUid).setValue(roomKey);
                                     userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(roomKey);
 

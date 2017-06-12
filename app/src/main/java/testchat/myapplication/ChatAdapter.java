@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,14 +23,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by snoopy on 2017-04-01.
@@ -123,17 +124,87 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.mTextView.setVisibility(View.GONE);
             holder.ivDownload.setVisibility(View.VISIBLE);
             holder.btnDownload.setVisibility(View.GONE);
+
             Glide.with(context).load(Uri.parse(mChat.get(position).getText()))
                     .override(800,800)
                     .fitCenter()
+                    .placeholder(R.drawable.ic_photo_placeholder_24dp)
                     .into(holder.ivDownload);
+
+            //이미지 파일 클릭 시 다운로드 수행
+            holder.ivDownload.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String fileName = mChat.get(position).getTime();
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
+                            .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
+
+                    File storagePath = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+                    if (!storagePath.exists())
+                        storagePath.mkdirs();
+
+                    final File image = new File(storagePath, UUID.randomUUID().toString()+".jpg");
+
+                    storageReference.getFile(image).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            });
 
         } else {
             holder.mTextView.setVisibility(View.GONE);
             holder.ivDownload.setVisibility(View.GONE);
             holder.btnDownload.setVisibility(View.VISIBLE);
 
-            holder.btnDownload.setText(mChat.get(position).getText());
+            final String fileName = mChat.get(position).getTime();
+            final String[] fileType = new String[1];
+            final StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
+                    .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
+            storageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                @Override
+                public void onSuccess(StorageMetadata storageMetadata) {
+                    fileType[0] = MimeTypeMap.getSingleton().getExtensionFromMimeType(storageMetadata.getContentType());
+                    holder.btnDownload.setText(fileType[0]);
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("file type extension",e.getMessage());
+                }
+            });
+            //그 외 파일 클릭 시 다운로드 수행행
+            holder.btnDownload.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    File storagePath = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+                    if (!storagePath.exists())
+                        storagePath.mkdirs();
+
+                    File file = new File(storagePath, UUID.randomUUID().toString() +"."+ fileType[0]);
+                    storageReference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            });
         }
 
         if(isYou)
@@ -162,98 +233,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             }
         });
-        //이미지 파일 클릭 시 다운로드 수행
-        holder.ivDownload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String fileName = mChat.get(position).getTime();
-                StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
-                        .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
 
-                storageReference.getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        File path = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
-                        if (!path.exists())
-                            path.mkdirs();
-
-                        File dir = new File(path,fileName+".jpg");
-
-                        try {
-                            FileOutputStream fos = new FileOutputStream(dir);
-                            fos.write(bytes);
-                            fos.close();
-                            Toast.makeText(context,"다운로드 성공",Toast.LENGTH_SHORT).show();
-
-                        } catch (FileNotFoundException e) {
-                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                    }
-                });
-                /*
-                File storagePath = new File(Environment.getExternalStorageDirectory(), "jnu_chat");
-                if (!storagePath.exists())
-                    storagePath.mkdirs();
-
-                final File image = new File(storagePath, UUID.randomUUID().toString()+".jpg");
-                storageReference.getFile(image).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-
-                        try {
-
-                            FileOutputStream fos = new FileOutputStream(image);
-                            fos.write((int) taskSnapshot.getBytesTransferred());
-                            fos.close();
-
-
-                            Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
-
-                        } catch (FileNotFoundException e) {
-                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-
-                        Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
-                    }
-                });
-                */
-            }
-        });
-        //그 외 파일 클릭 시 다운로드 수행행
-        holder.btnDownload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("Condition",position + mChat.get(position).getFile());
-            }
-        });
-
-    }
-
-    public void uploaded(String stFile, boolean success) {
-        for (Chat chat : mChat) {
-            if (stFile.equals(chat.getText())) {
-
-            }
-        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

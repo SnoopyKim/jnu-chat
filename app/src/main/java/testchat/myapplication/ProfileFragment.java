@@ -1,6 +1,7 @@
 package testchat.myapplication;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,8 @@ public class ProfileFragment extends Fragment {
     //개인정보 및 설정 Fragment 화면
     String TAG = getClass().getSimpleName();
 
+    Context context;
+
     ImageView ivUser;
     Button btnImage;
 
@@ -61,6 +64,7 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
+        context = getContext();
 
         //프로필 관련 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
@@ -84,11 +88,11 @@ public class ProfileFragment extends Fragment {
             //자신의 프로필 정보에서 사진URL 정보가 없다면 기본 Drawble로, 있다면 해당 사진으로 그림
             uriPhoto = user.getPhotoUrl();
             if (uriPhoto == null) {
-                Drawable defaultImg = getContext().getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
                 ivUser.setImageDrawable(defaultImg);
 
             } else {
-                Glide.with(getContext()).load(user.getPhotoUrl())
+                Glide.with(context).load(user.getPhotoUrl())
                         .placeholder(R.drawable.ic_person_black_24dp)
                         .into(ivUser);
 
@@ -149,7 +153,7 @@ public class ProfileFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent in = new Intent(v.getContext(),MainActivity.class);
+                Intent in = new Intent(context,MainActivity.class);
                 startActivity(in);
                 FirebaseAuth.getInstance().signOut();
                 LoginManager.getInstance().logOut();
@@ -169,7 +173,7 @@ public class ProfileFragment extends Fragment {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
-        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        final ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setTitle("업로드중...");
         progressDialog.show();
 
@@ -202,13 +206,13 @@ public class ProfileFragment extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            Glide.with(getContext()).load(user.getPhotoUrl())
+                            Glide.with(context).load(user.getPhotoUrl())
                                     .placeholder(R.drawable.ic_person_black_24dp)
                                     .into(ivUser);
-                            Toast.makeText(getContext(), "사진 업로드가 잘 됐습니다", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "사진 업로드가 잘 됐습니다", Toast.LENGTH_SHORT).show();
 
                         } else {
-                            Toast.makeText(getContext(), "사진 업로드에 실패했습니다", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "사진 업로드에 실패했습니다", Toast.LENGTH_SHORT).show();
 
                         }
                     }
