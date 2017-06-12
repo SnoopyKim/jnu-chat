@@ -17,7 +17,48 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/conceptRed"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
+        <LinearLayout
+            android:id="@+id/searchbox_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/toolbar"
+            android:background="@color/conceptRed"
+            android:weightSum="100">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="25dp"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:layout_marginLeft="@dimen/short_margin"
+                android:layout_marginTop="@dimen/short_margin"
+                android:orientation="horizontal"
+                android:background="@color/colorWhite"
+                android:layout_weight="10">
+
+                <Button
+                    android:id="@+id/btnSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/ic_search_black_24px" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="25dp"
+                android:layout_marginTop="@dimen/short_margin"
+                android:layout_marginBottom="@dimen/short_margin"
+                android:layout_marginRight="@dimen/short_margin"
+                android:layout_weight="90"
+                android:singleLine="true"
+                android:background="@color/colorWhite"
+                android:textColor="@color/colorBlack" />
+        </LinearLayout>
 
     </android.support.design.widget.AppBarLayout>
 

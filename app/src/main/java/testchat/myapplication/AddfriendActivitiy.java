@@ -1,25 +1,17 @@
 package testchat.myapplication;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,9 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 public class AddfriendActivitiy extends AppCompatActivity {
     String TAG = getClass().getSimpleName();
@@ -105,11 +95,22 @@ public class AddfriendActivitiy extends AppCompatActivity {
         mContext = this;
         //th fin
 
+        etSearch.setOnKeyListener(new View.OnKeyListener(){
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)){
+                    btnSearch.callOnClick();
+                }
+                return false;
+            }
+        });
         //검색 버튼 클릭 이벤트
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //검색한 아이디를 받음
+                rlConfirm.setVisibility(View.GONE);
+                rlResult.setVisibility(View.INVISIBLE);
                 final String searchEmail = etSearch.getText().toString();
 
                 //Firebase의 users db목록을 읽음
@@ -123,26 +124,34 @@ public class AddfriendActivitiy extends AppCompatActivity {
                         //모든 유저들 중 검색한 아이디와 동일한 계정을 찾음
                         for (DataSnapshot person : dataSnapshot.getChildren()) {
                             personEmail = person.child("profile").child("email").getValue().toString();
+                            //동일할 시 결과창의 이미지뷰와 텍스트뷰를 설정해준 뒤 활성화
                             if(personEmail.equals(searchEmail)) {
                                 personName = person.child("profile").child("name").getValue().toString();
                                 personPhoto = person.child("profile").child("photo").getValue().toString();
                                 personUid = person.child("profile").child("uid").getValue().toString();
+                                if (dataSnapshot.child(user.getUid()).child("friends").child(personUid).getValue() == null) {
+                                    if (personPhoto.equals("None")) {
+                                        Drawable defaultImg = getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                                        ivUser.setImageDrawable(defaultImg);
+                                    } else {
+                                        Glide.with(AddfriendActivitiy.this).load(personPhoto).into(ivUser);
+                                    }
+                                    tvUser.setText(personName);
 
-                                //동일할 시 결과창의 이미지뷰와 텍스트뷰를 설정해준 뒤 활성화
-                                if(personPhoto.equals("None")) {
-                                    Drawable defaultImg = getResources().getDrawable(R.drawable.ic_person_black_24dp);
-                                    ivUser.setImageDrawable(defaultImg);
+                                    rlResult.setVisibility(View.VISIBLE);
+                                    btnAddFriend.setEnabled(true);
+
+                                    break;
                                 } else {
-                                    Glide.with(AddfriendActivitiy.this).load(personPhoto).into(ivUser);
+                                    //만약 이미 친구면 다시 검색
+                                    Toast.makeText(AddfriendActivitiy.this,"이미 친구입니다",Toast.LENGTH_SHORT).show();
+                                    etSearch.setText("");
+                                    break;
                                 }
-                                tvUser.setText(personName);
-                                tvUsermail.setText(personEmail);
-
-                                rlResult.setVisibility(View.VISIBLE);
-                                btnAddFriend.setEnabled(true);
-
-                                break;
                             }
+                        }
+                        if (personName == null) {
+                            Toast.makeText(AddfriendActivitiy.this,"해당 이메일의 친구가 없습니다",Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -158,67 +167,16 @@ public class AddfriendActivitiy extends AppCompatActivity {
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //th ver.
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
-
-                // 제목셋팅
-                alertDialogBuilder.setTitle("프로그램 종료");
-
-
-                // AlertDialog 셋팅
-                alertDialogBuilder
-                        .setMessage("프로그램을 종료할 것입니까?")
-                        .setCancelable(false)
-                        //right side button
-                        .setPositiveButton("아니오",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // 다이얼로그를 취소한다
-                                        dialog.cancel();
-                                    }
-                                })
-                        //left side button
-                        .setNegativeButton("예",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Hashtable<String, String> friend = new Hashtable<String, String>();
-                                        friend.put("email", personEmail);
-                                        friend.put("name", personName);
-                                        friend.put("photo", personPhoto);
-                                        myRef.child(user.getUid()).child("friends").child(personUid).setValue(friend);
-
-                                        //해당 유저의 친구리스트DB에 자신을 추가
-                                        Hashtable<String, String> me = new Hashtable<String, String>();
-                                        me.put("email",user.getEmail());
-                                        me.put("name",user.getDisplayName());
-                                        me.put("photo",userPhoto);
-                                        myRef.child(personUid).child("friends").child(user.getUid()).setValue(me);
-
-                                        //팝업과 함께 전체화면 초기화
-                                        Toast.makeText(AddfriendActivitiy.this,"추가 되었습니다", Toast.LENGTH_SHORT).show();
-                                        rlConfirm.setVisibility(View.GONE);
-                                        rlResult.setVisibility(View.INVISIBLE);
-                                        btnAddFriend.setEnabled(false);
-                                        etSearch.setText("");
-                                    }
-                                });
-
-                // 다이얼로그 생성
-                AlertDialog alertDialog = alertDialogBuilder.create();
-
-                //back button || touch other screen -> close dialog
-                alertDialog.setCancelable(true);
-                alertDialog.setCanceledOnTouchOutside(true);
-
-                // 다이얼로그 보여주기
-                alertDialog.show();
-
-                Button rightBtn = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-              //  rightBtn.setBackground(R.color.conceptRed);
-
-
-                //thfin
-                //rlConfirm.setVisibility(View.VISIBLE);
+                TextView tvConfirmName = (TextView) findViewById(R.id.tvConfirmUser);
+                tvConfirmName.setText(tvUser.getText().toString());
+                ImageView ivConfirmImage = (ImageView) findViewById(R.id.ivConfirmUser);
+                if(personPhoto.equals("None")) {
+                    Drawable defaultImg = getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                    ivConfirmImage.setImageDrawable(defaultImg);
+                } else {
+                    Glide.with(AddfriendActivitiy.this).load(personPhoto).into(ivConfirmImage);
+                }
+                rlConfirm.setVisibility(View.VISIBLE);
             }
         });
 
@@ -235,17 +193,18 @@ public class AddfriendActivitiy extends AppCompatActivity {
 
                 //해당 유저의 친구리스트DB에 자신을 추가
                 Hashtable<String, String> me = new Hashtable<String, String>();
-                me.put("email",user.getEmail());
-                me.put("name",user.getDisplayName());
-                me.put("photo",userPhoto);
+                me.put("email", user.getEmail());
+                me.put("name", user.getDisplayName());
+                me.put("photo", userPhoto);
                 myRef.child(personUid).child("friends").child(user.getUid()).setValue(me);
 
                 //팝업과 함께 전체화면 초기화
-                Toast.makeText(AddfriendActivitiy.this,"추가 되었습니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddfriendActivitiy.this, "추가 되었습니다", Toast.LENGTH_SHORT).show();
                 rlConfirm.setVisibility(View.GONE);
                 rlResult.setVisibility(View.INVISIBLE);
                 btnAddFriend.setEnabled(false);
                 etSearch.setText("");
+
             }
         });
         //'아니오'버튼 클릭 시 확인 창 비활성화
@@ -262,10 +221,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                Intent intent = new Intent(AddfriendActivitiy.this, TabActivity.class);
-                startActivity(intent);
-
-                finish();
+                setResult(1);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -273,8 +229,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AddfriendActivitiy.this, TabActivity.class);
-        startActivity(intent);
+        setResult(1);
 
         finish();
     }

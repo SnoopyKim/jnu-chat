@@ -12,38 +12,47 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_light"
+        android:background="@color/conceptRed"
         android:minHeight="?attr/actionBarSize"
         android:title="hello"/>
-
     <LinearLayout
         android:id="@+id/searchbox_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@+id/toolbar"
-        android:background="@android:color/holo_red_light"
-        android:weightSum="100"
-        >
+        android:background="@color/conceptRed"
+        android:weightSum="100">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginTop="@dimen/short_margin"
+            android:orientation="horizontal"
+            android:background="@color/colorWhite"
+            android:layout_weight="10">
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:background="@drawable/ic_search_black_24px" />
+        </LinearLayout>
+
         <EditText
             android:id="@+id/etSearch"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/short_margin"
+            android:layout_height="25dp"
+            android:layout_marginTop="@dimen/short_margin"
+            android:layout_marginBottom="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
             android:layout_weight="90"
             android:singleLine="true"
-            android:background="@color/colorLightGray"
+            android:background="@color/colorWhite"
             android:textColor="@color/colorBlack" />
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="@dimen/short_margin"
-            android:layout_marginRight="@dimen/short_margin"
-            android:layout_marginBottom="@dimen/short_margin"
-            android:layout_centerInParent="true"
-            android:background="@drawable/ic_search_black_24px"
-            android:layout_weight="10" />
     </LinearLayout>
 
     <RelativeLayout
@@ -93,39 +102,80 @@
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/fab_margin"
             android:text="친구추가"
+            android:maxHeight="64dp"
             style="?android:attr/borderlessButtonStyle"
             android:textColor="@color/colorWhite"
             android:textSize="16sp"
-            android:background="@drawable/button_big_login"/>
+            android:background="@drawable/button_concept_red"/>
 
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/confirmPop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:background="@color/colorHintGray"
-        android:visibility="gone">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/searchbox_ll"
+        android:visibility="gone"
+        android:layout_marginTop="56dp"
+        android:layout_marginBottom="56dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:background="@drawable/chat_bubble">
+        <ImageView
+            android:id="@+id/ivConfirmUser"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+        <TextView
+            android:id="@+id/tvConfirmUser"
+            android:layout_below="@id/ivConfirmUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:layout_centerHorizontal="true"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorTextGray"/>
         <TextView
             android:id="@+id/tvConfirm"
+            android:layout_below="@id/tvConfirmUser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/fab_margin"
             android:layout_centerHorizontal="true"
+            android:textSize="16sp"
+            android:textColor="@color/colorDarkGray"
             android:text="친구로 추가하시겠습니까?"/>
-        <Button
-            android:id="@+id/btnYes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_below="@id/tvConfirm"
-            android:text="네"/>
-        <Button
-            android:id="@+id/btnNo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvConfirm"
-            android:layout_toRightOf="@+id/btnYes"
-            android:text="아니오"/>
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/btnYes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/fab_margin"
+                android:background="@drawable/button_concept_red"
+                android:text="예" />
+
+            <Button
+                android:id="@+id/btnNo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/fab_margin"
+                android:background="@drawable/button_dark_gray"
+                android:text="아니오" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 

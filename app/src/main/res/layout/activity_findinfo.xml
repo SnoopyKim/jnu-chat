@@ -5,12 +5,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="100">
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_red_light"
-        android:minHeight="?attr/actionBarSize"/>
+        android:background="@color/conceptRed"
+        android:minHeight="?attr/actionBarSize" />
 
     <LinearLayout
         android:id="@+id/upper_side"
@@ -90,7 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="입력하신 정보가 존재하지 않습니다."
+            android:text=""
             android:textAlignment="center"
             android:textColor="#ff0900" />
 
@@ -158,7 +159,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:ems="10"
-                android:maxLength="10"
+                android:maxLength="20"
                 android:inputType="textPersonName"
                 android:textSize="14sp"/>
 
@@ -214,7 +215,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#ff0900"
-            android:text="없는 아이디이거나 인증번호가 틀립니다."
+            android:text=""
             android:textAlignment="center" />
 
         <Button

@@ -18,30 +18,41 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorLightGray" >
-
-            <ProgressBar
-                android:id="@+id/pbLogin"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="120dp" />
+            android:background="@color/colorLightGray"
+            android:paddingBottom="@dimen/fab_margin">
 
             <ImageView
                 android:id="@+id/ivUser"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_centerInParent="true"
-                android:layout_marginTop="20dp"/>
+                android:layout_marginBottom="32dp"
+                android:layout_marginTop="16dp" />
+
             <TextView
-                android:layout_below="@id/ivUser"
                 android:id="@+id/tvUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:text="이름"
+                android:layout_below="@id/ivUser"
                 android:layout_centerHorizontal="true"
-                android:textColor="@color/colorDarkGray"/>
+                android:background="@drawable/user_info_line"
+                android:textColor="@color/colorTextBlack" />
+
+
+            <ImageView
+                android:id="@+id/icPencil"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_alignBottom="@id/tvUser"
+                android:layout_toRightOf="@id/tvUser"
+                android:src="@drawable/ic_pencil" />
+            <Button
+                android:id="@+id/btnImage"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_photo_camera_white_24px"
+                android:layout_above="@+id/icPencil"
+                android:layout_toEndOf="@+id/ivUser" />
         </RelativeLayout>
 
         <LinearLayout
@@ -88,7 +99,7 @@
                         android:id="@+id/tvFacebookaccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="페이스북 계정"
+                        android:text="계정"
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
@@ -132,7 +143,7 @@
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
-                        android:id="@+id/tvUserAddress"
+                        android:id="@+id/tvUserBirth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="서울"
@@ -172,7 +183,7 @@
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
-                        android:id="@+id/tvUserWorkplace"
+                        android:id="@+id/tvUserPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="세종대학교"
@@ -209,7 +220,7 @@
                     android:clickable="true"
                     android:padding="0dp"
                     android:background="@color/colorWhite"
-                    android:text="페이스북 로그아웃"
+                    android:text="로그아웃"
                     android:textAlignment="viewStart"
                     android:textColor="@color/colorTextBlack"/>
 

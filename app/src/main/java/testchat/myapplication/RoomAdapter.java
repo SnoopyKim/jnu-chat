@@ -3,18 +3,23 @@ package testchat.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -39,7 +44,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     DatabaseReference chatReference;
     FirebaseUser user;
 
-    String stRoomname;
     String roomKey;
 
     //리스트로 된 View들을 통합적으로 보관하는 객체
@@ -48,7 +52,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         public TextView tvName;
         public ImageView ivUser;
         public LinearLayout overall;
-
+        public TextView tvChatTime;
+        public TextView tvLastChat;
+        public Button btnDelete;
         //imageview 동그랗게
         //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
 
@@ -58,6 +64,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             overall = (LinearLayout) itemView.findViewById(R.id.room_overall) ;
             tvName = (TextView) itemView.findViewById(R.id.tvName);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
+            tvChatTime = (TextView) itemView.findViewById(R.id.tvChattime);
+            tvLastChat = (TextView) itemView.findViewById(R.id.tvLatestChat);
+            btnDelete = (Button) itemView.findViewById(R.id.btnDelete);
         }
     }
 
@@ -91,14 +100,66 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         chatReference = database.getReference("chats");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
+        //처음 값 설정하고 넣어줄 때의 roomKey
+        roomKey = mRoom.get(position).getKey();
+
         //채팅방 이름 (참여자들 중 본인빼고 이름 이어붙임)
         List<String> listNames = mRoom.get(position).getPeople();
+        final String allFriendName;
+        final String stPhoto = mRoom.get(position).getPhoto();
+
         String stName = "";
         for (String name : listNames) {
             if (!name.equals(user.getDisplayName()))
-                stName += name;
+                stName += (name+", ");
         }
-        holder.tvName.setText(stName);
+        if(stName.equals("")) {
+            allFriendName = "";
+            holder.tvName.setText("나");
+        } else {
+            allFriendName = stName.substring(0,(stName.length()-2));
+            holder.tvName.setText(allFriendName);
+        }
+
+        if (stPhoto.equals("None")) {
+            //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
+            Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+            holder.ivUser.setImageDrawable(defaultImg);
+        } else {
+            Glide.with(context).load(stPhoto).into(holder.ivUser);
+        }
+        try {
+            holder.tvChatTime.setText(mRoom.get(position).getLastTime().substring(11, 16));
+        } catch (java.lang.StringIndexOutOfBoundsException e) {
+            holder.tvChatTime.setText(mRoom.get(position).getLastTime());
+        }
+        holder.tvLastChat.setText(mRoom.get(position).getLastText());
+        chatReference.child(roomKey).child("chatInfo").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (dataSnapshot != null) {
+                    mRoom.get(position).setlastTime(dataSnapshot.getKey());
+                    mRoom.get(position).setLastText(dataSnapshot.child("text").getValue().toString());
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         //View에서 각 칸을 누를 시의 이벤트
         holder.overall.setOnTouchListener(new View.OnTouchListener()
@@ -116,23 +177,34 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     case MotionEvent.ACTION_UP:
                         holder.overall.setBackgroundColor(Color.WHITE);
 
-                        //채팅방 이름과 채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
-                        List<String> people = mRoom.get(position).getPeople();
-                        stRoomname = "";
-                        for (String person : people) {
-                            if(!person.equals(user.getDisplayName()))
-                                stRoomname += person;
-                        }
+                        //채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
                         roomKey = mRoom.get(position).getKey();
 
+                        if (user.getPhotoUrl()!=null)
+                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue(user.getPhotoUrl().toString());
+                        else
+                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue("None");
+
                         Intent intent = new Intent(context, ChatActivity.class);
-                        intent.putExtra("friendName",stRoomname);
+                        intent.putExtra("friendName",allFriendName);
                         intent.putExtra("roomKey",roomKey);
                         context.startActivity(intent);
 
                         break;
                 }
                 return true;
+            }
+        });
+
+        //각 칸의 삭제버튼을 누를 시의 이벤트
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatReference.child(roomKey).child("people").child(user.getUid()).removeValue();
+                mFilter.remove(position);
+                mRoom.remove(position);
+
+                notifyItemRemoved(position);
             }
         });
 
@@ -151,7 +223,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                     if (!fName.equals(user.getDisplayName()))
                         name += fName;
                 }
-                Log.d("RoomName for filter:",name);
                 if (name.toLowerCase().contains(charText)) {
                     mRoom.add(room);
                 }

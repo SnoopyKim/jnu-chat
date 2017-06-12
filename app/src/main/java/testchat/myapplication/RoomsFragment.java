@@ -6,14 +6,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,6 +43,9 @@ public class RoomsFragment extends Fragment {
     DatabaseReference myRef;
 
     boolean myRoom;
+    String photo;
+    TextView tvChat;
+    TextView tvNoChat;
 
     //Fragment생성시 View (FriendsFragment와 동일)
     @Override
@@ -55,6 +57,8 @@ public class RoomsFragment extends Fragment {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         etSearch = (EditText) v.findViewById(R.id.etSearch);
+        //tvNoChat = (TextView) v.findViewById(R.id.text_noFriend);
+        tvChat = (TextView) v.findViewById(R.id.text_Room);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.Chat_view);
         mRecyclerView.setHasFixedSize(true);
@@ -79,20 +83,17 @@ public class RoomsFragment extends Fragment {
                         myRoom = false;
                         List <String> roomPeople = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
-                        //roomText는 임시로 존재여부만 설정 (이후 마지막 채팅내용으로 할 예정)
-                        boolean roomText = dataSnapshot2.child("chatInfo").hasChildren();
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                            if(roomPerson.getValue().toString().equals(user.getDisplayName())) {
+                            if(roomPerson.getKey().equals(user.getUid())) {
                                 myRoom = true;
                             }
-                            roomPeople.add(roomPerson.getValue().toString());
+                            roomPeople.add(roomPerson.child("name").getValue().toString());
+                            if(!roomPerson.child("name").getValue().toString().equals(user.getDisplayName().toString()))
+                                photo = roomPerson.child("photo").getValue().toString();
                         }
-                        //참여자, 채팅방 고유키, 존재여부를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
-                        Room room = new Room(roomPeople,roomKey,roomText);
-
-                        // [START_EXCLUDE]
-                        // Update RecyclerView
+                        //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
                         if(myRoom) {
+                            Room room = new Room(roomPeople,roomKey,photo);
                             mRoom.add(room);
                         }
                     }
@@ -103,7 +104,19 @@ public class RoomsFragment extends Fragment {
                 //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
                 mRecyclerView.setAdapter(mRAdapter);
-                mRAdapter.notifyDataSetChanged();
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {
+                            mRAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("Notify:","Failed");
+                    }
+                });
             }
 
             @Override
@@ -114,26 +127,6 @@ public class RoomsFragment extends Fragment {
             }
         });
 
-        //검색버튼의 텍스트 변화 시
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(final CharSequence s, int start, int before, int count) {
-
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //텍스트가 바뀐 후 해당 텍스트로 filter함수 호출
-                mRAdapter.filter(etSearch.getText().toString().toLowerCase(Locale.getDefault()));
-            }
-        });
-
         //Chat Fragment 우측하단의 +버튼 (채팅방 추가 화면으로 넘어감)
         FloatingActionButton addRoomButton = (FloatingActionButton) v.findViewById(R.id.floatingActionButton);
         addRoomButton.setOnTouchListener(new View.OnTouchListener() {
@@ -141,8 +134,7 @@ public class RoomsFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     Intent intent = new Intent(v.getContext(), AddchatActivity.class);
-                    getContext().startActivity(intent);
-                    getActivity().finish();
+                    startActivityForResult(intent, 0);
                 }
 
                 return false;
@@ -152,4 +144,15 @@ public class RoomsFragment extends Fragment {
         return v;
     }
 
+    public void ChangeET(String s){
+        if(s.length()==0)
+        {
+            tvChat.setText("대화");
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+        else {
+            tvChat.setText("검색 결과");
+            mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
+        }
+    }
 }

@@ -11,40 +11,48 @@ public class Room {
 
     public List <String> people;
     public String key;
-    public boolean lastText;
+    public String lastText;
+    public String photo;
+    public String lastTime;
 
     public Room() {
         //기본 생성자
     }
-    public Room(List <String> people, String key,boolean lastText) {
+    public Room(List <String> people, String key,String aPhoto) {
         //커스텀 생성자
         this.people = people;
         this.key = key;
-        this.lastText = lastText;
-
+        this.lastText = "";
+        this.photo = aPhoto;
+        this.lastTime = "";
     }
 
-    public List<String> getPeople() {
-        return people;
-    }
 
     public void setPeople(List<String> people) {
         this.people = people;
     }
-
-    public String getKey() {
-        return key;
-    }
-
     public void setKey(String key) {
         this.key = key;
     }
+    public void setLastText(String lastText) {
+        this.lastText = lastText;
+    }
+    public void setPhoto(String aPhoto) {this.photo = aPhoto;}
+    public void setlastTime(String alastTime) {this.lastTime = alastTime;}
 
-    public boolean getLastText() {
+    public List<String> getPeople() {
+        return people;
+    }
+    public String getKey() {
+        return key;
+    }
+    public String getLastText() {
         return lastText;
     }
-
-    public void setLastText(boolean lastText) {
-        this.lastText = lastText;
+    public String getPhoto() {
+        return photo;
+    }
+    public String getLastTime() {
+        return lastTime;
     }
 }
