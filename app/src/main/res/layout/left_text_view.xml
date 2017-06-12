@@ -19,8 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/colorTextGray"
-        android:layout_alignBottom="@+id/mTextView"
-        android:layout_toRightOf="@+id/mTextView"
+        android:layout_alignBottom="@+id/RLbubble"
+        android:layout_toRightOf="@+id/RLbubble"
         android:textSize="10sp" />
 
     <TextView
@@ -31,41 +31,45 @@
         android:textSize="15sp"
         android:textColor="@color/colorBlack"/>
 
-    <TextView
-        android:id="@+id/mTextView"
+    <RelativeLayout
+        android:id="@+id/RLbubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvName"
-        android:layout_toEndOf="@+id/ivUser"
-        android:layout_marginLeft="@dimen/short_margin"
-        android:layout_marginRight="@dimen/short_margin"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:background="@drawable/chat_bubble_line"
-        android:maxWidth="200dp"
-        android:textSize="15sp" />
+        android:layout_toEndOf="@id/ivUser">
 
-    <ImageView
-        android:id="@+id/ivDownload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvName"
-        android:layout_toStartOf="@+id/ivUser"
-        android:visibility="gone"/>
+        <TextView
+            android:id="@+id/mTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:background="@drawable/chat_bubble_line"
+            android:maxWidth="200dp"
+            android:textSize="15sp" />
 
-    <Button
-        android:id="@+id/btnDownload"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/mTextView"
-        android:layout_toEndOf="@+id/ivUser"
-        android:layout_marginLeft="@dimen/short_margin"
-        android:layout_marginRight="@dimen/short_margin"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:background="@color/conceptRedHint"
-        android:text="다운로드"
-        android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/ivDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:background="@color/conceptRedHint"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+
 
 
 </RelativeLayout>

@@ -92,6 +92,7 @@ public class ChatActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.chat_toolbar);
         setSupportActionBar(toolbar);
 
+        //Permission 재확인 (파일 업로드/다운로드 및 이미지 그리기 관련)
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -181,7 +182,7 @@ public class ChatActivity extends AppCompatActivity{
         btnFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (fileSelected.equals("true")) {
+                if (!fileSelected.equals("false")) {
                     fileSelected = "false";
                     btnFile.setImageResource(ic_photo_white_24px);
                     etText.setEnabled(true);
@@ -190,8 +191,10 @@ public class ChatActivity extends AppCompatActivity{
                 } else {
                     Intent fileIntent = new Intent();
                     fileIntent.setType("*/*");
+                    fileIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     fileIntent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(fileIntent, "파일을 선택하세요"), 0);
+
                 }
             }
         });
@@ -212,20 +215,22 @@ public class ChatActivity extends AppCompatActivity{
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String formattedDate = df.format(c.getTime());
 
-                    Hashtable<String, String> chat = new Hashtable<String, String>();
-                    chat.put("uid",user.getUid());
-                    chat.put("name",user.getDisplayName());
-                    chat.put("text",stText);
-                    chat.put("file",fileSelected);
-                    myRef.child("chatInfo").child(formattedDate).setValue(chat);
-
                     if (!fileSelected.equals("false")) {
 
                         uploadFile(stText, formattedDate);
 
-                        fileSelected = "false";
                         btnFile.setImageResource(ic_photo_white_24px);
+                        btnSend.setVisibility(View.GONE);
+                        findViewById(R.id.pbSend).setVisibility(View.VISIBLE);
                         etText.setEnabled(true);
+
+                    } else {
+                        Hashtable<String, String> chat = new Hashtable<String, String>();
+                        chat.put("uid", user.getUid());
+                        chat.put("name", user.getDisplayName());
+                        chat.put("text", stText);
+                        chat.put("file", fileSelected);
+                        myRef.child("chatInfo").child(formattedDate).setValue(chat);
 
                     }
                     etText.setText("");
@@ -237,7 +242,7 @@ public class ChatActivity extends AppCompatActivity{
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(false);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
@@ -251,6 +256,13 @@ public class ChatActivity extends AppCompatActivity{
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // A new comment has been added, add it to the displayed list
+                /*
+                try {
+                        Date now = df.parse(formattedDate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                 */
                 String uid = dataSnapshot.child("uid").getValue().toString();
                 String name = dataSnapshot.child("name").getValue().toString();
                 String text = dataSnapshot.child("text").getValue().toString();
@@ -290,6 +302,7 @@ public class ChatActivity extends AppCompatActivity{
         Uri file = Uri.parse(stFile);
         storageRef = FirebaseStorage.getInstance().getReference("chats")
                 .child(roomKey).child(user.getUid()).child(stDate);
+
         UploadTask uploadTask = storageRef.putFile(file);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -300,8 +313,17 @@ public class ChatActivity extends AppCompatActivity{
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Uri fileUri = taskSnapshot.getDownloadUrl();
-                myRef.child("chatInfo").child(stDate).child("text").setValue(fileUri.toString());
 
+                Hashtable<String, String> chat = new Hashtable<String, String>();
+                chat.put("uid", user.getUid());
+                chat.put("name", user.getDisplayName());
+                chat.put("text", fileUri.toString());
+                chat.put("file", fileSelected);
+                myRef.child("chatInfo").child(stDate).setValue(chat);
+
+                fileSelected = "false";
+                findViewById(R.id.pbSend).setVisibility(View.GONE);
+                btnSend.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -312,7 +334,6 @@ public class ChatActivity extends AppCompatActivity{
         if (data != null) {
             Uri fileUri = data.getData();
             fileSelected = getContentResolver().getType(fileUri);
-            Log.d(TAG, "file type:" + getContentResolver().getType(fileUri));
 
             btnFile.setImageResource(ic_highlight_off_black_24dp);
             Drawable imgButton = DrawableCompat.wrap(btnFile.getDrawable());

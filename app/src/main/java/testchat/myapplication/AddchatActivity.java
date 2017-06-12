@@ -150,7 +150,7 @@ public class AddchatActivity extends AppCompatActivity {
                     }
 
                     Intent intent = new Intent(AddchatActivity.this, ChatActivity.class);
-                    intent.putExtra("friendName", roomName);
+                    intent.putExtra("friendName", roomName.substring(0,roomName.length()-2));
                     intent.putExtra("roomKey", roomKey);
                     startActivity(intent);
                     setResult(2);

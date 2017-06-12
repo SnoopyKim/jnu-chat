@@ -95,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{
                                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.MANAGE_DOCUMENTS},
                         1);
 
                 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
