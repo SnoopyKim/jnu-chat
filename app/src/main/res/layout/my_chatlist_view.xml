@@ -79,24 +79,32 @@
                 android:scaleType="center"
                 app:srcCompat="?attr/dividerHorizontal" />
 
-            <TextView
-                android:id="@+id/tvLatestChat"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="49"
-                android:text="최근 채팅"
-                android:textColor="@color/colorTextBlack"/>
-
+                android:weightSum="100">
+                <TextView
+                    android:id="@+id/tvLatestChat"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="85"
+                    android:text="최근 채팅"
+                    android:singleLine="true"
+                    android:textColor="@color/colorTextBlack"/>
+                <Button
+                    android:id="@+id/btnDelete"
+                    android:layout_width="0dp"
+                    android:layout_weight="15"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/room_overall"
+                    android:text="나가기"
+                    android:background="@color/conceptRed"/>
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnDelete"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_below="@id/room_overall"
-        android:background="@color/conceptRed"/>
 
 </RelativeLayout>

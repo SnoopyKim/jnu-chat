@@ -171,7 +171,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 switch(event.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                        //holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
 
                         break;
                     case MotionEvent.ACTION_UP:
