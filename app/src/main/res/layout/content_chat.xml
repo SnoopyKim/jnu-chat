@@ -14,13 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorWhite"
-        android:layout_marginLeft="@dimen/short_margin"
-        android:layout_marginRight="@dimen/short_margin"
         android:clipChildren="false"
         android:scrollbars="vertical"
         android:layout_above="@+id/LLsend"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="35dp" />
+        android:layout_alignParentEnd="true"/>
 
     <LinearLayout
         android:id="@+id/LLsend"
