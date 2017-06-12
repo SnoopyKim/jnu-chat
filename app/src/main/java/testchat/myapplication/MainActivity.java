@@ -1,6 +1,8 @@
 package testchat.myapplication;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -28,6 +30,8 @@ import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -49,6 +53,9 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import testchat.myapplication.fcm.QuickstartPreferences;
+import testchat.myapplication.fcm.RegistrationIntentService;
+
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -67,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        registBroadcastReceiver();
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -140,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //로그인 감지(계속 활성화되있음)
+        getInstanceIdToken();
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -430,5 +440,47 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         moveTaskToBack(true);
+    }
+    //get fcm tocken
+    public void getInstanceIdToken(){
+        if(checkPlayService()){
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
+    }
+    private boolean checkPlayService(){
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(resultCode != ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                GooglePlayServicesUtil.getErrorDialog(resultCode,this,
+                        9000).show();
+            }
+            else{
+                Log.i(TAG,"this device is not supported");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+    public void registBroadcastReceiver(){
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                if(action.equals(QuickstartPreferences.REGISTRATION_READY)){
+
+                }
+                else if(action.equals(QuickstartPreferences.REGISTRATION_GENERATION)){
+
+                }
+                else if(action.equals(QuickstartPreferences.REGISTRATION_COMPLETE)){
+                    String token = intent.getStringExtra("token");
+                    String register_id = token;
+                    Log.d("token",token);
+                }
+            }
+        };
     }
 }
