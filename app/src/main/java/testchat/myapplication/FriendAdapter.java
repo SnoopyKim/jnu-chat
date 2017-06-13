@@ -84,16 +84,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         Comparator<Friend> cmpAsc = new Comparator<Friend>() {
             @Override
             public int compare(Friend o1, Friend o2) {
-                //korean -> english sort
-                /*String left = o1.getName();
-                String right = o2.getName();
-                boolean isKoreanLeft=Pattern.matches("[가-힣]",left.substring(0,1));
-                boolean isKoreanRight=Pattern.matches("[가-힣]",right.substring(0,1));
-
-                if(isKoreanLeft & isKoreanRight) return o1.getName().compareTo(o2.getName());
-                else if(isKoreanLeft)           return o1.getName().compareTo(o2.getName())-10000;
-                else if(isKoreanRight)           return o1.getName().compareTo(o2.getName())+10000;
-                else                            return o1.getName().compareTo(o2.getName());*/
                 return o1.getName().compareTo(o2.getName());
             }
         };

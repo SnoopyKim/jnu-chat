@@ -40,6 +40,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    DatabaseReference tokenRef;
     FirebaseUser user;
 
     CallbackManager callbackManager;
@@ -104,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
                 // result of the request.
             }
         }
+        final String token = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG,"Token:" + token);
+
 
         //layout objects 생성 및 초기화
         etEmail = (EditText) findViewById(R.id.etEmail);
@@ -113,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
+        tokenRef = database.getReference("fcmtoken");
 
         //FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
@@ -153,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
                     if (mAuthListener != null) {
                         mAuth.removeAuthStateListener(mAuthListener);
                     }
+                    //접속 당시 유저의 기기 토큰을 업로드
+                    tokenRef.child(user.getUid()).setValue(token);
 
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
@@ -179,10 +187,12 @@ public class MainActivity extends AppCompatActivity {
                                                                     String friendName = users.child("profile").child("name").getValue().toString();
                                                                     String friendEmail = users.child("profile").child("email").getValue().toString();
                                                                     String friendPhoto = users.child("profile").child("photo").getValue().toString();
+                                                                    String friendToken = users.child("profile").child("token").getValue().toString();
 
                                                                     friend.put("email", friendEmail);
                                                                     friend.put("name", friendName);
                                                                     friend.put("photo", friendPhoto);
+                                                                    friend.put("token", friendToken);
 
                                                                     myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
                                                                 }
@@ -215,6 +225,8 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                     } else {
+                        myRef.child(user.getUid()).child("profile").child("token").setValue(token);
+
                         intent.putExtra("providerId","email");
                         startActivity(intent);
                         finish();
@@ -227,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        mAuth.addAuthStateListener(mAuthListener);
 
         //로그인 버튼 클릭 시
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
@@ -291,6 +302,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        Log.d(TAG,"addAuthListener");
     }
     @Override
     public void onStop() {

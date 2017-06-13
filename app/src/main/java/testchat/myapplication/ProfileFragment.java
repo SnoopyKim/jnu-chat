@@ -27,8 +27,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -98,18 +101,22 @@ public class ProfileFragment extends Fragment {
 
             }
             tvEmail.setText(stEmail);
-            /*
+
             FirebaseDatabase.getInstance().getReference("users").child(stUid)
                     .child("profile").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
-                        if (dataSnapshot.child("phone").getValue().equals("None")) {
+                        if (dataSnapshot.child("phone").getValue().equals("None") || dataSnapshot.child("phone").getValue() == null) {
                             tvPhone.setText("정보 없음");
                         } else {
                             tvPhone.setText(dataSnapshot.child("phone").getValue().toString());
                         }
-                        tvBirth.setText(dataSnapshot.child("birth").getValue().toString());
+                        if (dataSnapshot.child("birth").getValue().equals("None") || dataSnapshot.child("birth").getValue() == null) {
+                            tvBirth.setText("정보 없음");
+                        } else {
+                            tvBirth.setText(dataSnapshot.child("birth").getValue().toString());
+                        }
                     }
                 }
                 @Override
@@ -117,7 +124,7 @@ public class ProfileFragment extends Fragment {
 
                 }
             });
-            */
+
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
         }
@@ -133,20 +140,6 @@ public class ProfileFragment extends Fragment {
 
             }
         });
-        /*
-        ivUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //사진 클릭 시 기기 내의 갤러리로 연결
-                Intent imageIntent = new Intent();
-                imageIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                imageIntent.setType("image/*");
-                imageIntent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(imageIntent, "사진을 선택하세요"), 0);
-
-            }
-        });
-        */
 
         //로그아웃 버튼 클릭 시 계정 로그아웃하고 MainActivity로 넘어감
         TextView btnLogout = (TextView)v.findViewById(R.id.btnLogout);

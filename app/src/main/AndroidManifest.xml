@@ -58,8 +58,6 @@
         <activity
             android:name=".AddfriendActivitiy"
             android:label="@string/title_activity_addfriend_activitiy"
-
-
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
             android:name=".AddchatActivity"

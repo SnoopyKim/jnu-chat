@@ -23,6 +23,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -88,7 +90,7 @@ public class RoomsFragment extends Fragment {
                                 myRoom = true;
                             }
                             roomPeople.add(roomPerson.child("name").getValue().toString());
-                            if(!roomPerson.child("name").getValue().toString().equals(user.getDisplayName().toString()))
+                            if(!roomPerson.child("name").getValue().toString().equals(user.getDisplayName()))
                                 photo = roomPerson.child("photo").getValue().toString();
                         }
                         //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
@@ -108,6 +110,33 @@ public class RoomsFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot != null) {
+                            Comparator<Room> cmpAsc = new Comparator<Room>() {
+                                @Override
+                                public int compare(Room o1, Room o2) {
+                                    return o2.getLastTime().compareTo(o1.getLastTime());
+                                }
+                            };
+                            Collections.sort(mRoom, cmpAsc);
+                            mRAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("Notify:","Failed");
+                    }
+                });
+                myRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {
+                            Comparator<Room> cmpAsc = new Comparator<Room>() {
+                                @Override
+                                public int compare(Room o1, Room o2) {
+                                    return o2.getLastTime().compareTo(o1.getLastTime());
+                                }
+                            };
+                            Collections.sort(mRoom, cmpAsc);
                             mRAdapter.notifyDataSetChanged();
                         }
                     }
@@ -154,5 +183,11 @@ public class RoomsFragment extends Fragment {
             tvChat.setText("검색 결과");
             mRAdapter.filter(s.toLowerCase(Locale.getDefault()));
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
     }
 }
