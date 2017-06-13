@@ -260,6 +260,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(roomKey);
 
                                     Calendar c = Calendar.getInstance();
+                                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                                     String formattedDate = df.format(c.getTime());
 
                                     //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
