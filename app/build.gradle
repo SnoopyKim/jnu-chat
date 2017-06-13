@@ -43,8 +43,7 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    //fcm
-    compile 'com.google.android.gms:play-services-gcm:9.6.1'
+
 
     testCompile 'junit:junit:4.12'
 }

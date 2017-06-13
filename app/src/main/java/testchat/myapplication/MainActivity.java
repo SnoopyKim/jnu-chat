@@ -44,6 +44,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
@@ -53,8 +54,6 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import testchat.myapplication.fcm.QuickstartPreferences;
-import testchat.myapplication.fcm.RegistrationIntentService;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -74,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
+    private PushFirebaseMessagingService mPushFirebaseMessagingService;
     private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        registBroadcastReceiver();
+        Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -149,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //로그인 감지(계속 활성화되있음)
-        getInstanceIdToken();
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -441,13 +441,7 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
         moveTaskToBack(true);
     }
-    //get fcm tocken
-    public void getInstanceIdToken(){
-        if(checkPlayService()){
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
-    }
+
     private boolean checkPlayService(){
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if(resultCode != ConnectionResult.SUCCESS){
@@ -462,25 +456,5 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-    public void registBroadcastReceiver(){
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                if(action.equals(QuickstartPreferences.REGISTRATION_READY)){
-
-                }
-                else if(action.equals(QuickstartPreferences.REGISTRATION_GENERATION)){
-
-                }
-                else if(action.equals(QuickstartPreferences.REGISTRATION_COMPLETE)){
-                    String token = intent.getStringExtra("token");
-                    String register_id = token;
-                    Log.d("token",token);
-                }
-            }
-        };
     }
 }
