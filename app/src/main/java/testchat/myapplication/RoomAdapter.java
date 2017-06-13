@@ -139,7 +139,13 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot != null) {
                     mRoom.get(position).setlastTime(dataSnapshot.getKey());
-                    mRoom.get(position).setLastText(dataSnapshot.child("text").getValue().toString());
+                    if(dataSnapshot.child("file").getValue().toString().equals("false")) {
+                        mRoom.get(position).setLastText(dataSnapshot.child("text").getValue().toString());
+                    } else if (dataSnapshot.child("file").getValue().toString().contains("image")) {
+                        mRoom.get(position).setLastText("이미지");
+                    } else {
+                        mRoom.get(position).setLastText("첨부 파일");
+                    }
                 }
             }
 

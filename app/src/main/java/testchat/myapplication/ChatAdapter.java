@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -166,22 +164,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.btnDownload.setVisibility(View.VISIBLE);
 
             final String fileName = mChat.get(position).getTime();
-            final String[] fileType = new String[1];
+            final String fileType = MimeTypeMap.getSingleton().getExtensionFromMimeType(mChat.get(position).getFile());
+            if(fileType != null)
+                holder.btnDownload.setText(fileType);
+            else {
+                holder.btnDownload.setText("UNKNOWN");
+                holder.btnDownload.setEnabled(false);
+            }
+
             final StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
                     .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
-            storageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                @Override
-                public void onSuccess(StorageMetadata storageMetadata) {
-                    fileType[0] = MimeTypeMap.getSingleton().getExtensionFromMimeType(storageMetadata.getContentType());
-                    holder.btnDownload.setText(fileType[0]);
 
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d("file type extension",e.getMessage());
-                }
-            });
             //그 외 파일 클릭 시 다운로드 수행행
             holder.btnDownload.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -190,7 +183,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     if (!storagePath.exists())
                         storagePath.mkdirs();
 
-                    File file = new File(storagePath, UUID.randomUUID().toString() +"."+ fileType[0]);
+                    File file = new File(storagePath, UUID.randomUUID().toString() +"."+ fileType);
                     storageReference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {

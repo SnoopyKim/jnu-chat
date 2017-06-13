@@ -14,8 +14,8 @@ public class PushFirebaseInstanceIDService extends FirebaseInstanceIdService{
     //don't active onTokenRefresh -> String token = FirebaseInstanceID.getInstance.getToken();
     @Override
     public void onTokenRefresh() {
-        super.onTokenRefresh();
         String token = FirebaseInstanceId.getInstance().getToken();
-        Log.d("Token",token);
+        Log.d("TAG",token);
+
     }
 }

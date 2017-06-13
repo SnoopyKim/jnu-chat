@@ -270,6 +270,8 @@ public class ChatActivity extends AppCompatActivity{
                 String time = dataSnapshot.getKey();
                 Chat chat = new Chat(uid,name,text,file,time);
 
+
+
                 mChat.add(chat);
                 mRecyclerView.scrollToPosition(mChat.size()-1);
                 mAdapter.notifyItemInserted(mChat.size() - 1);
@@ -307,6 +309,11 @@ public class ChatActivity extends AppCompatActivity{
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ChatActivity.this,"업로드에 실패했습니다",Toast.LENGTH_SHORT).show();
+
+                fileSelected = "false";
+                findViewById(R.id.pbSend).setVisibility(View.GONE);
+                btnSend.setVisibility(View.VISIBLE);
 
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -334,13 +341,16 @@ public class ChatActivity extends AppCompatActivity{
         if (data != null) {
             Uri fileUri = data.getData();
             fileSelected = getContentResolver().getType(fileUri);
-
-            btnFile.setImageResource(ic_highlight_off_black_24dp);
-            Drawable imgButton = DrawableCompat.wrap(btnFile.getDrawable());
-            DrawableCompat.setTint(imgButton,getResources().getColor(R.color.conceptRedHint));
-            btnFile.setImageDrawable(imgButton);
-            etText.setText(fileUri.toString());
-            etText.setEnabled(false);
+            if(fileSelected.equals("none"))
+                Toast.makeText(ChatActivity.this,"알 수 없는 유형입니다", Toast.LENGTH_SHORT).show();
+            else {
+                btnFile.setImageResource(ic_highlight_off_black_24dp);
+                Drawable imgButton = DrawableCompat.wrap(btnFile.getDrawable());
+                DrawableCompat.setTint(imgButton, getResources().getColor(R.color.conceptRedHint));
+                btnFile.setImageDrawable(imgButton);
+                etText.setText(fileUri.toString());
+                etText.setEnabled(false);
+            }
         }
     }
 
