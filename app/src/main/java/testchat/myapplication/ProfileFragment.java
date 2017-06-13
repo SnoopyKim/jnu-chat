@@ -191,6 +191,8 @@ public class ProfileFragment extends Fragment {
 
                 myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
 
+                Glide.with(context).load(downloadUrl).into(ivUser);
+
                 //선택했던 사진을 Firebase 계정에 PhotoUri로 설정
                 UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
                         .setPhotoUri(downloadUrl).build();
@@ -199,9 +201,6 @@ public class ProfileFragment extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            Glide.with(context).load(user.getPhotoUrl())
-                                    .placeholder(R.drawable.ic_person_black_24dp)
-                                    .into(ivUser);
                             Toast.makeText(context, "사진 업로드가 잘 됐습니다", Toast.LENGTH_SHORT).show();
 
                         } else {

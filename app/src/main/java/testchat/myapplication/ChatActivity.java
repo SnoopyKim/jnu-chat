@@ -78,9 +78,11 @@ public class ChatActivity extends AppCompatActivity{
     FirebaseDatabase database;
     DatabaseReference myRef;
     DatabaseReference addRef;
+    DatabaseReference loginRef;
     FirebaseUser user;
 
     String roomKey;
+    String myTime;
     String stText;
     String fileSelected = "false";
 
@@ -128,6 +130,7 @@ public class ChatActivity extends AppCompatActivity{
         Intent in = getIntent();
         final String friendName = in.getStringExtra("friendName");
         roomKey = in.getStringExtra("roomKey");
+        myTime = in.getStringExtra("in");
         Log.d("roomKey",roomKey);
         if(friendName.equals(""))
             getSupportActionBar().setTitle("나");
@@ -212,7 +215,7 @@ public class ChatActivity extends AppCompatActivity{
                 } else {
                     //보낼 당시의 시각을 DB 내 child로 하고 채팅 정보를 업로드(추가)하고 EditText초기화
                     Calendar c = Calendar.getInstance();
-                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     String formattedDate = df.format(c.getTime());
 
                     if (!fileSelected.equals("false")) {
@@ -256,25 +259,19 @@ public class ChatActivity extends AppCompatActivity{
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // A new comment has been added, add it to the displayed list
-                /*
-                try {
-                        Date now = df.parse(formattedDate);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                 */
                 String uid = dataSnapshot.child("uid").getValue().toString();
                 String name = dataSnapshot.child("name").getValue().toString();
                 String text = dataSnapshot.child("text").getValue().toString();
                 String file = dataSnapshot.child("file").getValue().toString();
                 String time = dataSnapshot.getKey();
-                Chat chat = new Chat(uid,name,text,file,time);
 
+                if (myTime.compareTo(time) > 0) {
+                    Chat chat = new Chat(uid, name, text, file, time);
 
-
-                mChat.add(chat);
-                mRecyclerView.scrollToPosition(mChat.size()-1);
-                mAdapter.notifyItemInserted(mChat.size() - 1);
+                    mChat.add(chat);
+                    mRecyclerView.scrollToPosition(mChat.size() - 1);
+                    mAdapter.notifyItemInserted(mChat.size() - 1);
+                }
             }
 
             @Override
@@ -474,17 +471,26 @@ public class ChatActivity extends AppCompatActivity{
                     Toast.makeText(ChatActivity.this,"친구를 추가하세요",Toast.LENGTH_SHORT).show();
 
                 } else {
+                    String newTitle = getSupportActionBar().getTitle().toString();
                     for (Friend friend : aResult) {
+                        Calendar c = Calendar.getInstance();
+                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                        String formattedDate = df.format(c.getTime());
+
                         Hashtable<String, String> friendInfo = new Hashtable<String, String>();
                         friendInfo.put("name", friend.getName());
-                        friendInfo.put("photo", friend.getPhoto());
+                        friendInfo.put("in", formattedDate);
                         myRef.child("people").child(friend.getUid()).setValue(friendInfo);
 
                         inFriend.add(friend.getUid());
+                        newTitle.concat((", "+friend.getName()));
                     }
                     addMode = false;
                     findViewById(R.id.LLsend).setVisibility(View.VISIBLE);
                     findViewById(R.id.RLadd).setVisibility(View.GONE);
+                    getSupportActionBar().setTitle(newTitle);
+
+                    Toast.makeText(ChatActivity.this,"친구가 추가됐습니다",Toast.LENGTH_SHORT);
                 }
             }
         });
@@ -513,6 +519,25 @@ public class ChatActivity extends AppCompatActivity{
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        loginRef.setValue(formattedDate);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        loginRef.setValue("on");
+
     }
 
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행

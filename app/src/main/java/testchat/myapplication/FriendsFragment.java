@@ -137,11 +137,4 @@ public class FriendsFragment extends Fragment {
         }
     }
 
-    /*
-    public void showInfoDialog(View view)
-    {
-        InfoDialogFragment infoDialog = new InfoDialogFragment();
-        infoDialog.show(getFragmentManager(), "infoDialog");
-    }
-    */
 }
