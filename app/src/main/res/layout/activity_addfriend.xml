@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/conceptRed"
-        android:minHeight="?attr/actionBarSize"
-        android:title="hello"/>
+        android:minHeight="?attr/actionBarSize"/>
+
     <LinearLayout
         android:id="@+id/searchbox_ll"
         android:layout_width="match_parent"
