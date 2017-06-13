@@ -88,17 +88,18 @@
                     android:id="@+id/tvLatestChat"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="85"
+                    android:layout_weight="82"
                     android:text="최근 채팅"
                     android:singleLine="true"
                     android:textColor="@color/colorTextBlack"/>
                 <Button
                     android:id="@+id/btnDelete"
                     android:layout_width="0dp"
-                    android:layout_weight="15"
+                    android:layout_weight="18"
                     android:layout_height="match_parent"
                     android:layout_below="@id/room_overall"
                     android:text="나가기"
+                    android:textSize="12sp"
                     android:background="@color/conceptRed"/>
             </LinearLayout>
 

@@ -126,26 +126,7 @@ public class RoomsFragment extends Fragment {
                         Log.d("Notify:","Failed");
                     }
                 });
-                myRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null) {
-                            Comparator<Room> cmpAsc = new Comparator<Room>() {
-                                @Override
-                                public int compare(Room o1, Room o2) {
-                                    return o2.getLastTime().compareTo(o1.getLastTime());
-                                }
-                            };
-                            Collections.sort(mRoom, cmpAsc);
-                            mRAdapter.notifyDataSetChanged();
-                        }
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d("Notify:","Failed");
-                    }
-                });
             }
 
             @Override
