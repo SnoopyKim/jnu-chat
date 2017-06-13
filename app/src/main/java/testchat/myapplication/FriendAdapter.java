@@ -141,7 +141,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 switch (event.getAction()) {
                     //마우스를 눌렀을 때
                     case MotionEvent.ACTION_DOWN:
-                        holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                        //holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
 
                         database = FirebaseDatabase.getInstance();
                         userReference = database.getReference("users");

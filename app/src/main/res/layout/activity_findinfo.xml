@@ -132,7 +132,7 @@
             android:id="@+id/text_passwordfind"
             android:layout_width="match_parent"
             android:layout_height="31dp"
-            android:text="비밀번호 찾기"
+            android:text="비밀번호 재설정"
             android:textAlignment="center"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -200,6 +200,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:visibility="invisible"
                 android:text="인증" />
 
             <Button
@@ -207,6 +208,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:visibility="invisible"
                 android:text="인증번호 입력" />
         </LinearLayout>
 
