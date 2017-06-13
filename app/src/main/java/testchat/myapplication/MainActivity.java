@@ -2,7 +2,6 @@ package testchat.myapplication;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -45,7 +44,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,7 +51,6 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Hashtable;
-
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -196,12 +193,10 @@ public class MainActivity extends AppCompatActivity {
                                                                     String friendName = users.child("profile").child("name").getValue().toString();
                                                                     String friendEmail = users.child("profile").child("email").getValue().toString();
                                                                     String friendPhoto = users.child("profile").child("photo").getValue().toString();
-                                                                    String friendToken = users.child("profile").child("token").getValue().toString();
 
                                                                     friend.put("email", friendEmail);
                                                                     friend.put("name", friendName);
                                                                     friend.put("photo", friendPhoto);
-                                                                    friend.put("token", friendToken);
 
                                                                     myRef.child(user.getUid()).child("friends").child(friendUid).setValue(friend);
                                                                 }
@@ -221,6 +216,8 @@ public class MainActivity extends AppCompatActivity {
                                 request.setParameters(param);
                                 request.executeAsync();
 
+                                myRef.child(user.getUid()).child("profile").child("login").setValue("on");
+
                                 intent.putExtra("providerId","facebook");
                                 startActivity(intent);
 
@@ -234,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                     } else {
-                        myRef.child(user.getUid()).child("profile").child("token").setValue(token);
+                        myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                         intent.putExtra("providerId","email");
                         startActivity(intent);
@@ -270,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
         //페이스북 로그인하는 유저의 정보 동의를 얻는 부분 (이메일, 친구리스트)
-        fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
+        fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends","user_birthday"));
         fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -303,8 +300,6 @@ public class MainActivity extends AppCompatActivity {
                 fbtnLogin.performClick();
             }
         });
-
-        FirebaseMessaging.getInstance().subscribeToTopic("notice");
     }
 
     //계정 로그인 감지의 시작과 종료 호출 함수
@@ -364,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         Hashtable<String, String> profile = new Hashtable<String, String>();
                                         profile.put("name", object.getString("name"));
-                                        if (object.getString("email")!=null) {
+                                        if (object.has("email")) {
                                             profile.put("email", object.getString("email"));
                                         } else {
                                             profile.put("email", "None");
@@ -372,12 +367,12 @@ public class MainActivity extends AppCompatActivity {
                                         profile.put("photo", object.getJSONObject("picture").getJSONObject("data").getString("url"));
                                         profile.put("uid", user.getUid());
                                         profile.put("facebook_id", object.getString("id"));
-                                        if (object.get("birthday")!=null) {
+                                        if (object.has("birthday")) {
                                             profile.put("birth", object.getString("birthday"));
                                         } else {
                                             profile.put("birth", "None");
                                         }
-                                        if (object.get("gender")!=null) {
+                                        if (object.has("gender")) {
                                             profile.put("gender", object.getString("gender"));
                                         } else {
                                             profile.put("gender", "None");
