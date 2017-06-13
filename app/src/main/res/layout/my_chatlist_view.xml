@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="match_parent"  android:layout_height="wrap_content"
+    android:layout_width="match_parent"  android:layout_height="80dp"
     android:background="@color/colorWhite"
     android:paddingTop="@dimen/short_margin"
     android:paddingBottom="@dimen/short_margin">
@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/room_overall"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="horizontal"
         android:weightSum="10"
         android:clickable="true"
@@ -50,9 +50,11 @@
                     android:layout_height="match_parent"
                     android:layout_weight="80"
                     android:padding="0dp"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="0dp"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:gravity="left"
+                    android:gravity="center_vertical"
                     android:textColor="@color/colorTextBlack" />
 
                 <TextView
@@ -60,9 +62,8 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="20"
-                    android:gravity="right"
+                    android:gravity="center"
                     android:padding="0dp"
-                    android:text="23:06"
                     android:textColor="@color/colorTextBlack" />
 
             </LinearLayout>
@@ -84,20 +85,22 @@
                 android:layout_height="0dp"
                 android:layout_weight="49"
                 android:weightSum="100">
+
                 <TextView
                     android:id="@+id/tvLatestChat"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="82"
-                    android:text="최근 채팅"
-                    android:singleLine="true"
-                    android:textColor="@color/colorTextBlack"/>
+                    android:layout_weight="85"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:paddingEnd="0dp"
+                    android:paddingStart="5dp"
+                    android:textColor="@color/colorTextBlack" />
                 <Button
                     android:id="@+id/btnDelete"
                     android:layout_width="0dp"
                     android:layout_weight="18"
                     android:layout_height="match_parent"
-                    android:layout_below="@id/room_overall"
                     android:text="나가기"
                     android:textSize="12sp"
                     android:background="@color/conceptRed"/>

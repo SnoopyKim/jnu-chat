@@ -23,7 +23,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -100,14 +104,9 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         chatReference = database.getReference("chats");
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        //처음 값 설정하고 넣어줄 때의 roomKey
-        roomKey = mRoom.get(position).getKey();
-
         //채팅방 이름 (참여자들 중 본인빼고 이름 이어붙임)
         List<String> listNames = mRoom.get(position).getPeople();
         final String allFriendName;
-        final String stPhoto = mRoom.get(position).getPhoto();
-
         String stName = "";
         for (String name : listNames) {
             if (!name.equals(user.getDisplayName()))
@@ -121,30 +120,35 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.tvName.setText(allFriendName);
         }
 
-        if (stPhoto.equals("None")) {
-            //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
-            Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
-            holder.ivUser.setImageDrawable(defaultImg);
+        //개인 톡방이랑 단톡방 이미지 다르게
+        if (listNames.size()<=2) {
+            String stPhoto = mRoom.get(position).getPhoto();
+            if (stPhoto.equals("None")) {
+                //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
+                Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                holder.ivUser.setImageDrawable(defaultImg);
+            } else {
+                Glide.with(context).load(stPhoto).into(holder.ivUser);
+            }
+
         } else {
-            Glide.with(context).load(stPhoto).into(holder.ivUser);
+            Drawable drawable = context.getResources().getDrawable(R.drawable.ic_people_black_24dp);
+            holder.ivUser.setImageDrawable(drawable);
+
         }
-        try {
-            holder.tvChatTime.setText(mRoom.get(position).getLastTime().substring(11, 16));
-        } catch (java.lang.StringIndexOutOfBoundsException e) {
-            holder.tvChatTime.setText(mRoom.get(position).getLastTime());
-        }
-        holder.tvLastChat.setText(mRoom.get(position).getLastText());
-        chatReference.child(roomKey).child("chatInfo").addChildEventListener(new ChildEventListener() {
+        //최근 챗 시간과 표시내용 그려줌
+        chatReference.child(mRoom.get(position).getKey()).child("chatInfo").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot != null) {
+                    holder.tvChatTime.setText(dataSnapshot.getKey().substring(11,16));
                     mRoom.get(position).setlastTime(dataSnapshot.getKey());
                     if(dataSnapshot.child("file").getValue().toString().equals("false")) {
-                        mRoom.get(position).setLastText(dataSnapshot.child("text").getValue().toString());
+                        holder.tvLastChat.setText(dataSnapshot.child("text").getValue().toString());
                     } else if (dataSnapshot.child("file").getValue().toString().contains("image")) {
-                        mRoom.get(position).setLastText("이미지");
+                        holder.tvLastChat.setText("이미지");
                     } else {
-                        mRoom.get(position).setLastText("첨부 파일");
+                        holder.tvLastChat.setText("첨부 파일");
                     }
                 }
             }
@@ -186,11 +190,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                         //채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
                         roomKey = mRoom.get(position).getKey();
 
-                        if (user.getPhotoUrl()!=null)
-                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue(user.getPhotoUrl().toString());
-                        else
-                            chatReference.child(roomKey).child("people").child(user.getUid()).child("photo").setValue("None");
-
                         Intent intent = new Intent(context, ChatActivity.class);
                         intent.putExtra("friendName",allFriendName);
                         intent.putExtra("roomKey",roomKey);
@@ -206,7 +205,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chatReference.child(roomKey).child("people").child(user.getUid()).removeValue();
+                int friendCnt = mRoom.get(position).getPeople().size();
+                if(friendCnt <= 2) {
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String formattedDate = df.format(c.getTime());
+
+                    chatReference.child(roomKey).child("people").child(user.getUid()).child("in").setValue(formattedDate);
+                } else {
+                    chatReference.child(roomKey).child("people").child(user.getUid()).removeValue();
+                }
                 mFilter.remove(position);
                 mRoom.remove(position);
 
@@ -214,6 +222,17 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             }
         });
 
+    }
+
+    public void sortRoom() {
+        Comparator<Room> cmpAsc = new Comparator<Room>() {
+            @Override
+            public int compare(Room o1, Room o2) {
+                return o2.getLastTime().compareTo(o1.getLastTime());
+            }
+        };
+        Collections.sort(mRoom, cmpAsc);
+        notifyDataSetChanged();
     }
 
     //채팅방 검색 함수 (FriendAdapter에서의 filter함수와 동일)

@@ -3,7 +3,6 @@ package testchat.myapplication;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -49,7 +48,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,7 +55,6 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.Hashtable;
-
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -261,6 +258,8 @@ public class MainActivity extends AppCompatActivity {
                                 pbLogin.setVisibility(GONE);
                                 RLinput.setVisibility(VISIBLE);
 
+                                myRef.child(user.getUid()).child("profile").child("login").setValue("on");
+
                                 intent.putExtra("providerId","facebook");
                                 startActivity(intent);
 
@@ -276,6 +275,8 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         pbLogin.setVisibility(GONE);
                         RLinput.setVisibility(VISIBLE);
+
+                        myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                         intent.putExtra("providerId","email");
                         startActivity(intent);
@@ -342,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
                 fbtnLogin.performClick();
             }
         });
-
     }
 
     //계정 로그인 감지의 시작과 종료 호출 함수

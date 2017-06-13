@@ -28,6 +28,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class TabActivity extends AppCompatActivity {
 
@@ -35,6 +42,9 @@ public class TabActivity extends AppCompatActivity {
     private Fragment fragment;
     Toolbar toolbar;
     EditText etSearch;
+
+    FirebaseUser user;
+    DatabaseReference loginRef;
 
     //Navigation에서 Icon클릭시 해당 fragment로 이동
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -111,6 +121,9 @@ public class TabActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("JNU chat");
         toolbar.setTitleTextColor(Color.WHITE);
 
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        loginRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("profile").child("login");
+
         //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit) -> 첫화면은 친구 리스트
         if(fragment == null) {
             fragment = new FriendsFragment();
@@ -159,10 +172,35 @@ public class TabActivity extends AppCompatActivity {
     public void onBackPressed() {
         //2초안에 뒤로가기 버튼을 두번 누르면 종료
         if (System.currentTimeMillis() - lastPressed < 2000) {
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = df.format(c.getTime());
+
+            loginRef.setValue(formattedDate);
+
             moveTaskToBack(true);
         }
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
         lastPressed = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        loginRef.setValue(formattedDate);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        loginRef.setValue("on");
+
     }
 
     @Override

@@ -222,6 +222,8 @@ public class ProfileFragment extends Fragment {
 
                 myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
 
+                Glide.with(context).load(downloadUrl).into(ivUser);
+
                 //선택했던 사진을 Firebase 계정에 PhotoUri로 설정
                 UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()
                         .setPhotoUri(downloadUrl).build();
