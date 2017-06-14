@@ -247,10 +247,25 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                 if (dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
                                     roomKey = dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue().toString();
 
-                                    Intent in = new Intent(context, ChatActivity.class);
-                                    in.putExtra("friendName", stFriendname);
-                                    in.putExtra("roomKey", roomKey);
-                                    context.startActivity(in);
+                                    chatReference.child(roomKey).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            for(DataSnapshot person : dataSnapshot.getChildren()) {
+                                                if (person.getKey().equals(user.getUid())) {
+                                                    Intent in = new Intent(context, ChatActivity.class);
+                                                    in.putExtra("friendName", stFriendname);
+                                                    in.putExtra("roomKey", roomKey);
+                                                    in.putExtra("in", person.child("in").getValue().toString());
+                                                    context.startActivity(in);
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
 
                                 } else {
                                     //한 적이 없다면 입장 당시 시간 표시
@@ -261,7 +276,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
                                     Calendar c = Calendar.getInstance();
                                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                                    String formattedDate = df.format(c.getTime());
+                                    String formattedDate = df.format(c.getTime()).replace(".",":");
 
                                     //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
                                     Hashtable<String, String> myInfo = new Hashtable<String, String>();
@@ -277,6 +292,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     Intent in = new Intent(context, ChatActivity.class);
                                     in.putExtra("friendName", stFriendname);
                                     in.putExtra("roomKey", roomKey);
+                                    in.putExtra("in", formattedDate);
                                     context.startActivity(in);
                                 }
 

@@ -216,7 +216,7 @@ public class ChatActivity extends AppCompatActivity{
                     //보낼 당시의 시각을 DB 내 child로 하고 채팅 정보를 업로드(추가)하고 EditText초기화
                     Calendar c = Calendar.getInstance();
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    String formattedDate = df.format(c.getTime());
+                    String formattedDate = df.format(c.getTime()).replace(".",":");
 
                     if (!fileSelected.equals("false")) {
 
@@ -265,7 +265,7 @@ public class ChatActivity extends AppCompatActivity{
                 String file = dataSnapshot.child("file").getValue().toString();
                 String time = dataSnapshot.getKey();
 
-                if (myTime.compareTo(time) > 0) {
+                if (myTime.compareTo(time) < 0) {
                     Chat chat = new Chat(uid, name, text, file, time);
 
                     mChat.add(chat);
@@ -521,24 +521,6 @@ public class ChatActivity extends AppCompatActivity{
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = df.format(c.getTime());
-
-        loginRef.setValue(formattedDate);
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        loginRef.setValue("on");
-
-    }
 
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override

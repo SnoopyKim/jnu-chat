@@ -31,6 +31,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
@@ -104,18 +105,16 @@ public class MainActivity extends AppCompatActivity {
 
         //저장소 허용 동의 부분
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
-                Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
             if(ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) {
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS,
-                                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.MANAGE_DOCUMENTS},
                         1);

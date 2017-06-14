@@ -114,7 +114,10 @@ public class SigninActivity extends AppCompatActivity {
                     myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            id_check = 1;
                             for (DataSnapshot user : dataSnapshot.getChildren()) {
+                                if (user.child("profile").child("email").getValue() == null) continue;
+
                                 if (etEmail.getText().toString().equals(user.child("profile").child("email").getValue().toString())) {
                                     id_check = -1;
                                     break;
