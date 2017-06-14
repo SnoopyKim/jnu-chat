@@ -3,12 +3,9 @@ package testchat.myapplication;
 import android.*;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -36,6 +33,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+/**
+ * @Name    TabActivity
+ * @Usage   Upperrside bar(toolbar,search part) and navigation for friend/room/profile fragment
+ * @Layout  activity_tab.xml
+ * @Comment Tab Activity check 접속중인 친구
+ *            class Friend ~~ : 친구 리스트관련
+ *            class Room ~~ : 채팅방 리스트관련
+ *            ProfileFragment.class : 프로필
+ * */
 public class TabActivity extends AppCompatActivity {
 
     private long lastPressed;
@@ -44,9 +50,14 @@ public class TabActivity extends AppCompatActivity {
     EditText etSearch;
 
     FirebaseUser user;
-    DatabaseReference loginRef;
+    DatabaseReference loginRef;     // 접속중인 친구 store session
 
-    //Navigation에서 Icon클릭시 해당 fragment로 이동
+    /**
+     * @Name    mOnNavigationItemSelectedListener
+     * @Usage   Go to fragment when navigation icon click
+     *           set Toolbar name to fragment name , show/hide search bar
+     * @implements BottomNavigationView.OnNavigationItemSelectedListener
+     * */
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -101,7 +112,8 @@ public class TabActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         loginRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("profile").child("login");
 
-        //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit) -> 첫화면은 친구 리스트
+        //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit)
+        //default fragment : friend list
         if(fragment == null) {
             fragment = new FriendsFragment();
             fragmentTransaction.add(R.id.content, fragment);
@@ -133,10 +145,16 @@ public class TabActivity extends AppCompatActivity {
                 }
             }
         });
-        //String token = PushFirebaseInstanceID.getInstance.getToken();
     }
 
-    //fragment 이동 함수(transaction 수행)
+    /**
+     * @Name    switchFragment
+     * @Usage   move fragment
+     * @Param   where to go fragment
+     * @return  void
+     * @comment using FramgentTransaction
+     * */
+    //fragment 이동 (transaction 수행)
     public void switchFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -145,6 +163,7 @@ public class TabActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    //Save quit time when quit application for 접속중인 친구
     @Override
     public void onBackPressed() {
         //2초안에 뒤로가기 버튼을 두번 누르면 종료
@@ -160,7 +179,6 @@ public class TabActivity extends AppCompatActivity {
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
         lastPressed = System.currentTimeMillis();
     }
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -171,19 +189,16 @@ public class TabActivity extends AppCompatActivity {
         loginRef.setValue(formattedDate);
 
     }
-
     @Override
     protected void onResume() {
         super.onResume();
-
         loginRef.setValue("on");
-
     }
 
+    //get data from fragment for move fragment
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("onActivityResult:","resultCode:"+resultCode);
         switch(resultCode) {
             case 1:
                 fragment = new FriendsFragment();

@@ -35,7 +35,11 @@ import java.util.regex.Pattern;
 /**
  * Created by TH-home on 2017-05-08.
  */
-
+/**
+ * @Name    SigninActivity
+ * @Usage   Register firebase authentication and users profile
+ * @Layout  activity_singin.xml
+ * */
 public class SigninActivity extends AppCompatActivity {
     String TAG = this.getClass().getSimpleName();
     String stEmail;
@@ -56,8 +60,8 @@ public class SigninActivity extends AppCompatActivity {
     EditText etPhone;
     TextView tvPasswordError;
     Toolbar toolbar;
-    ToggleButton tb_m;
-    ToggleButton tb_f;
+    ToggleButton tb_m;//male
+    ToggleButton tb_f;//female
     ProgressBar pbRegister;
     Button btnRegister;
 
@@ -90,6 +94,7 @@ public class SigninActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         mAuth = FirebaseAuth.getInstance();
+
         //등록이 완료되면 Main으로 돌아감
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -169,6 +174,11 @@ public class SigninActivity extends AppCompatActivity {
                 stName = etName.getText().toString();
                 stBirth = etBirth.getText().toString();
                 stPhone = etPhone.getText().toString();
+                /**
+                 * Check Validity
+                 * important error's error code will big number
+                 * IsEmptyEtField
+                 */
                 int errorCode=0;
                 if(stEmail.isEmpty() || stEmail.equals(""))
                     errorCode+=2;
@@ -238,17 +248,22 @@ public class SigninActivity extends AppCompatActivity {
         });
 
     }
-
+    /**
+     * @Name    registerUser
+     * @Usage   Regist to firebase authentication
+     * @Param   user's email, user's password
+     * @return  void
+     * */
     //Firebase내의 계정에 해당 정보로 등록(추가)
     public void registerUser(String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
                         if (!task.isSuccessful()) {
                             Toast.makeText(SigninActivity.this, "등록에 실패하였습니다\n" + task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
+                            //Reset progress bar
                             btnRegister.setVisibility(View.VISIBLE);
                             pbRegister.setVisibility(View.GONE);
 
@@ -281,6 +296,7 @@ public class SigninActivity extends AppCompatActivity {
                     }
                 });
     }
+
     @Override
     public void onStart(){
         super.onStart();
@@ -308,6 +324,12 @@ public class SigninActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * @Name    toggleButtonProcess
+     * @Usage   union two toggle button
+     * @Param   to check in button  , to check out button
+     * @return  void
+     * */
     public void toggleButtonProcess(ToggleButton tb_checking,ToggleButton tb_checkout){
         if(tb_checking.isChecked()){
             if(tb_checkout.isChecked()){
@@ -336,13 +358,20 @@ public class SigninActivity extends AppCompatActivity {
             stGender="None";
         }
     }
+    /**
+     * @Name    checkBirthForm
+     * @Usage   validity check - Birth
+     * @Param   str = user's birth // from etBirth
+     * @return  boolean check result
+     * */
     public boolean checkBirthForm(String str){
         if(str.length()!=8){
             return false;
         }
         else{
+            //pattern chek
+            //none digit
             if(!Pattern.matches("^[0-9]+$", str)){
-                //숫자아님
                 return false;
             }
             int birth = Integer.parseInt(str);
