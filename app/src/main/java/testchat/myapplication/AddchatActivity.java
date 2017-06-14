@@ -24,7 +24,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -123,6 +125,9 @@ public class AddchatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mResult = mAAdapter.getResult();
+                Calendar c = Calendar.getInstance();
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                String formattedDate = df.format(c.getTime());
                 if(mResult.size() == 0) {
                     Toast.makeText(AddchatActivity.this,"친구를 추가하세요",Toast.LENGTH_SHORT).show();
 
@@ -136,24 +141,21 @@ public class AddchatActivity extends AppCompatActivity {
 
                     Hashtable<String, String> myInfo = new Hashtable<String, String>();
                     myInfo.put("name", user.getDisplayName());
-                    if (user.getPhotoUrl() != null) {
-                        myInfo.put("photo", user.getPhotoUrl().toString());
-                    } else {
-                        myInfo.put("photo", "None");
-                    }
+                    myInfo.put("in", formattedDate);
                     chatRef.child(roomKey).child("people").child(user.getUid()).setValue(myInfo);
                     for (Friend friend : mResult) {
                         Hashtable<String, String> friendInfo = new Hashtable<String, String>();
                         friendInfo.put("name", friend.getName());
-                        friendInfo.put("photo", friend.getPhoto());
+                        friendInfo.put("in", formattedDate);
                         chatRef.child(roomKey).child("people").child(friend.getUid()).setValue(friendInfo);
                     }
 
                     Intent intent = new Intent(AddchatActivity.this, ChatActivity.class);
-                    intent.putExtra("pre",1);
-                    intent.putExtra("friendName", roomName);
+                    intent.putExtra("friendName", roomName.substring(0,roomName.length()-2));
                     intent.putExtra("roomKey", roomKey);
+                    intent.putExtra("in",formattedDate);
                     startActivity(intent);
+                    setResult(2);
                     finish();
 
                 }
@@ -166,7 +168,7 @@ public class AddchatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case R.id.action_backbutton:
-                setResult(1);
+                setResult(2);
                 finish();
                 break;
         }
@@ -175,7 +177,7 @@ public class AddchatActivity extends AppCompatActivity {
     //폰의 뒤로가기 버튼 클릭 시 TabActivity(FriendsFragment)화면 재실행
     @Override
     public void onBackPressed() {
-        setResult(1);
+        setResult(2);
         finish();
     }
 

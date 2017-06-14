@@ -1,8 +1,17 @@
 package testchat.myapplication;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
@@ -22,8 +31,11 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -36,7 +48,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,11 +75,18 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
+    private notiListener notifs;
+    private ServiceConnection connection;
+
+    private PushFirebaseMessagingService mPushFirebaseMessagingService;
+    private BroadcastReceiver mBroadcastReceiver;
+    private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    DatabaseReference tokenRef;
     FirebaseUser user;
 
     CallbackManager callbackManager;
@@ -75,8 +94,62 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle !=null){
+            Log.d(TAG,"hi");
+        }
+        //Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
+
+        //저장소 허용 동의 부분
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.MANAGE_DOCUMENTS},
+                        1);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+        final String token = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG,"Token:" + token);
+
+        notifs=new notiListener();
+        connection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                Log.d("notif","nls started");
+                notiListener.ServiceBinder binder = (notiListener.ServiceBinder) iBinder;
+                notifs = binder.getService();
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                Log.d("notif","nls stopped");
+            }
+        };
+
+        Intent i = new Intent(this, notiListener.class);
+        this.startService(i);
+        bindService(i,connection,this.BIND_AUTO_CREATE);
+
+
+
+        Intent i2 = new Intent(this, MyService.class);
+        this.startService(i2);
+
 
         //layout objects 생성 및 초기화
         etEmail = (EditText) findViewById(R.id.etEmail);
@@ -86,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
+        tokenRef = database.getReference("fcmtoken");
 
         //FirebaseAuth.getInstance().signOut();
         //LoginManager.getInstance().logOut();
@@ -126,6 +200,11 @@ public class MainActivity extends AppCompatActivity {
                     if (mAuthListener != null) {
                         mAuth.removeAuthStateListener(mAuthListener);
                     }
+                    //접속 당시 유저의 기기 토큰을 업로드
+                    tokenRef.child(user.getUid()).setValue(token);
+
+                    RLinput.setVisibility(GONE);
+                    pbLogin.setVisibility(VISIBLE);
 
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
@@ -175,6 +254,11 @@ public class MainActivity extends AppCompatActivity {
                                 request.setParameters(param);
                                 request.executeAsync();
 
+                                pbLogin.setVisibility(GONE);
+                                RLinput.setVisibility(VISIBLE);
+
+                                myRef.child(user.getUid()).child("profile").child("login").setValue("on");
+
                                 intent.putExtra("providerId","facebook");
                                 startActivity(intent);
 
@@ -188,6 +272,11 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                     } else {
+                        pbLogin.setVisibility(GONE);
+                        RLinput.setVisibility(VISIBLE);
+
+                        myRef.child(user.getUid()).child("profile").child("login").setValue("on");
+
                         intent.putExtra("providerId","email");
                         startActivity(intent);
                         finish();
@@ -200,7 +289,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        mAuth.addAuthStateListener(mAuthListener);
 
         //로그인 버튼 클릭 시
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
@@ -223,13 +311,11 @@ public class MainActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         final LoginButton fbtnLogin = (LoginButton) findViewById(R.id.facebook_login);
         //페이스북 로그인하는 유저의 정보 동의를 얻는 부분 (이메일, 친구리스트)
-        fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends"));
+        fbtnLogin.setReadPermissions(Arrays.asList("public_profile","email","user_friends","user_birthday"));
         fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
 
             }
 
@@ -256,14 +342,14 @@ public class MainActivity extends AppCompatActivity {
                 fbtnLogin.performClick();
             }
         });
-
-        FirebaseMessaging.getInstance().subscribeToTopic("notice");
     }
 
     //계정 로그인 감지의 시작과 종료 호출 함수
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        Log.d(TAG,"addAuthListener");
     }
     @Override
     public void onStop() {
@@ -284,9 +370,25 @@ public class MainActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            String errorMessage = task.getException().getMessage();
+                            String errorToast;
+                            if(errorMessage.equals("The email address is badly formatted.")){
+                                errorToast = "이메일 형식이 올바르지 않습니다.";
+                            }
+                            else if(errorMessage.equals("There is no user record corresponding to this identifier. The user may have been deleted.")){
+                                errorToast = "아이디가 존재하지 않습니다.";
+                            }
+                            else if(errorMessage.equals("The password is invalid or the user does not have a password.")){
+                                errorToast = "비밀번호가 일치하지 않습니다.";
+                            }
+                            else{
+                                errorToast="로그인에 문제가 생겼습니다. 다시 한번 확인해 주세요.";
+                            }
 
+                            Toast.makeText(MainActivity.this, errorToast,Toast.LENGTH_SHORT).show();
+
+                            RLinput.setVisibility(VISIBLE);
+                            pbLogin.setVisibility(GONE);
                         }
                     }
                 });
@@ -313,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         Hashtable<String, String> profile = new Hashtable<String, String>();
                                         profile.put("name", object.getString("name"));
-                                        if (object.getString("email")!=null) {
+                                        if (object.has("email")) {
                                             profile.put("email", object.getString("email"));
                                         } else {
                                             profile.put("email", "None");
@@ -321,12 +423,12 @@ public class MainActivity extends AppCompatActivity {
                                         profile.put("photo", object.getJSONObject("picture").getJSONObject("data").getString("url"));
                                         profile.put("uid", user.getUid());
                                         profile.put("facebook_id", object.getString("id"));
-                                        if (object.get("birthday")!=null) {
-                                            profile.put("birth", object.getString("birthday"));
+                                        if (object.has("birthday")) {
+                                            profile.put("birth", object.getString("birthday").replace("/","-"));
                                         } else {
                                             profile.put("birth", "None");
                                         }
-                                        if (object.get("gender")!=null) {
+                                        if (object.has("gender")) {
                                             profile.put("gender", object.getString("gender"));
                                         } else {
                                             profile.put("gender", "None");
@@ -369,5 +471,60 @@ public class MainActivity extends AppCompatActivity {
             default:
                 callbackManager.onActivityResult(requestCode, resultCode, data); break;
         }
+    }
+
+    //저장소 허용 동의 부분에서 결과 처리 부분인데 아직 아무것도 없음 (딱히 필요한 이벤트가 없을 듯?)
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        moveTaskToBack(true);
+    }
+
+    private boolean checkPlayService(){
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(resultCode != ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
+                GooglePlayServicesUtil.getErrorDialog(resultCode,this,
+                        9000).show();
+            }
+            else{
+                Log.i(TAG,"this device is not supported");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+        connection=null;
     }
 }

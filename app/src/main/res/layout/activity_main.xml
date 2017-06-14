@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWhite"
-    
     tools:context="testchat.myapplication.MainActivity">
 
 
@@ -18,13 +17,14 @@
         android:layout_below="@+id/pbLogin"
         android:visibility="visible">
 
-        <TextView
+        <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:text="JNU LOGO"
             android:textAlignment="center"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorBlack"
+            android:src="@mipmap/jnu_chat_main_logo"/>
 
         <EditText
             android:id="@+id/etEmail"

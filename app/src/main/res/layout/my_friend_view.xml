@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="match_parent"  android:layout_height="wrap_content"
+    android:layout_width="match_parent"  android:layout_height="80dp"
     android:background="@color/colorWhite"
     android:paddingTop="@dimen/short_margin"
     android:paddingBottom="@dimen/short_margin"
@@ -15,7 +15,8 @@
         android:textColor="@color/colorTextBlack"
         android:layout_marginLeft="@dimen/short_margin"
         android:layout_alignParentTop="true"
-        android:text="" />
+        android:text=""
+        android:textSize="12sp"/>
 
     <LinearLayout
         android:id="@+id/friend_overall"
@@ -50,25 +51,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="48"
-                android:layout_toEndOf="@+id/ivUser"
                 android:padding="0dp"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="100">
                 <TextView
                     android:id="@+id/tvEmail"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_weight="70"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="0dp"
                     android:padding="0dp"
-                    android:gravity="left"
+                    android:gravity="center_vertical"
                     android:textColor="@color/colorTextBlack" />
                 <TextView
-                    android:id="@+id/tvAccessTime"
-                    android:layout_width="match_parent"
+                    android:id="@+id/tvLoginTime"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:padding="0dp"
-                    android:text="23:06"
-                    android:gravity="right"
-                    android:textColor="@color/colorTextBlack"/>
-
+                    android:layout_weight="30"
+                    android:gravity="center"
+                    android:textColor="@color/colorTextBlack"
+                    android:visibility="gone"/>
+                <ImageView
+                    android:id="@+id/ivLogin"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="50"
+                    android:padding="0dp"
+                    android:src="@drawable/ic_radio_button_checked_black_24dp"
+                    android:tint="@color/conceptRed"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <ImageView
@@ -87,7 +101,11 @@
                 android:id="@+id/empty_text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="49"/>
+                android:layout_weight="49"
+                android:paddingStart="5dp"
+                android:paddingEnd="0dp"
+                android:padding="0dp"
+                android:gravity="center_vertical"/>
 
         </LinearLayout>
 

@@ -14,6 +14,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,6 +53,13 @@ public class AddchatAdapter extends RecyclerView.Adapter<AddchatAdapter.ViewHold
 
     // 커스텀 생성자로 친구 데이터 리스트를 받음
     public AddchatAdapter(List<Friend> mFriend, Context context) {
+        Comparator<Friend> cmpAsc = new Comparator<Friend>() {
+            @Override
+            public int compare(Friend o1, Friend o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        };
+        Collections.sort(mFriend, cmpAsc);
         this.mFriend = mFriend;
         this.mFilter = new ArrayList<>();
         this.mFilter.addAll(mFriend);

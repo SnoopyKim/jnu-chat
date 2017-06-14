@@ -12,39 +12,65 @@
         android:layout_height="40dp"
         android:layout_below="@+id/tvName"
         android:src="@drawable/ic_account_circle_white_24px"
-        android:layout_alignParentRight="true"/>
-
-    <TextView
-        android:id="@+id/tvChatTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorTextGray"
-        android:layout_alignBottom="@id/mTextView"
-        android:layout_toLeftOf="@id/mTextView"
-        android:textSize="10sp" />
-
-    <TextView
-        android:id="@+id/mTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvName"
-        android:layout_toLeftOf="@id/ivUser"
-        android:layout_marginLeft="@dimen/short_margin"
-        android:layout_marginRight="@dimen/short_margin"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:background="@drawable/chat_bubble_line"
-        android:maxWidth="200dp"
-        android:textSize="15sp" />
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:id="@+id/tvName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="viewEnd"
-        android:layout_marginRight="48dp"
+        android:layout_marginEnd="48dp"
         android:textSize="15sp"
         android:text="나"
         android:textColor="@color/colorTextGray"/>
+
+    <TextView
+        android:id="@+id/tvChatTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextGray"
+        android:layout_alignBottom="@id/RLbubble"
+        android:layout_toStartOf="@id/RLbubble"
+        android:textSize="10sp" />
+
+    <RelativeLayout
+        android:id="@+id/RLbubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvName"
+        android:layout_toStartOf="@id/ivUser">
+
+        <TextView
+            android:id="@+id/mTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:background="@drawable/chat_bubble_line"
+            android:maxWidth="250dp"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:id="@+id/ivDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="@dimen/short_margin"
+            android:layout_marginRight="@dimen/short_margin"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:background="@color/conceptRedHint"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>

@@ -1,13 +1,21 @@
 package testchat.myapplication;
 
+import android.*;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -15,10 +23,18 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class TabActivity extends AppCompatActivity {
 
@@ -26,6 +42,9 @@ public class TabActivity extends AppCompatActivity {
     private Fragment fragment;
     Toolbar toolbar;
     EditText etSearch;
+
+    FirebaseUser user;
+    DatabaseReference loginRef;
 
     //Navigation에서 Icon클릭시 해당 fragment로 이동
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -79,6 +98,9 @@ public class TabActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("JNU chat");
         toolbar.setTitleTextColor(Color.WHITE);
 
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        loginRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("profile").child("login");
+
         //삽입할 뷰에 Friendsfragment를 추가하고(add), 이를 적용(commit) -> 첫화면은 친구 리스트
         if(fragment == null) {
             fragment = new FriendsFragment();
@@ -127,10 +149,35 @@ public class TabActivity extends AppCompatActivity {
     public void onBackPressed() {
         //2초안에 뒤로가기 버튼을 두번 누르면 종료
         if (System.currentTimeMillis() - lastPressed < 2000) {
-            finish();
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String formattedDate = df.format(c.getTime());
+
+            loginRef.setValue(formattedDate);
+
+            moveTaskToBack(true);
         }
         Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
         lastPressed = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = df.format(c.getTime());
+
+        loginRef.setValue(formattedDate);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        loginRef.setValue("on");
+
     }
 
     @Override
@@ -138,20 +185,30 @@ public class TabActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d("onActivityResult:","resultCode:"+resultCode);
         switch(resultCode) {
-            case 0:
+            case 1:
                 fragment = new FriendsFragment();
                 findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
                 etSearch.setVisibility(View.VISIBLE);
                 switchFragment(fragment);
                 getSupportActionBar().setTitle("친구");
                 break;
-            case 1:
+            case 2:
                 fragment = new RoomsFragment();
                 findViewById(R.id.searchbox_ll).setVisibility(View.VISIBLE);
                 etSearch.setVisibility(View.VISIBLE);
                 switchFragment(fragment);
                 getSupportActionBar().setTitle("채팅");
                 break;
+            default:
+                fragment = new ProfileFragment();
+                findViewById(R.id.searchbox_ll).setVisibility(View.GONE);
+                etSearch.setVisibility(View.GONE);
+                switchFragment(fragment);
+                getSupportActionBar().setTitle("프로필");
+                break;
+
         }
     }
+
+
 }

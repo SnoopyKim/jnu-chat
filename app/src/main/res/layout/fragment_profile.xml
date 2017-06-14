@@ -21,13 +21,6 @@
             android:background="@color/colorLightGray"
             android:paddingBottom="@dimen/fab_margin">
 
-            <ProgressBar
-                android:id="@+id/pbLogin"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="120dp" />
-
             <ImageView
                 android:id="@+id/ivUser"
                 android:layout_width="100dp"
@@ -113,7 +106,6 @@
                         android:id="@+id/tvUseraccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="+82 1012345678"
                         android:textColor="@color/colorTextLightGray"/>
                 </LinearLayout>
 
@@ -129,11 +121,11 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/ivAddress"
+                    android:id="@+id/ivBirth"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_home_black_24dp" />
+                    app:srcCompat="@drawable/ic_today_black_24dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -143,17 +135,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tvAddress"
+                        android:id="@+id/tvBirth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="거주지"
+                        android:text="생일"
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
                         android:id="@+id/tvUserBirth"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="서울"
                         android:textColor="@color/colorTextLightGray"/>
                 </LinearLayout>
 
@@ -169,11 +160,11 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/ivWorkplace"
+                    android:id="@+id/ivPhone"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_business_black_24dp" />
+                    app:srcCompat="@drawable/ic_phone_in_talk_black_24dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -183,17 +174,16 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tvWorkplace"
+                        android:id="@+id/tvPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="근무지"
+                        android:text="전화번호"
                         android:textColor="@color/colorTextBlack"/>
 
                     <TextView
                         android:id="@+id/tvUserPhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="세종대학교"
                         android:textColor="@color/colorTextLightGray"/>
                 </LinearLayout>
 
@@ -281,6 +271,7 @@
                         android:paddingRight="@dimen/short_margin"
                         android:track="@drawable/switch_track_selector"
                         android:thumb="@drawable/switch_thumb_selector"
+                        android:checked="true"
                         android:text="Switch" />
                 </LinearLayout>
             </LinearLayout>

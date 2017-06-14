@@ -26,7 +26,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
@@ -65,51 +67,29 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     //리스트로 된 View들을 통합적으로 보관하는 객체
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvEmail;
+        public TextView tvLogin;
         public ImageView ivUser;
+        public ImageView ivLogin;
         public LinearLayout overall;
-        public TextView tvFristname;
+        public TextView tvFirstname;
 
         //순서대로 칸, 이름, 이미지를 레이아웃에서 불러와 생성
         public ViewHolder(View itemView) {
             super(itemView);
             overall = (LinearLayout) itemView.findViewById(R.id.friend_overall);
             tvEmail = (TextView) itemView.findViewById(R.id.tvEmail);
+            tvLogin = (TextView) itemView.findViewById(R.id.tvLoginTime);
             ivUser = (ImageView) itemView.findViewById(R.id.ivUser);
-            tvFristname = (TextView) itemView.findViewById(R.id.tvFirstname);
+            ivLogin = (ImageView) itemView.findViewById(R.id.ivLogin);
+            tvFirstname = (TextView) itemView.findViewById(R.id.tvFirstname);
         }
     }
 
     // 커스텀 생성자로 친구 데이터 리스트를 받음
-    public FriendAdapter(List<Friend> aFriend, Context context) {
-        Comparator<Friend> cmpAsc = new Comparator<Friend>() {
-            @Override
-            public int compare(Friend o1, Friend o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        };
-        Collections.sort(aFriend, cmpAsc);
-        this.mFriend = aFriend;
-        this.mFilter = new ArrayList<>();
-        this.mFilter.addAll(aFriend);
-        this.context = context;
-
-        beforeFirstName = new String("");
-    }    // 커스텀 생성자로 친구 데이터 리스트를 받음
-
     public FriendAdapter(List<Friend> aFriend, Context context, FragmentManager aFragmentManager) {
         Comparator<Friend> cmpAsc = new Comparator<Friend>() {
             @Override
             public int compare(Friend o1, Friend o2) {
-                //korean -> english sort
-                /*String left = o1.getName();
-                String right = o2.getName();
-                boolean isKoreanLeft=Pattern.matches("[가-힣]",left.substring(0,1));
-                boolean isKoreanRight=Pattern.matches("[가-힣]",right.substring(0,1));
-
-                if(isKoreanLeft & isKoreanRight) return o1.getName().compareTo(o2.getName());
-                else if(isKoreanLeft)           return o1.getName().compareTo(o2.getName())-10000;
-                else if(isKoreanRight)           return o1.getName().compareTo(o2.getName())+10000;
-                else                            return o1.getName().compareTo(o2.getName());*/
                 return o1.getName().compareTo(o2.getName());
             }
         };
@@ -121,6 +101,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         this.mFragmentManager = aFragmentManager;
 
         beforeFirstName = new String("");
+        database = FirebaseDatabase.getInstance();
+        userReference = database.getReference("users");
+        chatReference = database.getReference("chats");
+        user = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     //VIew생성 및 레이아웃 설정
@@ -141,21 +125,49 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
         holder.tvEmail.setText(mFriend.get(position).getName());
-        holder.tvFristname.setText(mFriend.get(position).getName().substring(0, 1));
-        if (beforeFirstName.equals(holder.tvFristname.getText())) {
-            holder.tvFristname.setVisibility(View.GONE);
+        holder.tvFirstname.setText(mFriend.get(position).getName().substring(0, 1));
+        if (beforeFirstName.equals(holder.tvFirstname.getText())) {
+            holder.tvFirstname.setVisibility(View.GONE);
         } else {
-            beforeFirstName = holder.tvFristname.getText().toString();
-            holder.tvFristname.setVisibility(View.VISIBLE);
+            beforeFirstName = holder.tvFirstname.getText().toString();
+            holder.tvFirstname.setVisibility(View.VISIBLE);
         }
-        final String stPhoto = mFriend.get(position).getPhoto();
+
+        userReference.child(mFriend.get(position).getUid()).child("profile").child("login")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            String login = dataSnapshot.getValue().toString();
+                            if(login.equals("on")) {
+                                holder.tvLogin.setVisibility(View.GONE);
+                                holder.ivLogin.setVisibility(View.VISIBLE);
+                            } else {
+                                holder.tvLogin.setVisibility(View.VISIBLE);
+                                holder.ivLogin.setVisibility(View.GONE);
+
+                                holder.tvLogin.setText(login.substring(5,16));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        String stPhoto = mFriend.get(position).getPhoto();
         if (stPhoto.equals("None")) {
             //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
             Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
             holder.ivUser.setImageDrawable(defaultImg);
         } else {
-            Glide.with(context).load(stPhoto).into(holder.ivUser);
+            Glide.with(context).load(stPhoto)
+                    .placeholder(R.drawable.ic_person_black_24dp)
+                    .into(holder.ivUser);
         }
+
         //View(칸) 클릭 시
         holder.overall.setOnTouchListener(new View.OnTouchListener() {
 
@@ -165,12 +177,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 switch (event.getAction()) {
                     //마우스를 눌렀을 때
                     case MotionEvent.ACTION_DOWN:
-                        holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
-
-                        database = FirebaseDatabase.getInstance();
-                        userReference = database.getReference("users");
-                        chatReference = database.getReference("chats");
-                        user = FirebaseAuth.getInstance().getCurrentUser();
+                        //holder.overall.setBackgroundColor(Color.parseColor("#F5F5F5"));
 
                         break;
                     //마우스를 땠을 때
@@ -240,29 +247,52 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                 if (dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
                                     roomKey = dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue().toString();
 
+                                    chatReference.child(roomKey).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            for(DataSnapshot person : dataSnapshot.getChildren()) {
+                                                if (person.getKey().equals(user.getUid())) {
+                                                    Intent in = new Intent(context, ChatActivity.class);
+                                                    in.putExtra("friendName", stFriendname);
+                                                    in.putExtra("roomKey", roomKey);
+                                                    in.putExtra("in", person.child("in").getValue().toString());
+                                                    context.startActivity(in);
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+
                                 } else {
+                                    //한 적이 없다면 입장 당시 시간 표시
                                     roomKey = chatReference.push().getKey();
-                                }
-                                if (roomKey != null) {
-                                    //채팅을 한적이 없다면 양쪽 사람에게 표시를하고
+
                                     userReference.child(user.getUid()).child("room").child(stFriendUid).setValue(roomKey);
                                     userReference.child(stFriendUid).child("room").child(user.getUid()).setValue(roomKey);
+
+                                    Calendar c = Calendar.getInstance();
+                                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                                    String formattedDate = df.format(c.getTime()).replace(".",":");
 
                                     //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
                                     Hashtable<String, String> myInfo = new Hashtable<String, String>();
                                     myInfo.put("name", user.getDisplayName());
-                                    myInfo.put("photo", dataSnapshot.child(user.getUid()).child("profile").child("photo").getValue().toString());
+                                    myInfo.put("in", formattedDate);
                                     chatReference.child(roomKey).child("people").child(user.getUid()).setValue(myInfo);
 
                                     Hashtable<String, String> friendInfo = new Hashtable<String, String>();
                                     friendInfo.put("name", stFriendname);
-                                    friendInfo.put("photo", stFriendPhoto);
+                                    friendInfo.put("in", formattedDate);
                                     chatReference.child(roomKey).child("people").child(stFriendUid).setValue(friendInfo);
 
                                     Intent in = new Intent(context, ChatActivity.class);
-                                    in.putExtra("pre", 0);
                                     in.putExtra("friendName", stFriendname);
                                     in.putExtra("roomKey", roomKey);
+                                    in.putExtra("in", formattedDate);
                                     context.startActivity(in);
                                 }
 
