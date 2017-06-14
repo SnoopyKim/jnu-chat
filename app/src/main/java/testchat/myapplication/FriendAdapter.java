@@ -45,6 +45,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
     FragmentManager mFragmentManager;
 
     //친구 데이터 리스트 두개 (하나는 백업용)
+    //@Comment search results are dynamic element. So, Friends list back up to mFilter
     List<Friend> mFriend;
     List<Friend> mFilter;
     Context context;

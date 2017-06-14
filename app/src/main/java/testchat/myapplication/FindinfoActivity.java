@@ -29,7 +29,12 @@ import java.util.regex.Pattern;
  * Created by th on 2017-04-12.
  */
 
-//비밀번호 찾기 화면
+/**
+ * @Name    FindinfoActivity
+ * @Usage   Find ID/Reset Password
+ * @Layout  activity_findinfo.xml
+ * @Comment Reset password using Email of user id part, so user must using correct and exist own Email adrress
+ * */
 public class FindinfoActivity extends AppCompatActivity {
 
     EditText etName;
@@ -71,7 +76,7 @@ public class FindinfoActivity extends AppCompatActivity {
         etPhone = (EditText) findViewById(R.id.edit_phone) ;
         tvPwError = (TextView) findViewById(R.id.text_warning_password);
 
-
+        //Find ID
         Button btnFindID = (Button) findViewById(R.id.button_idfind);
         btnFindID.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +92,7 @@ public class FindinfoActivity extends AppCompatActivity {
                     myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            //Check all user data equal stName
                             for (DataSnapshot user : dataSnapshot.getChildren()) {
                                 if (user.child("profile").child("name").getValue().toString().equals(stName)
                                         && user.child("profile").child("facebook_id").getValue().toString().equals("None")) {
@@ -106,6 +112,7 @@ public class FindinfoActivity extends AppCompatActivity {
 
             }
         });
+        //Reset Password
         Button btnFindPW = (Button) findViewById(R.id.button_passwordfind);
         btnFindPW.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,7 +123,13 @@ public class FindinfoActivity extends AppCompatActivity {
                 if(stID.isEmpty() || stID.equals("") || stPhone.isEmpty() || stPhone.equals(""))
                     tvPwError.setText("아이디와 휴대폰 번호를 입력해주세요");
                 else{
-                    //비밀번호 찾기는 안되고 재설정은 가능함 (문제는 재설정 작업이 이메일로 링크를 보내는 식이라 계정이 없는 이메일이면 받지를 못함...)
+                    /**
+                     * mAuth.sendPasswordResetEmail
+                     * @Reference   https://firebase.google.com/docs/reference/js/firebase.auth.Auth
+                     * @Return      firebase.Promise containing void
+                     * @Comment     비밀번호 찾기는 안되고 재설정은 가능함 (문제는 재설정 작업이 이메일로 링크를 보내는 식이라 계정이 없는 이메일이면 받지를 못함...)
+                     *               User must correct and exist email for reset password
+                     */
                     mAuth.sendPasswordResetEmail(stID).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -148,6 +161,12 @@ public class FindinfoActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * @Name    checkBirthForm
+     * @Usage   validity check - Birth
+     * @Param   str = user's birth // from etBirth
+     * @return  boolean check result
+     * */
     public boolean checkBirthForm(String str){
         if(str.length()!=8){
             return false;

@@ -47,11 +47,6 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
         //String title = dataNoti.get("title");
         //String msg = dataNoti.get("body");
         //Log.d(TAG,title);
-        Intent serviceIntent = new Intent(getApplicationContext(),MyService.class);
-        getApplicationContext().startService(serviceIntent);
-
-        serviceIntent = new Intent(getApplicationContext(),notiListener.class);
-        getApplicationContext().startService(serviceIntent);
 
         RemoteMessage.Notification noti = remoteMessage.getNotification();
 

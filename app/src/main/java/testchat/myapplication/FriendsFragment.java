@@ -25,9 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-
+/**
+ * @Name    FriendsFragment
+ * @Usage   Init variables and add adapter to recyclerview
+ * @Layout  fragment_friends.xml
+ * */
 public class FriendsFragment extends Fragment {
-
     String TAG = getClass().getSimpleName();
 
     TextView tvFriendcnt;
@@ -86,7 +89,6 @@ public class FriendsFragment extends Fragment {
                     }
 
                 } else {
-                    Log.d(TAG, "FriendsList is Empty");
                     tvNoFriend.setVisibility(View.VISIBLE);
                 }
 
@@ -102,8 +104,6 @@ public class FriendsFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 //Failed to read value
-                Log.w(TAG,"Failed to read value", databaseError.toException());
-
             }
         });
 
@@ -123,6 +123,13 @@ public class FriendsFragment extends Fragment {
 
         return v;
     }
+
+    /**
+     * @Name    ChangeET
+     * @Usage   Change UI : tvFriend's contents / tvFriendcnt's content AND Send adapter to result
+     * @Param   search string, etSearch
+     * @return  void
+     * */
     public void ChangeET(String s){
         if(s.length()==0)
         {

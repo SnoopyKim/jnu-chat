@@ -1,9 +1,13 @@
 package testchat.myapplication;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,10 +18,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -61,6 +67,13 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 
+/**
+ * @Name    MainActivity
+ * @Usage   Checking grant options
+ *           Checking Login Information
+ *           Linking SinginActivity/FindinfoActivity/Tabactivity
+ * @Layout  activity_main.xml
+ * */
 public class MainActivity extends AppCompatActivity {
     String TAG = "MainActivity";
     String stEmail;
@@ -75,11 +88,7 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
-    private notiListener notifs;
-    private ServiceConnection connection;
-
     private PushFirebaseMessagingService mPushFirebaseMessagingService;
-    private BroadcastReceiver mBroadcastReceiver;
     private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -91,15 +100,32 @@ public class MainActivity extends AppCompatActivity {
 
     CallbackManager callbackManager;
 
+    //noti listner permission string
+    private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+    private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+    private AlertDialog enableNotificationListenerAlertDialog;
+
+    private ImageChangeBroadcastReceiver imageChangeBroadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // If the user did not turn the notification listener service on we prompt him to do so
+        if(!isNotificationServiceEnabled()){
+            enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
+            enableNotificationListenerAlertDialog.show();
+        }
+        //get noti receiver/start service
+        imageChangeBroadcastReceiver = new ImageChangeBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(this.getPackageName());
+        registerReceiver(imageChangeBroadcastReceiver,intentFilter);
 
         Bundle bundle = getIntent().getExtras();
         if(bundle !=null){
             Log.d(TAG,"hi");
         }
-        //Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -126,29 +152,6 @@ public class MainActivity extends AppCompatActivity {
         }
         final String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG,"Token:" + token);
-
-        notifs=new notiListener();
-        connection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                Log.d("notif","nls started");
-                notiListener.ServiceBinder binder = (notiListener.ServiceBinder) iBinder;
-                notifs = binder.getService();
-            }
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                Log.d("notif","nls stopped");
-            }
-        };
-
-        Intent i = new Intent(this, notiListener.class);
-        this.startService(i);
-        bindService(i,connection,this.BIND_AUTO_CREATE);
-
-
-
-        Intent i2 = new Intent(this, MyService.class);
-        this.startService(i2);
 
 
         //layout objects 생성 및 초기화
@@ -482,11 +485,12 @@ public class MainActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    Toast.makeText(this,"저장소 접근에 동의하셨습니다",Toast.LENGTH_SHORT).show();
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
 
                 } else {
+                    Toast.makeText(this,"저장소 접근을 거절하셨습니다. 어플 사용에 제한이나 에러가 발생할 수 있습니다",Toast.LENGTH_SHORT).show();
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -505,26 +509,103 @@ public class MainActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    private boolean checkPlayService(){
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(resultCode != ConnectionResult.SUCCESS){
-            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
-                GooglePlayServicesUtil.getErrorDialog(resultCode,this,
-                        9000).show();
-            }
-            else{
-                Log.i(TAG,"this device is not supported");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     *  Broad caster turn down
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(connection);
-        connection=null;
+        unregisterReceiver(imageChangeBroadcastReceiver);
+    }
+
+
+    /**
+     * Change Intercepted Notification Image
+     * Changes the MainActivity image based on which notification was intercepted
+     * @param notificationCode The intercepted notification code
+     */
+    private void changeInterceptedNotificationImage(int notificationCode){
+        switch(notificationCode){
+            case notiListener.InterceptedNotificationCode.FACEBOOK_CODE:
+                Toast.makeText(this,"facebook",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.INSTAGRAM_CODE:
+                Toast.makeText(this,"insta",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.WHATSAPP_CODE:
+                Toast.makeText(this,"whatsapp",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.JNU_CODE:
+                Toast.makeText(this,"jnu",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE:
+                Toast.makeText(this,"other",Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    /**
+     * Is Notification Service Enabled.
+     * Verifies if the notification listener service is enabled.
+     * Got it from: https://github.com/kpbird/NotificationListenerService-Example/blob/master/NLSExample/src/main/java/com/kpbird/nlsexample/NLService.java
+     * @return True if eanbled, false otherwise.
+     */
+    private boolean isNotificationServiceEnabled(){
+        String pkgName = getPackageName();
+        final String flat = Settings.Secure.getString(getContentResolver(),
+                ENABLED_NOTIFICATION_LISTENERS);
+        if (!TextUtils.isEmpty(flat)) {
+            final String[] names = flat.split(":");
+            for (int i = 0; i < names.length; i++) {
+                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+                if (cn != null) {
+                    if (TextUtils.equals(pkgName, cn.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Image Change Broadcast Receiver.
+     * We use this Broadcast Receiver to notify the Main Activity when
+     * a new notification has arrived, so it can properly change the
+     * notification image
+     * */
+    public class ImageChangeBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int receivedNotificationCode = intent.getIntExtra("Notification Code",-1);
+            changeInterceptedNotificationImage(receivedNotificationCode);
+        }
+    }
+
+
+    /**
+     * Build Notification Listener Alert Dialog.
+     * Builds the alert dialog that pops up if the user has not turned
+     * the Notification Listener Service on yet.
+     * @return An alert dialog which leads to the notification enabling screen
+     */
+    private android.app.AlertDialog buildNotificationServiceAlertDialog(){
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(R.string.notification_listener_service);
+        alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
+        alertDialogBuilder.setPositiveButton(R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                    }
+                });
+        alertDialogBuilder.setNegativeButton(R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // If you choose to not enable the notification listener
+                        // the app. will not work as expected
+                    }
+                });
+        return(alertDialogBuilder.create());
     }
 }
