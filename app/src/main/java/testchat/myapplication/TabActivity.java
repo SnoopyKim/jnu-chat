@@ -111,7 +111,7 @@ public class TabActivity extends AppCompatActivity {
                 }
             }
         });
-        String token = PushFirebaseInstanceID.getInstance.getToken();
+        //String token = PushFirebaseInstanceID.getInstance.getToken();
     }
 
     //fragment 이동 함수(transaction 수행)
