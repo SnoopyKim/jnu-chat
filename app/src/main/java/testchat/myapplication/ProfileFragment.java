@@ -14,7 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +56,8 @@ public class ProfileFragment extends Fragment {
     TextView tvBirth;
     TextView tvPhone;
 
+    Switch swAlarm;
+
     private StorageReference mStorageRef;
     FirebaseUser user;
     Bitmap bitmap;
@@ -68,6 +72,14 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         context = getContext();
+
+        swAlarm = (Switch) v.findViewById(R.id.switchAlarm);
+        swAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                PushFirebaseMessagingService.isPopup = !PushFirebaseMessagingService.isPopup;
+            }
+        });
 
         //프로필 관련 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
@@ -86,7 +98,6 @@ public class ProfileFragment extends Fragment {
         if(user != null) {
             stUid = user.getUid();
             stEmail = user.getEmail();
-            //유저 이메일 설정
             tvUser.setText(user.getDisplayName());
             //자신의 프로필 정보에서 사진URL 정보가 없다면 기본 Drawble로, 있다면 해당 사진으로 그림
             uriPhoto = user.getPhotoUrl();
@@ -107,12 +118,12 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot != null) {
-                        if (dataSnapshot.child("phone").getValue().equals("None") || dataSnapshot.child("phone").getValue() == null) {
+                        if (dataSnapshot.child("phone").getValue() == null || dataSnapshot.child("phone").getValue().equals("None")) {
                             tvPhone.setText("정보 없음");
                         } else {
                             tvPhone.setText(dataSnapshot.child("phone").getValue().toString());
                         }
-                        if (dataSnapshot.child("birth").getValue().equals("None") || dataSnapshot.child("birth").getValue() == null) {
+                        if ( dataSnapshot.child("birth").getValue() == null || dataSnapshot.child("birth").getValue().equals("None")) {
                             tvBirth.setText("정보 없음");
                         } else {
                             tvBirth.setText(dataSnapshot.child("birth").getValue().toString());
@@ -128,6 +139,26 @@ public class ProfileFragment extends Fragment {
         } else {
             Toast.makeText(getActivity(),"로그인 정보를 불러들이지 못했습니다.",Toast.LENGTH_SHORT).show();
         }
+        FirebaseDatabase.getInstance().getReference("users").child(stUid)
+                .child("profile").child("photo").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null || dataSnapshot.getValue().equals("None")) {
+                    Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                    ivUser.setImageDrawable(defaultImg);
+
+                } else {
+                    Glide.with(context).load(dataSnapshot.getValue().toString())
+                            .placeholder(R.drawable.ic_person_black_24dp)
+                            .into(ivUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         btnImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -185,7 +216,7 @@ public class ProfileFragment extends Fragment {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 //올려진 사진 데이터를 저장소에서 Uri-String형식으로 받은 후 DB에 저장
                 final Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                String photoUri =  String.valueOf(downloadUrl);
+                final String photoUri =  String.valueOf(downloadUrl);
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference myRef = database.getReference("users");
 

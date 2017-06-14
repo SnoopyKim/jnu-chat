@@ -2,9 +2,13 @@ package testchat.myapplication;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,6 +31,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
@@ -70,8 +75,11 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
+    private notiListener notifs;
+    private ServiceConnection connection;
+
     private PushFirebaseMessagingService mPushFirebaseMessagingService;
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
+    private BroadcastReceiver mBroadcastReceiver;
     private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -86,7 +94,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle !=null){
+            Log.d(TAG,"hi");
+        }
+        //Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -96,13 +109,12 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
 
             if(ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.MANAGE_DOCUMENTS},
                         1);
@@ -114,6 +126,29 @@ public class MainActivity extends AppCompatActivity {
         }
         final String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG,"Token:" + token);
+
+        notifs=new notiListener();
+        connection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                Log.d("notif","nls started");
+                notiListener.ServiceBinder binder = (notiListener.ServiceBinder) iBinder;
+                notifs = binder.getService();
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                Log.d("notif","nls stopped");
+            }
+        };
+
+        Intent i = new Intent(this, notiListener.class);
+        this.startService(i);
+        bindService(i,connection,this.BIND_AUTO_CREATE);
+
+
+
+        Intent i2 = new Intent(this, MyService.class);
+        this.startService(i2);
 
 
         //layout objects 생성 및 초기화
@@ -168,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
                     //접속 당시 유저의 기기 토큰을 업로드
                     tokenRef.child(user.getUid()).setValue(token);
 
+                    RLinput.setVisibility(GONE);
+                    pbLogin.setVisibility(VISIBLE);
+
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
@@ -216,6 +254,9 @@ public class MainActivity extends AppCompatActivity {
                                 request.setParameters(param);
                                 request.executeAsync();
 
+                                pbLogin.setVisibility(GONE);
+                                RLinput.setVisibility(VISIBLE);
+
                                 myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                                 intent.putExtra("providerId","facebook");
@@ -231,6 +272,9 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                     } else {
+                        pbLogin.setVisibility(GONE);
+                        RLinput.setVisibility(VISIBLE);
+
                         myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                         intent.putExtra("providerId","email");
@@ -272,8 +316,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
 
             }
 
@@ -328,8 +370,22 @@ public class MainActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
+                            String errorMessage = task.getException().getMessage();
+                            String errorToast;
+                            if(errorMessage.equals("The email address is badly formatted.")){
+                                errorToast = "이메일 형식이 올바르지 않습니다.";
+                            }
+                            else if(errorMessage.equals("There is no user record corresponding to this identifier. The user may have been deleted.")){
+                                errorToast = "아이디가 존재하지 않습니다.";
+                            }
+                            else if(errorMessage.equals("The password is invalid or the user does not have a password.")){
+                                errorToast = "비밀번호가 일치하지 않습니다.";
+                            }
+                            else{
+                                errorToast="로그인에 문제가 생겼습니다. 다시 한번 확인해 주세요.";
+                            }
+
+                            Toast.makeText(MainActivity.this, errorToast,Toast.LENGTH_SHORT).show();
 
                             RLinput.setVisibility(VISIBLE);
                             pbLogin.setVisibility(GONE);
@@ -368,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                                         profile.put("uid", user.getUid());
                                         profile.put("facebook_id", object.getString("id"));
                                         if (object.has("birthday")) {
-                                            profile.put("birth", object.getString("birthday"));
+                                            profile.put("birth", object.getString("birthday").replace("/","-"));
                                         } else {
                                             profile.put("birth", "None");
                                         }
@@ -463,5 +519,12 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+        connection=null;
     }
 }

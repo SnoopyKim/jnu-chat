@@ -271,6 +271,7 @@
                         android:paddingRight="@dimen/short_margin"
                         android:track="@drawable/switch_track_selector"
                         android:thumb="@drawable/switch_thumb_selector"
+                        android:checked="true"
                         android:text="Switch" />
                 </LinearLayout>
             </LinearLayout>
