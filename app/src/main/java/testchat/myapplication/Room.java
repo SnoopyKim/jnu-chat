@@ -11,17 +11,15 @@ public class Room {
 
     public List <String> people;
     public String key;
-    public String photo;
     public String lastTime;
 
     public Room() {
         //기본 생성자
     }
-    public Room(List <String> people, String key,String aPhoto) {
+    public Room(List <String> people, String key) {
         //커스텀 생성자
         this.people = people;
         this.key = key;
-        this.photo = aPhoto;
         this.lastTime = "";
     }
 
@@ -32,7 +30,6 @@ public class Room {
     public void setKey(String key) {
         this.key = key;
     }
-    public void setPhoto(String aPhoto) {this.photo = aPhoto;}
     public void setlastTime(String alastTime) {this.lastTime = alastTime;}
 
     public List<String> getPeople() {
@@ -40,9 +37,6 @@ public class Room {
     }
     public String getKey() {
         return key;
-    }
-    public String getPhoto() {
-        return photo;
     }
     public String getLastTime() {
         return lastTime;

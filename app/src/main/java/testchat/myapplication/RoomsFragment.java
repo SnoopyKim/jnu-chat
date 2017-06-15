@@ -42,7 +42,6 @@ public class RoomsFragment extends Fragment {
 
     DatabaseReference myRef;
 
-    String photo;
     TextView tvChat;
     TextView tvNoChat;
 
@@ -80,7 +79,10 @@ public class RoomsFragment extends Fragment {
                     //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
-                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) continue;
+                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
+                            Log.d(TAG,"no data");
+                            continue;
+                        }
                         List <String> roomPeople = new ArrayList<String>();
                         List <String> chatInfo = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
@@ -88,30 +90,22 @@ public class RoomsFragment extends Fragment {
                         for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
                             chatInfo.add(chat.getKey());
                         }
+                        if (chatInfo.size() == 0) {
+                            Log.d(TAG,"no chat");
+                            continue;
+                        }
                         String lastTime = chatInfo.get(chatInfo.size()-1);
-                        if (myTime.compareTo(lastTime) > 0) continue;
+                        if (myTime.compareTo(lastTime) > 0) {
+                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
+                            continue;
+                        }
 
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             roomPeople.add(roomPerson.child("name").getValue().toString());
-                            if(!roomPerson.getKey().equals(user.getUid())) {
-                                FirebaseDatabase.getInstance().getReference("users").child(roomPerson.getKey())
-                                        .child("profile").child("photo").addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        photo = dataSnapshot.getValue().toString();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }
-
                         }
                         //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
 
-                        Room room = new Room(roomPeople,roomKey,photo);
+                        Room room = new Room(roomPeople, roomKey);
                         mRoom.add(room);
 
                     }
@@ -130,17 +124,6 @@ public class RoomsFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
                 //Failed to read value
                 Log.w(TAG,"Failed to read value", databaseError.toException());
-
-            }
-        });
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mRAdapter.sortRoom();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
@@ -187,7 +170,10 @@ public class RoomsFragment extends Fragment {
                     //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
-                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) continue;
+                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
+                            Log.d(TAG,"no data");
+                            continue;
+                        }
                         List <String> roomPeople = new ArrayList<String>();
                         List <String> chatInfo = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
@@ -195,31 +181,23 @@ public class RoomsFragment extends Fragment {
                         for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
                             chatInfo.add(chat.getKey());
                         }
+                        if (chatInfo.size() == 0) {
+                            Log.d(TAG,"no chat");
+                            continue;
+                        }
                         String lastTime = chatInfo.get(chatInfo.size()-1);
-                        if (myTime.compareTo(lastTime) <= 0) continue;
+                        if (myTime.compareTo(lastTime) > 0) {
+                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
+                            continue;
+                        }
 
                          for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                              roomPeople.add(roomPerson.child("name").getValue().toString());
-                             if(!roomPerson.getKey().equals(user.getUid())) {
-                                 FirebaseDatabase.getInstance().getReference("users").child(roomPerson.getKey())
-                                         .child("profile").child("photo").addListenerForSingleValueEvent(new ValueEventListener() {
-                                     @Override
-                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                         photo = dataSnapshot.getValue().toString();
-                                     }
-
-                                     @Override
-                                     public void onCancelled(DatabaseError databaseError) {
-
-                                     }
-                                 });
-                             }
-
                          }
                          //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
 
-                         Room room = new Room(roomPeople,roomKey,photo);
-                         mRoom.add(room);
+                        Room room = new Room(roomPeople, roomKey);
+                        mRoom.add(room);
 
                     }
                 } else {

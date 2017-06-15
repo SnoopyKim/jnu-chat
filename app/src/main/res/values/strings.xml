@@ -15,4 +15,10 @@
     <string name="password_check_error">비밀번호 확인이 일치하지 않습니다</string>
     <string name="title_activity_addfriend_activitiy">AddfriendActivitiy</string>
     <string name="title_activity_addchat">AddchatActivity</string>
+
+    <!-- noti listener -->
+    <string name="notification_listener_service">"Notification Listener Service"</string>
+    <string name="notification_listener_service_explanation">"JNU-chat은 알림 작업을 위해 당신의 알림 접근 권한을 필요로 합니다. 지금 허용 하시겠습니까?"</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

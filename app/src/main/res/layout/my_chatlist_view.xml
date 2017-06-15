@@ -96,13 +96,13 @@
                     android:paddingEnd="0dp"
                     android:paddingStart="5dp"
                     android:textColor="@color/colorTextBlack" />
-
                 <Button
                     android:id="@+id/btnDelete"
                     android:layout_width="0dp"
-                    android:layout_weight="15"
+                    android:layout_weight="18"
                     android:layout_height="match_parent"
                     android:text="나가기"
+                    android:textSize="12sp"
                     android:background="@color/conceptRed"/>
             </LinearLayout>
 

@@ -1,19 +1,29 @@
 package testchat.myapplication;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -27,6 +37,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
@@ -56,6 +67,13 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 
+/**
+ * @Name    MainActivity
+ * @Usage   Checking grant options
+ *           Checking Login Information
+ *           Linking SinginActivity/FindinfoActivity/Tabactivity
+ * @Layout  activity_main.xml
+ * */
 public class MainActivity extends AppCompatActivity {
     String TAG = "MainActivity";
     String stEmail;
@@ -71,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnSignin;
 
     private PushFirebaseMessagingService mPushFirebaseMessagingService;
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
     private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -83,10 +100,32 @@ public class MainActivity extends AppCompatActivity {
 
     CallbackManager callbackManager;
 
+    //noti listner permission string
+    private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+    private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
+    private AlertDialog enableNotificationListenerAlertDialog;
+
+    private ImageChangeBroadcastReceiver imageChangeBroadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("fcm token", FirebaseInstanceId.getInstance().getToken());
+
+        // If the user did not turn the notification listener service on we prompt him to do so
+        if(!isNotificationServiceEnabled()){
+            enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
+            enableNotificationListenerAlertDialog.show();
+        }
+        //get noti receiver/start service
+        imageChangeBroadcastReceiver = new ImageChangeBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(this.getPackageName());
+        registerReceiver(imageChangeBroadcastReceiver,intentFilter);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle !=null){
+            Log.d(TAG,"hi");
+        }
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -96,13 +135,12 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
 
             if(ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
-                        new String[]{
-                                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                        new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.MANAGE_DOCUMENTS},
                         1);
@@ -168,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
                     //접속 당시 유저의 기기 토큰을 업로드
                     tokenRef.child(user.getUid()).setValue(token);
 
+                    RLinput.setVisibility(GONE);
+                    pbLogin.setVisibility(VISIBLE);
+
                     //계정 제공업체 분류하고 TabActivity로 이동
                     final Intent intent = new Intent(MainActivity.this, TabActivity.class);
                     if (user.getProviderData().get(1).getProviderId().equals("facebook.com")) {
@@ -216,6 +257,9 @@ public class MainActivity extends AppCompatActivity {
                                 request.setParameters(param);
                                 request.executeAsync();
 
+                                pbLogin.setVisibility(GONE);
+                                RLinput.setVisibility(VISIBLE);
+
                                 myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                                 intent.putExtra("providerId","facebook");
@@ -231,6 +275,9 @@ public class MainActivity extends AppCompatActivity {
                         });
 
                     } else {
+                        pbLogin.setVisibility(GONE);
+                        RLinput.setVisibility(VISIBLE);
+
                         myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                         intent.putExtra("providerId","email");
@@ -272,8 +319,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 handleFacebookAccessToken(loginResult.getAccessToken());
-                pbLogin.setVisibility(GONE);
-                RLinput.setVisibility(VISIBLE);
 
             }
 
@@ -328,8 +373,22 @@ public class MainActivity extends AppCompatActivity {
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
+                            String errorMessage = task.getException().getMessage();
+                            String errorToast;
+                            if(errorMessage.equals("The email address is badly formatted.")){
+                                errorToast = "이메일 형식이 올바르지 않습니다.";
+                            }
+                            else if(errorMessage.equals("There is no user record corresponding to this identifier. The user may have been deleted.")){
+                                errorToast = "아이디가 존재하지 않습니다.";
+                            }
+                            else if(errorMessage.equals("The password is invalid or the user does not have a password.")){
+                                errorToast = "비밀번호가 일치하지 않습니다.";
+                            }
+                            else{
+                                errorToast="로그인에 문제가 생겼습니다. 다시 한번 확인해 주세요.";
+                            }
+
+                            Toast.makeText(MainActivity.this, errorToast,Toast.LENGTH_SHORT).show();
 
                             RLinput.setVisibility(VISIBLE);
                             pbLogin.setVisibility(GONE);
@@ -368,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
                                         profile.put("uid", user.getUid());
                                         profile.put("facebook_id", object.getString("id"));
                                         if (object.has("birthday")) {
-                                            profile.put("birth", object.getString("birthday"));
+                                            profile.put("birth", object.getString("birthday").replace("/","-"));
                                         } else {
                                             profile.put("birth", "None");
                                         }
@@ -426,11 +485,12 @@ public class MainActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    Toast.makeText(this,"저장소 접근에 동의하셨습니다",Toast.LENGTH_SHORT).show();
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
 
                 } else {
+                    Toast.makeText(this,"저장소 접근을 거절하셨습니다. 어플 사용에 제한이나 에러가 발생할 수 있습니다",Toast.LENGTH_SHORT).show();
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -449,19 +509,103 @@ public class MainActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    private boolean checkPlayService(){
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(resultCode != ConnectionResult.SUCCESS){
-            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
-                GooglePlayServicesUtil.getErrorDialog(resultCode,this,
-                        9000).show();
-            }
-            else{
-                Log.i(TAG,"this device is not supported");
-                finish();
-            }
-            return false;
+    /**
+     *  Broad caster turn down
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(imageChangeBroadcastReceiver);
+    }
+
+
+    /**
+     * Change Intercepted Notification Image
+     * Changes the MainActivity image based on which notification was intercepted
+     * @param notificationCode The intercepted notification code
+     */
+    private void changeInterceptedNotificationImage(int notificationCode){
+        switch(notificationCode){
+            case notiListener.InterceptedNotificationCode.FACEBOOK_CODE:
+                Toast.makeText(this,"facebook",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.INSTAGRAM_CODE:
+                Toast.makeText(this,"insta",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.WHATSAPP_CODE:
+                Toast.makeText(this,"whatsapp",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.JNU_CODE:
+                Toast.makeText(this,"jnu",Toast.LENGTH_SHORT).show();
+                break;
+            case notiListener.InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE:
+                Toast.makeText(this,"other",Toast.LENGTH_SHORT).show();
+                break;
         }
-        return true;
+    }
+
+    /**
+     * Is Notification Service Enabled.
+     * Verifies if the notification listener service is enabled.
+     * Got it from: https://github.com/kpbird/NotificationListenerService-Example/blob/master/NLSExample/src/main/java/com/kpbird/nlsexample/NLService.java
+     * @return True if eanbled, false otherwise.
+     */
+    private boolean isNotificationServiceEnabled(){
+        String pkgName = getPackageName();
+        final String flat = Settings.Secure.getString(getContentResolver(),
+                ENABLED_NOTIFICATION_LISTENERS);
+        if (!TextUtils.isEmpty(flat)) {
+            final String[] names = flat.split(":");
+            for (int i = 0; i < names.length; i++) {
+                final ComponentName cn = ComponentName.unflattenFromString(names[i]);
+                if (cn != null) {
+                    if (TextUtils.equals(pkgName, cn.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Image Change Broadcast Receiver.
+     * We use this Broadcast Receiver to notify the Main Activity when
+     * a new notification has arrived, so it can properly change the
+     * notification image
+     * */
+    public class ImageChangeBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int receivedNotificationCode = intent.getIntExtra("Notification Code",-1);
+            changeInterceptedNotificationImage(receivedNotificationCode);
+        }
+    }
+
+
+    /**
+     * Build Notification Listener Alert Dialog.
+     * Builds the alert dialog that pops up if the user has not turned
+     * the Notification Listener Service on yet.
+     * @return An alert dialog which leads to the notification enabling screen
+     */
+    private android.app.AlertDialog buildNotificationServiceAlertDialog(){
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(R.string.notification_listener_service);
+        alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation);
+        alertDialogBuilder.setPositiveButton(R.string.yes,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        startActivity(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                    }
+                });
+        alertDialogBuilder.setNegativeButton(R.string.no,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // If you choose to not enable the notification listener
+                        // the app. will not work as expected
+                    }
+                });
+        return(alertDialogBuilder.create());
     }
 }

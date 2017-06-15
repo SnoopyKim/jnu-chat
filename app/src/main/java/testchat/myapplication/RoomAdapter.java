@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -122,14 +124,38 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         //개인 톡방이랑 단톡방 이미지 다르게
         if (listNames.size()<=2) {
-            String stPhoto = mRoom.get(position).getPhoto();
-            if (stPhoto.equals("None")) {
-                //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
-                Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
-                holder.ivUser.setImageDrawable(defaultImg);
-            } else {
-                Glide.with(context).load(stPhoto).into(holder.ivUser);
-            }
+            chatReference.child(mRoom.get(position).getKey()).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot person : dataSnapshot.getChildren()) {
+                        String stUid = person.getKey();
+                        if (stUid.equals(user.getUid())) continue;
+                        userReference.child(person.getKey()).child("profile").child("photo").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.getValue().toString().equals("None")) {
+                                    //친구의 이미지 정보가 없을 경우 지정해둔 기본 이미지로
+                                    Drawable defaultImg = context.getResources().getDrawable(R.drawable.ic_person_black_24dp);
+                                    holder.ivUser.setImageDrawable(defaultImg);
+                                } else {
+                                    Glide.with(context).load(dataSnapshot.getValue().toString()).into(holder.ivUser);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
 
         } else {
             Drawable drawable = context.getResources().getDrawable(R.drawable.ic_people_black_24dp);
@@ -137,32 +163,23 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         }
         //최근 챗 시간과 표시내용 그려줌
-        chatReference.child(mRoom.get(position).getKey()).child("chatInfo").addChildEventListener(new ChildEventListener() {
+        chatReference.child(mRoom.get(position).getKey()).child("chatInfo").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot != null) {
-                    holder.tvChatTime.setText(dataSnapshot.getKey().substring(11,16));
-                    mRoom.get(position).setlastTime(dataSnapshot.getKey());
-                    if(dataSnapshot.child("file").getValue().toString().equals("false")) {
-                        holder.tvLastChat.setText(dataSnapshot.child("text").getValue().toString());
-                    } else if (dataSnapshot.child("file").getValue().toString().contains("image")) {
-                        holder.tvLastChat.setText("이미지");
-                    } else {
-                        holder.tvLastChat.setText("첨부 파일");
-                    }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> chatInfo = new ArrayList<String>();
+                for(DataSnapshot chat : dataSnapshot.getChildren()) {
+                    chatInfo.add(chat.getKey());
                 }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                String lastTime = chatInfo.get(chatInfo.size()-1);
+                holder.tvChatTime.setText(lastTime.substring(11,16));
+                mRoom.get(position).setlastTime(lastTime);
+                if (dataSnapshot.child(lastTime).child("file").getValue().toString().equals("false")) {
+                    holder.tvLastChat.setText(dataSnapshot.child(lastTime).child("text").getValue().toString());
+                } else if (dataSnapshot.child(lastTime).child("file").getValue().toString().contains("image")) {
+                    holder.tvLastChat.setText("이미지");
+                } else {
+                    holder.tvLastChat.setText("첨부 파일");
+                }
             }
 
             @Override
@@ -189,11 +206,25 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
                         //채팅방 고유키를 받아 ChatActivity에 넘겨주면서 이동
                         roomKey = mRoom.get(position).getKey();
+                        chatReference.child(roomKey).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot person : dataSnapshot.getChildren()) {
+                                    if (person.getKey().equals(user.getUid())) {
+                                        Intent in = new Intent(context, ChatActivity.class);
+                                        in.putExtra("friendName", allFriendName);
+                                        in.putExtra("roomKey", roomKey);
+                                        in.putExtra("in", person.child("in").getValue().toString());
+                                        context.startActivity(in);
+                                    }
+                                }
+                            }
 
-                        Intent intent = new Intent(context, ChatActivity.class);
-                        intent.putExtra("friendName",allFriendName);
-                        intent.putExtra("roomKey",roomKey);
-                        context.startActivity(intent);
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
 
                         break;
                 }
@@ -205,6 +236,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                roomKey = mRoom.get(position).getKey();
                 int friendCnt = mRoom.get(position).getPeople().size();
                 if(friendCnt <= 2) {
                     Calendar c = Calendar.getInstance();
@@ -218,7 +250,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 mFilter.remove(position);
                 mRoom.remove(position);
 
-                notifyItemRemoved(position);
+                notifyDataSetChanged();
             }
         });
 
