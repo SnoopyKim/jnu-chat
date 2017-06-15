@@ -22,8 +22,12 @@ import java.util.Locale;
 /**
  * Created by snoopy on 2017-04-01.
  */
-
-//FriendsFragment에서 RecyclerView의 커스텀Adapter (View에서 한 row마다의 데이터나 이벤트 적용)
+/**
+ * @Name    AddchatAdapter
+ * @Usage   manage custom viewholder
+ *           search chat
+ * @Layout  add_chat_view.xml
+ * */
 public class AddchatAdapter extends RecyclerView.Adapter<AddchatAdapter.ViewHolder> {
 
     //친구 데이터 리스트 두개 (하나는 백업용)
@@ -37,11 +41,6 @@ public class AddchatAdapter extends RecyclerView.Adapter<AddchatAdapter.ViewHold
         public TextView tvEmail;
         public ImageView ivUser;
         public CheckBox cbAdd;
-
-
-        //imageview 동그랗게
-        //ivUser.setBackground(new ShapeDrawable(new OvalShape()));
-
         //순서대로 칸, 이름, 이미지를 레이아웃에서 불러와 생성
         public ViewHolder(View itemView) {
             super(itemView);
@@ -80,7 +79,12 @@ public class AddchatAdapter extends RecyclerView.Adapter<AddchatAdapter.ViewHold
         return vh;
     }
 
-    //친구 데이터 리스트에 따라 row들의 이미지, 텍스트, 이벤트 관리(설정)
+    /**
+     * @Name    onBindViewHolder
+     * @Usage   set holder's element to Firebase data
+     * @Param   holder : custom viewholder , position : Friend's index in Friend list
+     * @return  void
+     * */
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
@@ -137,7 +141,6 @@ public class AddchatAdapter extends RecyclerView.Adapter<AddchatAdapter.ViewHold
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-
         return mFriend.size();
     }
 }

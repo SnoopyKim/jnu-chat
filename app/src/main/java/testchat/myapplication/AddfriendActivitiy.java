@@ -28,6 +28,11 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Hashtable;
 
+/**
+ * @Name    AddfriendActivitiy
+ * @Usage   search friend in firebase, and  add my friend list
+ * @Layout  activity_addchat.xml
+ * */
 public class AddfriendActivitiy extends AppCompatActivity {
     String TAG = getClass().getSimpleName();
 
@@ -60,9 +65,7 @@ public class AddfriendActivitiy extends AppCompatActivity {
     String userPhoto;
     String userFacebookid;
 
-    //th ver.
     Context mContext;
-    //th fin
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,10 +94,12 @@ public class AddfriendActivitiy extends AppCompatActivity {
         rlConfirm = (RelativeLayout) findViewById(R.id.confirmPop);
         btnYes = (Button) findViewById(R.id.btnYes);
         btnNo = (Button) findViewById(R.id.btnNo);
-        //th ver.
-        mContext = this;
-        //th fin
 
+        mContext = this;
+
+
+        //set enter listener
+        //this search is must perfectly same as user id, so don't use change listener but button.onclicklistener
         etSearch.setOnKeyListener(new View.OnKeyListener(){
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -164,6 +169,11 @@ public class AddfriendActivitiy extends AppCompatActivity {
         });
 
         //친구추가 버튼 클릭 시 확인 창 활성화
+        /**
+         * @Name        setOnClickListener
+         * @Implement  button.setOnClickListener
+         * @Usage       hide search layout, and show confirm layout
+         */
         btnAddFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

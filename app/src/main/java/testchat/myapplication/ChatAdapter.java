@@ -34,7 +34,13 @@ import java.util.UUID;
  * Created by snoopy on 2017-04-01.
  */
 
-//말풍선 View에서의 데이터 및 레이아웃 관리
+/**
+ * @Name    ChatAdapter
+ * @Usage   Check chat property(left/right)
+ *           File download
+ *           manage custom viewholder
+ * @Layout  left_text_view.xml/right_text_view.xml
+ * */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     List<Chat> mChat;
@@ -111,6 +117,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이미지, 텍스트, 이름, 시간 layout에 값 설정
+        //text chat
         if (mChat.get(position).getFile().equals("false")) {
             holder.mTextView.setVisibility(View.VISIBLE);
             holder.ivDownload.setVisibility(View.GONE);
@@ -118,7 +125,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             holder.mTextView.setText(mChat.get(position).getText());
 
-        } else if (mChat.get(position).getFile().contains("image")) {
+        }
+        //image chat
+        else if (mChat.get(position).getFile().contains("image")) {
             holder.mTextView.setVisibility(View.GONE);
             holder.ivDownload.setVisibility(View.VISIBLE);
             holder.btnDownload.setVisibility(View.GONE);
@@ -151,14 +160,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context,"다운로드에 실패했습니다 : "+e.getMessage(),Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     });
                 }
             });
 
-        } else {
+        }
+        //file chat
+        else {
             holder.mTextView.setVisibility(View.GONE);
             holder.ivDownload.setVisibility(View.GONE);
             holder.btnDownload.setVisibility(View.VISIBLE);
@@ -200,6 +211,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             });
         }
 
+        //if right text view = user
         if(isYou)
             holder.tvName.setText("나");
         else

@@ -23,7 +23,17 @@ import java.util.Map;
 /**
  * Created by TH-home on 2017-06-07.
  */
-//create push message and showing
+/**
+ * @Name    PushFirebaseMessagingService
+ * @Usage   when receive message from firebase, get noti
+ * @Implement FirebaseMessagingService(FCM)
+ * @Comment Only foreground active, noti listener help this active anytime
+ *
+ * remoteMessage.getNotification -> background -> tray noti
+ * remoteMessage.getData -> foreground -> head up alarm
+ * android code : foreground alarm
+ * node.js : background alarm
+ * */
 public class PushFirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService{
     private static final String TAG = "MyFirebaseMSGService";
     public static String pushTitle;
@@ -35,58 +45,30 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
     3. 메시지 리시브에서 notification compat builder 사용하지 말기
     **위의 사항을 안지키면 우선순위 뺏김
     */
+    /**
+     * @Name    onMessageReceived
+     * @Usage   callback about get noti(message from server)
+     * @Param   remoteMessage : notification's data
+     * @return  void
+     * */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        pushTitle="";
-        pushBody="";
-        //get data -> 백그라운드일 때 사용
-        //get notification -> 백그라운드일때 메세지 리시브 안거치고 바로 알람 띄움
-        //안드로이드 : 포그라운드 메시지
-        //node.js : 백그라운드 알람 이엇네
-        //String title = dataNoti.get("title");
-        //String msg = dataNoti.get("body");
-        //Log.d(TAG,title);
-
         RemoteMessage.Notification noti = remoteMessage.getNotification();
-
-        Map<String,String> data = remoteMessage.getData();
+        //Map<String,String> data = remoteMessage.getData();        //get data
         String title = noti.getTitle();
         String msg = noti.getBody();
 
-        pushTitle=title;
-        pushBody=msg;
-        Log.d(TAG,title);
         sendPushNotification(title,msg);
     }
 
+    /**
+     * @Name    sendPushNotification
+     * @Usage   change push to head up
+     * @Param   title : message from, message : receive text
+     * @return  void
+     * */
     private void sendPushNotification(String title,String message){
-        System.out.println("received message : " + message);
-        Log.d(TAG,"Title:"+title);
-        Log.d(TAG,"Message:"+message);
-//        //up MainActivity
-//        //flag activity clear top : set piriorty 1st
-//        Intent intent = new Intent(this, MainActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        //define intent work
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-//                0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT);
-//
-//        //ringing class
-//        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//
-//        //alarm service setting
-//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.ic_jnu_chat).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
-//                .setContentTitle(title)
-//                .setContentText(message)
-//                .setAutoCancel(true)
-//                .setSound(defaultSoundUri).setLights(000000255,500,2000)
-//                .setContentIntent(pendingIntent);
-//
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-
 
         //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
         //** 없을 경우 이전 버전의 Notification과 동일
@@ -96,6 +78,7 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
         PendingIntent fullScreenPendingIntent;
 
         push = new Intent();
+        //alarm on diffrent app active
         push.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         push.setClass(this, MainActivity.class);
 
@@ -103,8 +86,9 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
         //** 여기까지 헤드업 알림을 사용하기 위한 필수 조건!
 
         builder = new Notification.Builder(this)
-            .setSmallIcon(R.mipmap.ic_launcher).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
-            .setTicker("Test1") //** 이 부분은 확인 필요
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
+            .setTicker("메시지가 도착했습니다") //** 이 부분은 확인 필요
             .setWhen(System.currentTimeMillis())
             .setContentTitle(title) //** 큰 텍스트로 표시
             .setContentText(message) //** 작은 텍스트로 표시
@@ -113,9 +97,8 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
             .setFullScreenIntent(fullScreenPendingIntent, true);
 
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(0, builder.build());
+        nm.notify(0/*noti request code, can custom*/, builder.build());
 
-        //nm.cancel(0);
     }
 
 }

@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,6 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @Name    FriendsFragment
+ * @Usage   Init variables and add adapter to recyclerview
+ * @Layout  fragment_chats.xml
+ * @Comment Iterate all of room for find my room
+ * TODO add if no chatting room, show tvNoChat
+ * */
 public class RoomsFragment extends Fragment {
     //채팅방 리스트 화면 Fragment
     String TAG = getClass().getSimpleName();
@@ -80,7 +88,6 @@ public class RoomsFragment extends Fragment {
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
                         if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
-                            Log.d(TAG,"no data");
                             continue;
                         }
                         List <String> roomPeople = new ArrayList<String>();
@@ -91,12 +98,10 @@ public class RoomsFragment extends Fragment {
                             chatInfo.add(chat.getKey());
                         }
                         if (chatInfo.size() == 0) {
-                            Log.d(TAG,"no chat");
                             continue;
                         }
                         String lastTime = chatInfo.get(chatInfo.size()-1);
                         if (myTime.compareTo(lastTime) > 0) {
-                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
                             continue;
                         }
 
@@ -110,8 +115,7 @@ public class RoomsFragment extends Fragment {
 
                     }
                 } else {
-
-                    Log.d(TAG, "ChatList is Empty");
+                    //empty room list
                 }
                 //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
@@ -123,7 +127,8 @@ public class RoomsFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 //Failed to read value
-                Log.w(TAG,"Failed to read value", databaseError.toException());
+
+                Toast.makeText(getContext(),"정보를 불러들이는데 실패했습니다. 잠시후 다시 시도해 주세요",Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -145,6 +150,12 @@ public class RoomsFragment extends Fragment {
         return v;
     }
 
+    /**
+     * @Name    ChangeET
+     * @Usage   Change UI : tvChat's contents
+     * @Param   search string, <- Tabactivity's etSearch
+     * @return  void
+     * */
     public void ChangeET(String s){
         if(s.length()==0)
         {
@@ -157,6 +168,13 @@ public class RoomsFragment extends Fragment {
         }
     }
 
+    /**
+     * @Name    onResume
+     * @Usage   real time update -> order/time/image etc...
+     * @return  void
+     * @Comment Override life-cycle function
+     *           Same as this.onCreateView -> myRef.addListenerForSingleValueEvent -> ValueEventListener
+     * */
     @Override
     public void onResume() {
         super.onResume();
@@ -171,7 +189,6 @@ public class RoomsFragment extends Fragment {
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
                         if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
-                            Log.d(TAG,"no data");
                             continue;
                         }
                         List <String> roomPeople = new ArrayList<String>();
@@ -182,12 +199,10 @@ public class RoomsFragment extends Fragment {
                             chatInfo.add(chat.getKey());
                         }
                         if (chatInfo.size() == 0) {
-                            Log.d(TAG,"no chat");
                             continue;
                         }
                         String lastTime = chatInfo.get(chatInfo.size()-1);
                         if (myTime.compareTo(lastTime) > 0) {
-                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
                             continue;
                         }
 
@@ -201,8 +216,7 @@ public class RoomsFragment extends Fragment {
 
                     }
                 } else {
-
-                    Log.d(TAG, "ChatList is Empty");
+                    //empty room list
                 }
                 //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
@@ -214,7 +228,7 @@ public class RoomsFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 //Failed to read value
-                Log.w(TAG,"Failed to read value", databaseError.toException());
+                Toast.makeText(getContext(),"정보를 불러들이는데 실패했습니다. 잠시후 다시 시도해 주세요",Toast.LENGTH_SHORT).show();
 
             }
         });

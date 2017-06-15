@@ -30,7 +30,12 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
-
+/**
+ * @Name    AddchatActivity
+ * @Usage   add chat(단체 채팅방) by check box
+ * @Layout  activity_addchat.xml
+ * @Comment If back button(phone/menu bar) click, back to friends fragment not chats list
+ * */
 public class AddchatActivity extends AppCompatActivity {
     String TAG = this.getClass().getSimpleName();
 
@@ -91,7 +96,6 @@ public class AddchatActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Log.d(TAG, "FriendsList is Empty");
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
@@ -103,8 +107,7 @@ public class AddchatActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 //Failed to read value
-                Log.w(TAG,"Failed to read value", databaseError.toException());
-
+                Toast.makeText(AddchatActivity.this,"정보를 불러들이는데 실패했습니다. 잠시후 다시 시도해 주세요",Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -38,8 +38,14 @@ import java.util.Locale;
 /**
  * Created by snoopy on 2017-04-01.
  */
-
-//FriendsFragment에서 RecyclerView의 커스텀Adapter (View에서 한 row마다의 데이터나 이벤트 적용)
+/**
+ * @Name    FriendAdapter
+ * @Usage   Friend list adapter
+ *           manage each view
+ *           search list
+ *           show info dialog
+ * @Layout  my_friend_view.xml
+ * */
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
     FragmentManager mFragmentManager;
@@ -65,7 +71,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     InfoDialogFragment infoDialog;
 
-    //리스트로 된 View들을 통합적으로 보관하는 객체
+    /**
+     * @Name    ViewHolder
+     * @Usage   Save views in Recycler view and link between variable and layout view(tag)
+     * */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvEmail;
         public TextView tvLogin;
@@ -110,8 +119,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     //VIew생성 및 레이아웃 설정
     @Override
-    public FriendAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                       int viewType) {
+    public FriendAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.my_friend_view, parent, false);
@@ -121,12 +129,22 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         return vh;
     }
 
+
+    /**
+     * @Name    onBindViewHolder
+     * @Usage   set holder's element to Firebase data
+     * @Param   holder : custom viewholder , position : Friend's index in Friend list
+     * @return  void
+     * @Comment Because of hover event about viewholder, define setOnTouchListener. but can't implement
+     * */
     //친구 데이터 리스트에 따라 row들의 이미지, 텍스트, 이벤트 관리(설정)
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         //이름과 이미지를 친구 데이터 리스트에서와 같은 순서로 설정(그림)
         holder.tvEmail.setText(mFriend.get(position).getName());
         holder.tvFirstname.setText(mFriend.get(position).getName().substring(0, 1));
+
+        //first name only show having first user
         if (beforeFirstName.equals(holder.tvFirstname.getText())) {
             holder.tvFirstname.setVisibility(View.GONE);
         } else {
@@ -134,6 +152,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
             holder.tvFirstname.setVisibility(View.VISIBLE);
         }
 
+        //접속중인 친구
+        //all change of data -> refresh
         userReference.child(mFriend.get(position).getUid()).child("profile").child("login")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -192,6 +212,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         stFriendname = mFriend.get(position).getName();
                         stFriendPhoto = mFriend.get(position).getPhoto();
 
+                        //info dialog show friend's info and offer send message/delete friend function
                         infoDialog = showInfoDialog(v, position, stFriendUid, stFriendEmail, stFriendname, stFriendPhoto);
                         break;
                 }
@@ -200,7 +221,13 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         });
     }
 
-    //리스트 검색 시 호출되는 함수
+    /**
+     * @Name    filter
+     * @Usage   search friends list
+     * @Param   charText : search text <- Tabactivity's changeET's event catch value
+     * @return  void
+     * @Comment mFilter : backup, mFilter : showing at user
+     * */
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
         //친구 데이터 리스트를 하나 비운 뒤, 입력한 문자에 따라 백업용으로 다시 친구 데이터 리스트를 만듬
@@ -215,6 +242,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                 }
             }
         }
+        //Communicate list view with adapter. Saying "data set Changed!"
         notifyDataSetChanged();
     }
 
@@ -224,6 +252,12 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         return mFriend.size();
     }
 
+    /**
+     * @Name    newInstance
+     * @Usage   send user' information to dialog, show dialog and manage (send message/delete friend) function
+     * @Param   user data
+     * @return  InfoDialogFragment
+     * */
     //send user info to dialog fragment
     public InfoDialogFragment newInstance(final int position, final String aID, final String aEmail, final String aName, final String aPhoto) {
         Bundle args = new Bundle();
@@ -234,10 +268,10 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
         InfoDialogFragment fragment = new InfoDialogFragment();
         fragment.setArguments(args);
+        //DismissListener : return result of infoDialogFragment
         fragment.setDissmissListner(new DialogDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                Log.d("FriendAdapter:","DissmissListener");
                 if (getValueForBool("MESSAGE", true)) {
                     //Firebase에 users 부분 데이터 불러오기
                     userReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -306,6 +340,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         }
                     });
                 }
+                //if click delete button
                 else if (getValueForBool("Delete",true)) {
                     String friendUID = getValueForStr("friendUID");
                     userReference.child(user.getUid()).child("friends").child(friendUID).removeValue();
