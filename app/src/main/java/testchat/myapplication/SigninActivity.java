@@ -329,6 +329,8 @@ public class SigninActivity extends AppCompatActivity {
      * @Usage   union two toggle button
      * @Param   to check in button  , to check out button
      * @return  void
+     * @Issue   default : setBackground -> toggled : setBackgroundDrawable -> add padding to view
+     * @HACK    Add setPadding 0 to togglebutton.
      * */
     public void toggleButtonProcess(ToggleButton tb_checking,ToggleButton tb_checkout){
         if(tb_checking.isChecked()){

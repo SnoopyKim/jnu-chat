@@ -49,10 +49,17 @@ import java.util.Locale;
 import static testchat.myapplication.R.drawable.ic_highlight_off_black_24dp;
 import static testchat.myapplication.R.drawable.ic_photo_white_24px;
 
-//채팅방 화면 Activity
+/**
+ * @Name    ChatActivity
+ * @Usage
+ * @Layout  activity_chat.xml / content_chat.xml
+ * @comment Checking permission again
+ *           In searching, it can only find the first one, not the rest of them
+ * */
 public class ChatActivity extends AppCompatActivity{
     String TAG = this.getClass().getSimpleName();
 
+    //개인톡/단체톡
     boolean onebyone = false;
     boolean addMode = false;
 
@@ -160,6 +167,10 @@ public class ChatActivity extends AppCompatActivity{
         etText = (EditText) findViewById(R.id.etText);
         etSearch = (EditText) findViewById(R.id.etSearch);
         btnSearch = (Button) findViewById(R.id.btnSearch);
+
+        //go to search word position in recycler view
+        //if not exist, don't scroll
+        //you can find only first one
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -297,6 +308,12 @@ public class ChatActivity extends AppCompatActivity{
 
     }
 
+    /**
+     * @Name    uploadFile
+     * @Usage   upload local file to server
+     * @Param   stFile : file ,stDate : send date -> uploaded files name
+     * @return  void
+     * */
     public void uploadFile(String stFile, final String stDate) {
         Uri file = Uri.parse(stFile);
         storageRef = FirebaseStorage.getInstance().getReference("chats")
@@ -338,6 +355,7 @@ public class ChatActivity extends AppCompatActivity{
         if (data != null) {
             Uri fileUri = data.getData();
             fileSelected = getContentResolver().getType(fileUri);
+            //file error check. -> known filename extension
             if(fileSelected.equals("none"))
                 Toast.makeText(ChatActivity.this,"알 수 없는 유형입니다", Toast.LENGTH_SHORT).show();
             else {
@@ -351,6 +369,7 @@ public class ChatActivity extends AppCompatActivity{
         }
     }
 
+    //개인 채팅방이면 add friend 못함
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         addRef.child(user.getUid()).child("room").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -384,9 +403,11 @@ public class ChatActivity extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
+            //toolbar - backbotton
             case R.id.action_backbutton:
                 finish();
                 break;
+            //toolbar - add friend button
             case R.id.action_addbutton:
                 if (!addMode) {
                     addMode = true;
@@ -403,6 +424,12 @@ public class ChatActivity extends AppCompatActivity{
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * @Name    friendAddMode
+     * @Usage   if 단체 채팅방, add friend in chat
+     *           search friend exclude friends' in chat
+     * */
     public void friendAddMode () {
         EditText etAdd = (EditText)findViewById(R.id.etAdd);
         Button btnAdd = (Button)findViewById(R.id.btnAdd);
@@ -432,7 +459,6 @@ public class ChatActivity extends AppCompatActivity{
                     }
 
                 } else {
-                    Log.d(TAG, "FriendsList is Empty");
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
@@ -490,7 +516,7 @@ public class ChatActivity extends AppCompatActivity{
                     findViewById(R.id.RLadd).setVisibility(View.GONE);
                     getSupportActionBar().setTitle(newTitle);
 
-                    Toast.makeText(ChatActivity.this,"친구가 추가됐습니다",Toast.LENGTH_SHORT);
+                    Toast.makeText(ChatActivity.this,"친구가 초대 되었습니다",Toast.LENGTH_SHORT);
                 }
             }
         });

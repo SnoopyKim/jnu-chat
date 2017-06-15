@@ -14,22 +14,20 @@ import android.widget.Toast;
 
 /**
  * Created by th on 2017-06-14.
- *
  * Refrence https://github.com/Chagall/notification-listener-service-example
- *
- *
  */
 
+/**
+ * @Name    SigninActivity
+ * @Usage   Register firebase authentication and users profile
+ * @Layout  activity_singin.xml
+ * */
 public class notiListener extends NotificationListenerService {
     /*
     These are the package names of the apps. for which we want to
     listen the notifications
  */
     private static final class ApplicationPackageNames {
-        public static final String FACEBOOK_PACK_NAME = "com.facebook.katana";
-        public static final String FACEBOOK_MESSENGER_PACK_NAME = "com.facebook.orca";
-        public static final String WHATSAPP_PACK_NAME = "com.whatsapp";
-        public static final String INSTAGRAM_PACK_NAME = "com.instagram.android";
         public static final String JNU_PACK_NAME = "testchat.myapplication";
     }
     /*
@@ -37,11 +35,8 @@ public class notiListener extends NotificationListenerService {
         the notifications, to decide whether we should do something or not
      */
     public static final class InterceptedNotificationCode {
-        public static final int FACEBOOK_CODE = 1;
-        public static final int WHATSAPP_CODE = 2;
-        public static final int INSTAGRAM_CODE = 3;
-        public static final int JNU_CODE = 4;
-        public static final int OTHER_NOTIFICATIONS_CODE = 5; // We ignore all notification with code == 4
+        public static final int JNU_CODE = 1;
+        public static final int OTHER_NOTIFICATIONS_CODE = 2; // We ignore all notification with code == 4
     }
     @Override
     public IBinder onBind(Intent intent) {
@@ -52,8 +47,8 @@ public class notiListener extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         int notificationCode = matchNotificationCode(sbn);
-        if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE){
-            Intent intent = new  Intent("testchat.myapplication");
+        if(notificationCode == InterceptedNotificationCode.JNU_CODE){
+            Intent intent = new  Intent(ApplicationPackageNames.JNU_PACK_NAME);
             intent.putExtra("Notification Code", notificationCode);
             sendBroadcast(intent);
         }
@@ -62,16 +57,14 @@ public class notiListener extends NotificationListenerService {
     public void onNotificationRemoved(StatusBarNotification sbn){
         int notificationCode = matchNotificationCode(sbn);
 
-        if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE) {
-
+        if(notificationCode == InterceptedNotificationCode.JNU_CODE) {
             StatusBarNotification[] activeNotifications = this.getActiveNotifications();
-
             if(activeNotifications != null && activeNotifications.length > 0) {
                 for (int i = 0; i < activeNotifications.length; i++) {
                     if (notificationCode == matchNotificationCode(activeNotifications[i])) {
-                        Intent intent = new  Intent("testchat.myapplication");
+                        Intent intent = new  Intent(getPackageName());
                         intent.putExtra("Notification Code", notificationCode);
-                        sendBroadcast(intent);
+                        //sendBroadcast(intent);
                         break;
                     }
                 }
@@ -80,18 +73,7 @@ public class notiListener extends NotificationListenerService {
     }
     private int matchNotificationCode(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
-        Toast.makeText(notiListener.this, "mynoti match noticode" + packageName, Toast.LENGTH_LONG).show();
-        if(packageName.equals(ApplicationPackageNames.FACEBOOK_PACK_NAME)
-                || packageName.equals(ApplicationPackageNames.FACEBOOK_MESSENGER_PACK_NAME)){
-            return(InterceptedNotificationCode.FACEBOOK_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.INSTAGRAM_PACK_NAME)){
-            return(InterceptedNotificationCode.INSTAGRAM_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.WHATSAPP_PACK_NAME)){
-            return(InterceptedNotificationCode.WHATSAPP_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.JNU_PACK_NAME)){
+        if(packageName.equals(ApplicationPackageNames.JNU_PACK_NAME)){
             return(InterceptedNotificationCode.JNU_CODE);
         }
         else{
@@ -108,6 +90,7 @@ public class notiListener extends NotificationListenerService {
     public void onDestroy() {
         super.onDestroy();
     }
+    //START_STICKY : if service turn down, after a while - turn on
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;

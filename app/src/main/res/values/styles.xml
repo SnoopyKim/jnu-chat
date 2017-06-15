@@ -18,6 +18,7 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!-- editText view's edit bar change color -->
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/conceptRed</item>
     </style>
@@ -30,6 +31,7 @@
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!-- Toggle button arise padding when toggled -> style edit -->
     <style name="noMarginToggleButton" parent="Base.Widget.AppCompat.Button">
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginBottom">0dp</item>

@@ -88,8 +88,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textbtnFindinfo;
     TextView textbtnSignin;
 
-    private PushFirebaseMessagingService mPushFirebaseMessagingService;
-    private PushFirebaseInstanceIDService mPushFirebaseInstanceIDService;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -105,8 +103,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
     private AlertDialog enableNotificationListenerAlertDialog;
 
-    private ImageChangeBroadcastReceiver imageChangeBroadcastReceiver;
-
+    private BroadcastReceiver notiReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,15 +114,24 @@ public class MainActivity extends AppCompatActivity {
             enableNotificationListenerAlertDialog.show();
         }
         //get noti receiver/start service
-        imageChangeBroadcastReceiver = new ImageChangeBroadcastReceiver();
+
+        /**
+         * Broadcast Receiver.
+         * We use this Broadcast Receiver to notify the Main Activity when
+         * a new notification has arrived, so it can properly change the
+         * notification push to head up
+         * */
+        notiReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int receivedNotificationCode = intent.getIntExtra("Notification Code",-1);
+            }
+        };
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(this.getPackageName());
-        registerReceiver(imageChangeBroadcastReceiver,intentFilter);
+        registerReceiver(notiReceiver,intentFilter);
 
-        Bundle bundle = getIntent().getExtras();
-        if(bundle !=null){
-            Log.d(TAG,"hi");
-        }
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -152,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
         }
         final String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG,"Token:" + token);
-
 
         //layout objects 생성 및 초기화
         etEmail = (EditText) findViewById(R.id.etEmail);
@@ -515,33 +520,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(imageChangeBroadcastReceiver);
-    }
-
-
-    /**
-     * Change Intercepted Notification Image
-     * Changes the MainActivity image based on which notification was intercepted
-     * @param notificationCode The intercepted notification code
-     */
-    private void changeInterceptedNotificationImage(int notificationCode){
-        switch(notificationCode){
-            case notiListener.InterceptedNotificationCode.FACEBOOK_CODE:
-                Toast.makeText(this,"facebook",Toast.LENGTH_SHORT).show();
-                break;
-            case notiListener.InterceptedNotificationCode.INSTAGRAM_CODE:
-                Toast.makeText(this,"insta",Toast.LENGTH_SHORT).show();
-                break;
-            case notiListener.InterceptedNotificationCode.WHATSAPP_CODE:
-                Toast.makeText(this,"whatsapp",Toast.LENGTH_SHORT).show();
-                break;
-            case notiListener.InterceptedNotificationCode.JNU_CODE:
-                Toast.makeText(this,"jnu",Toast.LENGTH_SHORT).show();
-                break;
-            case notiListener.InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE:
-                Toast.makeText(this,"other",Toast.LENGTH_SHORT).show();
-                break;
-        }
+        unregisterReceiver(notiReceiver);
     }
 
     /**
@@ -566,20 +545,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
-    }
-
-    /**
-     * Image Change Broadcast Receiver.
-     * We use this Broadcast Receiver to notify the Main Activity when
-     * a new notification has arrived, so it can properly change the
-     * notification image
-     * */
-    public class ImageChangeBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int receivedNotificationCode = intent.getIntExtra("Notification Code",-1);
-            changeInterceptedNotificationImage(receivedNotificationCode);
-        }
     }
 
 

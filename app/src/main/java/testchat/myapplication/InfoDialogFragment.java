@@ -19,7 +19,14 @@ import com.bumptech.glide.Glide;
 /**
  * Created by TH-home on 2017-06-03.
  */
-// reference http://www.programkr.com/blog/MQTMxEDMwYT2.html
+
+/**
+ * @Name    InfoDialogFragment
+ * @Usage   show friend's detail data,  select menu : send message/delete friend
+ * @Layout  dialog_info.xml
+ * @Comment base dialog : alert dialog. But don't use left/right button.
+ * @Reference  http://www.programkr.com/blog/MQTMxEDMwYT2.html
+ * */
 public class InfoDialogFragment  extends DialogFragment
 {
     private String stFriendUID;
@@ -50,7 +57,7 @@ public class InfoDialogFragment  extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        //dailog creator = builder
+        //dailog creator : builder
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_info, null);
@@ -58,6 +65,8 @@ public class InfoDialogFragment  extends DialogFragment
         tvName = (TextView) view.findViewById(R.id.tvUser);         tvName.setText(stFriendName);
         tvEmail = (TextView) view.findViewById(R.id.tvUsermail);   tvEmail.setText(stFriendEmail);
         ivUser = (ImageView) view.findViewById(R.id.ivUser);
+
+        //click btns -> dismiss
         btnMessage = (Button) view.findViewById(R.id.btnMessage);
         btnMessage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +107,7 @@ public class InfoDialogFragment  extends DialogFragment
         getDialog().setOnDismissListener(onDismissListener);
     }
 
+    //@usage specify size of dialog
     @Override
     public void onStart() {
         super.onStart();
@@ -111,6 +121,7 @@ public class InfoDialogFragment  extends DialogFragment
         getDialog().getWindow().setLayout(dialogWidth, dialogHeight);
     }
 
+    //set dismisslistener -> must clarify dismiss in onCancel etc...
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
