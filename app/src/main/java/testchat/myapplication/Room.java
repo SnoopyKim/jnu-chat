@@ -6,7 +6,12 @@ import java.util.List;
  * Created by snoopy on 2017-04-21.
  */
 
-//채팅방 정보 데이터
+/**
+ * @Name    Room
+ * @Usage   Form of room(Chatting room) info
+ * @Comment String photo is photo's url. photo saved in (Facebook user : facebook server  ,  Email user : firebase Storage/users/)
+ * TODO     class Room have get/set function. So variable in Friend  change public to private
+ * */
 public class Room {
 
     public List <String> people;

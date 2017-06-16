@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="testchat.myapplication">
 
-
+    <!-- Permission part start -->
     <!-- for get noti/message alarm-->
     <uses-permission android:name="testchat.myapplication.permission.C2D_MESSAGE"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -13,14 +13,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+    <!-- Permission part finish -->
 
-
+    <!-- Application part start -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_jnu_chat"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
+        <!-- Serivce part start -->
         <!-- get FCM push noti -->
         <service
             android:name=".PushFirebaseMessagingService"
@@ -41,11 +43,24 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
+        <!-- get notification recieve event -->
+        <service
+            android:name=".notiListener"
+            android:label="notiListener"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+        <!-- Serivce part finish -->
 
+        <!-- meta data part start -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <!-- meta data part finish -->
 
+        <!-- activity part start -->
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -78,15 +93,9 @@
             android:name=".AddchatActivity"
             android:label="@string/title_activity_addchat"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <!-- activity part finish -->
 
-        <service
-            android:name=".notiListener"
-            android:label="notiListener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
     </application>
+    <!-- Application part finish -->
 
 </manifest>

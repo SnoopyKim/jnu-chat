@@ -41,7 +41,11 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-
+/**
+ * @Name    ProfileFragment
+ * @Usage
+ * @Layout  fragment_profile.xml
+ * */
 public class ProfileFragment extends Fragment {
     //개인정보 및 설정 Fragment 화면
     String TAG = getClass().getSimpleName();
@@ -68,6 +72,12 @@ public class ProfileFragment extends Fragment {
     String stEmail;
     Uri uriPhoto;
 
+    /**
+     * @Name    onCreateView
+     * @Usage   initialize variable
+     * @Param   layout inflater,viewgroup bundle
+     * @return  void
+     * */
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
@@ -239,11 +249,17 @@ public class ProfileFragment extends Fragment {
         return v;
     }
 
-    //자신의 갤러리에서 선택한 사진을 그릴 때 DB에 해당 사진을 올림
+    /**
+     * @Name    uploadImage
+     * @Usage   upload image(JPEG) local to server
+     * @Param   layout inflater,viewgroup bundle
+     * @return  void
+     * */
     public void uploadImage() {
 
         StorageReference mountainRef = mStorageRef.child("users").child(stUid);
 
+        //mapping image to byte
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
@@ -293,7 +309,12 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    //사진 클릭 시 넘어갔던 화면에서 다시 돌아올 때 호출되는 함수
+    /**
+     * @Name    onActivityResult
+     * @Usage   when select Image and back, call bitmap // catch error
+     * @Param   requestCode, result code, data
+     * @return  void
+     * */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

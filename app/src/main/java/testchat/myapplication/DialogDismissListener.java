@@ -8,6 +8,10 @@ import java.util.HashMap;
  * Created by TH-home on 2017-06-05.
  */
 
+/**
+ * @Name    DialogDismissListener
+ * @Usage   When dialog dismissed, return custom value
+ * */
 public abstract class DialogDismissListener implements DialogInterface.OnDismissListener {
 
     private HashMap<String, String> mStrMap;

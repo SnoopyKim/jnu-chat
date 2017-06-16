@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +38,13 @@ import java.util.Locale;
  * Created by snoopy on 2017-04-01.
  */
 
-//채팅방 리스트 View관리 어댑터
+/**
+ * @Name    RoomAdapter
+ * @Usage   Friend list adapter
+ *           manage each view
+ *           search list
+ * @Layout  my_chatlist_view.xml
+ * */
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     //FriendAdapter와 동일 (두개의 채팅방 데이터 리스트)
@@ -52,7 +59,10 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     String roomKey;
 
-    //리스트로 된 View들을 통합적으로 보관하는 객체
+    /**
+     * @Name    ViewHolder
+     * @Usage   Save views in Recycler view and link between variable and layout view(tag)
+     * */
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView tvName;
@@ -114,6 +124,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             if (!name.equals(user.getDisplayName()))
                 stName += (name+", ");
         }
+
+        //Because of jumping  user name in data, user's name room-name is empty
         if(stName.equals("")) {
             allFriendName = "";
             holder.tvName.setText("나");
@@ -222,7 +234,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
                             }
                         });
 
@@ -256,6 +267,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
     }
 
+    //Sort room by recent chat time
     public void sortRoom() {
         Comparator<Room> cmpAsc = new Comparator<Room>() {
             @Override

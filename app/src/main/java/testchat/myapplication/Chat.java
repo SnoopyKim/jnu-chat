@@ -3,8 +3,12 @@ package testchat.myapplication;
 /**
  * Created by snoopy on 2017-04-01.
  */
-
-//채팅방 내에서의 말풍선 데이터
+/**
+ * @Name    Chat
+ * @Usage   Form of chat info
+ * @Comment String file is file's url in server. file saved in firebase Storage/chats/roomKey/)
+ * TODO     class Chat have get/set function. So variable in Friend  change public to private
+ * */
 public class Chat {
 
     public String uid;

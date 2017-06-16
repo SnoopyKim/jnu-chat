@@ -1,5 +1,6 @@
 package testchat.myapplication;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -22,7 +23,17 @@ import java.util.Map;
 /**
  * Created by TH-home on 2017-06-07.
  */
-//create push message and showing
+/**
+ * @Name    PushFirebaseMessagingService
+ * @Usage   when receive message from firebase, get noti
+ * @Implement FirebaseMessagingService(FCM)
+ * @Comment Only foreground active, noti listener help this active anytime
+ *
+ * remoteMessage.getNotification -> background -> tray noti
+ * remoteMessage.getData -> foreground -> head up alarm
+ * android code : foreground alarm
+ * node.js : background alarm
+ * */
 public class PushFirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService{
     private static final String TAG = "MyFirebaseMSGService";
     public static String pushTitle;
@@ -36,22 +47,17 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
     3. 메시지 리시브에서 notification compat builder 사용하지 말기
     **위의 사항을 안지키면 우선순위 뺏김
     */
+    /**
+     * @Name    onMessageReceived
+     * @Usage   callback about get noti(message from server)
+     * @Param   remoteMessage : notification's data
+     * @return  void
+     * */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        pushTitle="";
-        pushBody="";
-        //get data -> 백그라운드일 때 사용
-        //get notification -> 백그라운드일때 메세지 리시브 안거치고 바로 알람 띄움
-        //안드로이드 : 포그라운드 메시지
-        //node.js : 백그라운드 알람 이엇네
-        //String title = dataNoti.get("title");
-        //String msg = dataNoti.get("body");
-        //Log.d(TAG,title);
-
         RemoteMessage.Notification noti = remoteMessage.getNotification();
 
-        Map<String,String> data = remoteMessage.getData();
         final String title = noti.getTitle();
         final String msg = noti.getBody();
 
@@ -69,9 +75,14 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
 
             }
         });
-
     }
 
+    /**
+     * @Name    sendPushNotification
+     * @Usage   change push to head up
+     * @Param   title : message from, message : receive text
+     * @return  void
+     * */
     private void sendPushNotification(String title,String message){
         System.out.println("received message : " + message);
         Log.d(TAG,"Title:"+title);
@@ -87,7 +98,7 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
             .setSmallIcon(R.drawable.ic_jnu_chat).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
-            .setTicker(message) //** 상단 한줄 메세지
+            .setTicker("메세지가 도착했습니다") //** 상단 한줄 메세지
             .setWhen(System.currentTimeMillis())
             .setContentTitle(title) //** 큰 텍스트로 표시
             .setContentText(message) //** 작은 텍스트로 표시
