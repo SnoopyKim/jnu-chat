@@ -1,21 +1,20 @@
 package testchat.myapplication;
 
-import android.app.Dialog;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.Window;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
@@ -28,7 +27,9 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
     private static final String TAG = "MyFirebaseMSGService";
     public static String pushTitle;
     public static String pushBody;
-    public static boolean isPopup = true;
+
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    DatabaseReference alarmRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("alarm");
     /*헤드업 알림 쓰고싶으면
     1. data에 priority high/sound값주기
     2. data에는 sound priority 주지말기
@@ -51,71 +52,69 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
         RemoteMessage.Notification noti = remoteMessage.getNotification();
 
         Map<String,String> data = remoteMessage.getData();
-        String title = noti.getTitle();
-        String msg = noti.getBody();
+        final String title = noti.getTitle();
+        final String msg = noti.getBody();
 
-        pushTitle=title;
-        pushBody=msg;
-        Log.d(TAG,title);
-        sendPushNotification(title,msg);
+        alarmRef.child("noti").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null &&
+                        dataSnapshot.getValue().toString().equals("on")) {
+                    sendPushNotification(title,msg);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     private void sendPushNotification(String title,String message){
         System.out.println("received message : " + message);
         Log.d(TAG,"Title:"+title);
         Log.d(TAG,"Message:"+message);
-//        //up MainActivity
-//        //flag activity clear top : set piriorty 1st
-//        Intent intent = new Intent(this, MainActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        //define intent work
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-//                0 /* Request code */, intent, PendingIntent.FLAG_ONE_SHOT);
-//
-//        //ringing class
-//        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//
-//        //alarm service setting
-//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.ic_jnu_chat).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
-//                .setContentTitle(title)
-//                .setContentText(message)
-//                .setAutoCancel(true)
-//                .setSound(defaultSoundUri).setLights(000000255,500,2000)
-//                .setContentIntent(pendingIntent);
-//
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-
 
         //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
         //** 없을 경우 이전 버전의 Notification과 동일
-        NotificationManager nm;
-        Notification.Builder builder;
-        Intent push;
-        PendingIntent fullScreenPendingIntent;
+        Intent push = new Intent(this, MainActivity.class);
+        push.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        push = new Intent();
-        push.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        push.setClass(this, MainActivity.class);
-
-        fullScreenPendingIntent = PendingIntent.getActivity(this, 0, push, PendingIntent.FLAG_CANCEL_CURRENT);
+        final PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0, push, PendingIntent.FLAG_UPDATE_CURRENT);
         //** 여기까지 헤드업 알림을 사용하기 위한 필수 조건!
 
-        builder = new Notification.Builder(this)
-            .setSmallIcon(R.mipmap.ic_launcher).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
-            .setTicker("Test1") //** 이 부분은 확인 필요
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+            .setSmallIcon(R.drawable.ic_jnu_chat).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
+            .setTicker(message) //** 상단 한줄 메세지
             .setWhen(System.currentTimeMillis())
             .setContentTitle(title) //** 큰 텍스트로 표시
             .setContentText(message) //** 작은 텍스트로 표시
             .setAutoCancel(true)
-            .setPriority(Notification.PRIORITY_MAX) //** MAX 나 HIGH로 줘야 가능함
-            .setFullScreenIntent(fullScreenPendingIntent, true);
+            .setPriority(NotificationCompat.PRIORITY_MAX); //** MAX 나 HIGH로 줘야 가능함
 
-        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(0, builder.build());
+        alarmRef.child("pop").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null
+                        && dataSnapshot.getValue().toString().equals("on")) {
+                    builder.setFullScreenIntent(fullScreenPendingIntent, true);
+                } else {
+                    builder.setContentIntent(fullScreenPendingIntent);
+                }
+                builder.addAction(R.drawable.ic_jnu_chat,"답장",fullScreenPendingIntent);
+                
+                NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                nm.notify(0, builder.build());
+            }
 
-        //nm.cancel(0);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 }

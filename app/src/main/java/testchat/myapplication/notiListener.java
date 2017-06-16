@@ -1,16 +1,9 @@
 package testchat.myapplication;
 
-import android.app.Notification;
-import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.IntDef;
-import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Created by th on 2017-06-14.
@@ -80,22 +73,18 @@ public class notiListener extends NotificationListenerService {
     }
     private int matchNotificationCode(StatusBarNotification sbn) {
         String packageName = sbn.getPackageName();
-        Toast.makeText(notiListener.this, "mynoti match noticode" + packageName, Toast.LENGTH_LONG).show();
-        if(packageName.equals(ApplicationPackageNames.FACEBOOK_PACK_NAME)
-                || packageName.equals(ApplicationPackageNames.FACEBOOK_MESSENGER_PACK_NAME)){
-            return(InterceptedNotificationCode.FACEBOOK_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.INSTAGRAM_PACK_NAME)){
-            return(InterceptedNotificationCode.INSTAGRAM_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.WHATSAPP_PACK_NAME)){
-            return(InterceptedNotificationCode.WHATSAPP_CODE);
-        }
-        else if(packageName.equals(ApplicationPackageNames.JNU_PACK_NAME)){
-            return(InterceptedNotificationCode.JNU_CODE);
-        }
-        else{
-            return(InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE);
+        switch (packageName) {
+            case ApplicationPackageNames.FACEBOOK_PACK_NAME:
+            case ApplicationPackageNames.FACEBOOK_MESSENGER_PACK_NAME:
+                return (InterceptedNotificationCode.FACEBOOK_CODE);
+            case ApplicationPackageNames.INSTAGRAM_PACK_NAME:
+                return (InterceptedNotificationCode.INSTAGRAM_CODE);
+            case ApplicationPackageNames.WHATSAPP_PACK_NAME:
+                return (InterceptedNotificationCode.WHATSAPP_CODE);
+            case ApplicationPackageNames.JNU_PACK_NAME:
+                return (InterceptedNotificationCode.JNU_CODE);
+            default:
+                return (InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE);
         }
     }
 

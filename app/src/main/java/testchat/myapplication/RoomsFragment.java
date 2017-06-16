@@ -79,10 +79,8 @@ public class RoomsFragment extends Fragment {
                     //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
-                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
-                            Log.d(TAG,"no data");
-                            continue;
-                        }
+                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) continue;
+
                         List <String> roomPeople = new ArrayList<String>();
                         List <String> chatInfo = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
@@ -90,15 +88,10 @@ public class RoomsFragment extends Fragment {
                         for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
                             chatInfo.add(chat.getKey());
                         }
-                        if (chatInfo.size() == 0) {
-                            Log.d(TAG,"no chat");
-                            continue;
-                        }
+                        if (chatInfo.size() == 0) continue;
+
                         String lastTime = chatInfo.get(chatInfo.size()-1);
-                        if (myTime.compareTo(lastTime) > 0) {
-                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
-                            continue;
-                        }
+                        if (myTime.compareTo(lastTime) > 0) continue;
 
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             roomPeople.add(roomPerson.child("name").getValue().toString());
@@ -170,10 +163,7 @@ public class RoomsFragment extends Fragment {
                     //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         //방에 내가 없으면 패스
-                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) {
-                            Log.d(TAG,"no data");
-                            continue;
-                        }
+                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) continue;
                         List <String> roomPeople = new ArrayList<String>();
                         List <String> chatInfo = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
@@ -181,15 +171,9 @@ public class RoomsFragment extends Fragment {
                         for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
                             chatInfo.add(chat.getKey());
                         }
-                        if (chatInfo.size() == 0) {
-                            Log.d(TAG,"no chat");
-                            continue;
-                        }
+                        if (chatInfo.size() == 0) continue;
                         String lastTime = chatInfo.get(chatInfo.size()-1);
-                        if (myTime.compareTo(lastTime) > 0) {
-                            Log.d(TAG,"Time:"+myTime.compareTo(lastTime));
-                            continue;
-                        }
+                        if (myTime.compareTo(lastTime) > 0) continue;
 
                          for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                              roomPeople.add(roomPerson.child("name").getValue().toString());

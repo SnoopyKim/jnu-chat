@@ -192,10 +192,9 @@ public class ChatActivity extends AppCompatActivity{
                     etText.setText("");
 
                 } else {
-                    Intent fileIntent = new Intent();
+                    Intent fileIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                     fileIntent.setType("*/*");
                     fileIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    fileIntent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(fileIntent, "파일을 선택하세요"), 0);
 
                 }
