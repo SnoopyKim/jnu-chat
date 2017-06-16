@@ -1,13 +1,11 @@
 package testchat.myapplication;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,8 +15,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
-
-import java.util.Map;
 
 /**
  * Created by TH-home on 2017-06-07.
@@ -35,18 +31,11 @@ import java.util.Map;
  * node.js : background alarm
  * */
 public class PushFirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService{
-    private static final String TAG = "MyFirebaseMSGService";
-    public static String pushTitle;
-    public static String pushBody;
 
+    //사용자의 정보와 DB 내 알람 관련 위치를 선언
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     DatabaseReference alarmRef = FirebaseDatabase.getInstance().getReference("users").child(user.getUid()).child("alarm");
-    /*헤드업 알림 쓰고싶으면
-    1. data에 priority high/sound값주기
-    2. data에는 sound priority 주지말기
-    3. 메시지 리시브에서 notification compat builder 사용하지 말기
-    **위의 사항을 안지키면 우선순위 뺏김
-    */
+
     /**
      * @Name    onMessageReceived
      * @Usage   callback about get noti(message from server)
@@ -56,11 +45,13 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+        //js에서 보낸 Notification 정보를 받음
         RemoteMessage.Notification noti = remoteMessage.getNotification();
 
         final String title = noti.getTitle();
         final String msg = noti.getBody();
 
+        //알림 설정이 꺼져있으면 아예 호출X
         alarmRef.child("noti").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -84,10 +75,6 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
      * @return  void
      * */
     private void sendPushNotification(String title,String message){
-        System.out.println("received message : " + message);
-        Log.d(TAG,"Title:"+title);
-        Log.d(TAG,"Message:"+message);
-
         //** Intent와 PendingIntent를 추가해 주는 것으로 헤드업 알림이 가능
         //** 없을 경우 이전 버전의 Notification과 동일
         Intent push = new Intent(this, MainActivity.class);
@@ -96,6 +83,7 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
         final PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0, push, PendingIntent.FLAG_UPDATE_CURRENT);
         //** 여기까지 헤드업 알림을 사용하기 위한 필수 조건!
 
+        //알림 내용 및 설정 빌드
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
             .setSmallIcon(R.drawable.ic_jnu_chat).setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.ic_jnu_chat) )
             .setTicker("메세지가 도착했습니다") //** 상단 한줄 메세지
@@ -105,6 +93,7 @@ public class PushFirebaseMessagingService extends com.google.firebase.messaging.
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_MAX); //** MAX 나 HIGH로 줘야 가능함
 
+        //사용자 팝업 체크에 따라 알림을 다르게 띄움
         alarmRef.child("pop").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

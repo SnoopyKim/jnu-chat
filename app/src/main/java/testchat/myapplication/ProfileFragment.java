@@ -184,7 +184,9 @@ public class ProfileFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //토큰 정보 DB에 자신의 것 삭제 (알람이 안오기 위함)
                 FirebaseDatabase.getInstance().getReference("fcmtoken").child(user.getUid()).removeValue();
+
                 Intent in = new Intent(context,MainActivity.class);
                 startActivity(in);
                 FirebaseAuth.getInstance().signOut();
@@ -217,6 +219,7 @@ public class ProfileFragment extends Fragment {
 
             }
         });
+        //알람 스위치 버튼에서 키면 상단만 키고 팝업 버튼을 활성, 끄면 알람과 팝업 둘다 끄고 팝업 버튼 비활성
         notiAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -233,6 +236,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+        //팝업 스위치 버튼 (팝업 알림 켜기 끄기)
         popAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

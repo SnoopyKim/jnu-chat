@@ -6,7 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -93,14 +92,15 @@ public class RoomsFragment extends Fragment {
                         List <String> chatInfo = new ArrayList<String>();
                         String roomKey = dataSnapshot2.getKey();
                         String myTime = dataSnapshot2.child("people").child(user.getUid()).child("in").getValue().toString();
+                        //채팅방에 채팅 기록이 없으면 패스
                         for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
                             chatInfo.add(chat.getKey());
                         }
                         if (chatInfo.size() == 0) continue;
-
+                        //채팅방의 마지막 채팅시간이 자신의 입장 시간보다 빠르면 패스
                         String lastTime = chatInfo.get(chatInfo.size()-1);
                         if (myTime.compareTo(lastTime) > 0) continue;
-
+                        //앞 모든 패스 경우에 속하지 않을 때 룸리스트에 추가
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             roomPeople.add(roomPerson.child("name").getValue().toString());
                         }
@@ -174,6 +174,7 @@ public class RoomsFragment extends Fragment {
      * */
     @Override
     public void onResume() {
+        //앱이 다른 화면에서 다시 돌아올 때 실행 (내용은 FloatingButton을 뺀 CreateView랑 같음)
         super.onResume();
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

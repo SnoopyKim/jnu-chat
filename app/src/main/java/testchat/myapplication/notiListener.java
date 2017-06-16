@@ -46,6 +46,7 @@ public class notiListener extends NotificationListenerService {
             sendBroadcast(intent);
         }
     }
+    //푸시를 없앴을 경우
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn){
         int notificationCode = matchNotificationCode(sbn);

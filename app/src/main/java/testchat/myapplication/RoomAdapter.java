@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,12 +13,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -134,7 +131,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
             holder.tvName.setText(allFriendName);
         }
 
-        //개인 톡방이랑 단톡방 이미지 다르게
+        //개인 톡방이면 이미지를 상대 프로필 사진으로
         if (listNames.size()<=2) {
             chatReference.child(mRoom.get(position).getKey()).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -168,7 +165,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
                 }
             });
 
-
+            //단톡방이면 이미지를 지정해둔 Drawble로
         } else {
             Drawable drawable = context.getResources().getDrawable(R.drawable.ic_people_black_24dp);
             holder.ivUser.setImageDrawable(drawable);

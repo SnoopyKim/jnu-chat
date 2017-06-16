@@ -149,21 +149,6 @@ public class ChatActivity extends AppCompatActivity{
         myRef = database.getReference("chats").child(roomKey);
         addRef = database.getReference("users");
 
-        inFriend = new ArrayList<>();
-        myRef.child("people").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot user : dataSnapshot.getChildren()) {
-                    inFriend.add(user.getKey());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         etText = (EditText) findViewById(R.id.etText);
         etSearch = (EditText) findViewById(R.id.etSearch);
         btnSearch = (Button) findViewById(R.id.btnSearch);
@@ -183,6 +168,7 @@ public class ChatActivity extends AppCompatActivity{
                     String charText = searchString.toLowerCase(Locale.getDefault());
                     for (int pos=0; pos<mChat.size(); pos++) {
                         String text = mChat.get(pos).getText();
+                        //검색한 텍스트가 포함 된 곳으로 스크롤
                         if (text.toLowerCase().contains(charText)) {
                             mRecyclerView.scrollToPosition(pos);
                         }
@@ -204,6 +190,7 @@ public class ChatActivity extends AppCompatActivity{
 
                 } else {
                     Intent fileIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    //MIME형식의 모든 파일을 볼 수 있음
                     fileIntent.setType("*/*");
                     fileIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivityForResult(Intent.createChooser(fileIntent, "파일을 선택하세요"), 0);
@@ -228,6 +215,7 @@ public class ChatActivity extends AppCompatActivity{
                     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     String formattedDate = df.format(c.getTime()).replace(".",":");
 
+                    //이미지 혹은 파일을 업로드 할 경우
                     if (!fileSelected.equals("false")) {
 
                         uploadFile(stText, formattedDate);
@@ -238,6 +226,7 @@ public class ChatActivity extends AppCompatActivity{
                         etText.setEnabled(true);
 
                     } else {
+                        //텍스트만 업로드할 경우
                         Hashtable<String, String> chat = new Hashtable<String, String>();
                         chat.put("uid", user.getUid());
                         chat.put("name", user.getDisplayName());
@@ -275,6 +264,7 @@ public class ChatActivity extends AppCompatActivity{
                 String file = dataSnapshot.child("file").getValue().toString();
                 String time = dataSnapshot.getKey();
 
+                //만약 내 입장시간보다 채팅 시간이 늦으면 add
                 if (myTime.compareTo(time) < 0) {
                     Chat chat = new Chat(uid, name, text, file, time);
 
@@ -318,6 +308,7 @@ public class ChatActivity extends AppCompatActivity{
         storageRef = FirebaseStorage.getInstance().getReference("chats")
                 .child(roomKey).child(user.getUid()).child(stDate);
 
+        //해당 채팅방 저장소에 파일을 업로드
         UploadTask uploadTask = storageRef.putFile(file);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -334,6 +325,7 @@ public class ChatActivity extends AppCompatActivity{
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Uri fileUri = taskSnapshot.getDownloadUrl();
 
+                //성공하면 채팅 DB에 추가
                 Hashtable<String, String> chat = new Hashtable<String, String>();
                 chat.put("uid", user.getUid());
                 chat.put("name", user.getDisplayName());
@@ -380,6 +372,7 @@ public class ChatActivity extends AppCompatActivity{
                         break;
                     }
                 }
+                //순서 조심! (UI 바뀜)
                 if(!onebyone) {
                     getMenuInflater().inflate(R.menu.toolbar_add_button, menu);
                     getMenuInflater().inflate(R.menu.toolbar_back_button, menu);
@@ -412,6 +405,7 @@ public class ChatActivity extends AppCompatActivity{
                     addMode = true;
                     findViewById(R.id.LLsend).setVisibility(View.GONE);
                     findViewById(R.id.RLadd).setVisibility(View.VISIBLE);
+                    //친구 추가 실행
                     friendAddMode();
 
                 } else {
@@ -430,6 +424,7 @@ public class ChatActivity extends AppCompatActivity{
      *           search friend exclude friends' in chat
      * */
     public void friendAddMode () {
+        //친구 추가 관련 Layout 객체 설정
         EditText etAdd = (EditText)findViewById(R.id.etAdd);
         Button btnAdd = (Button)findViewById(R.id.btnAdd);
 
@@ -437,6 +432,22 @@ public class ChatActivity extends AppCompatActivity{
         aRecyclerView.setHasFixedSize(true);
         aLayoutManager = new LinearLayoutManager(this);
         aRecyclerView.setLayoutManager(aLayoutManager);
+
+        //현재 방에 있는 유저들 리스트를 생성
+        inFriend = new ArrayList<>();
+        myRef.child("people").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
+                    inFriend.add(user.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         aFriend = new ArrayList<>();
         addRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
@@ -447,6 +458,7 @@ public class ChatActivity extends AppCompatActivity{
                     aFriend.clear();
                     for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
                         String uid = dataSnapshot2.getKey();
+                        //이미 있는 친구들을 제외하고 add
                         if(!inFriend.contains(uid)) {
                             String email = dataSnapshot2.child("email").getValue().toString();
                             String name = dataSnapshot2.child("name").getValue().toString();
@@ -457,7 +469,6 @@ public class ChatActivity extends AppCompatActivity{
                         }
                     }
 
-                } else {
                 }
 
                 //친구 데이터 리스트 작업이 다 끝나고 나면 어댑터에 리스트를 집어놓고 RecyclerView에 적용
@@ -507,9 +518,11 @@ public class ChatActivity extends AppCompatActivity{
                         friendInfo.put("in", formattedDate);
                         myRef.child("people").child(friend.getUid()).setValue(friendInfo);
 
+                        //방에 있는 유저 리스트에 add하고 상단 바의 채팅방 이름을 확장
                         inFriend.add(friend.getUid());
                         newTitle.concat((", "+friend.getName()));
                     }
+                    //다 add하면 추가모드를 끄고 채팅방 이름 재설정
                     addMode = false;
                     findViewById(R.id.LLsend).setVisibility(View.VISIBLE);
                     findViewById(R.id.RLadd).setVisibility(View.GONE);

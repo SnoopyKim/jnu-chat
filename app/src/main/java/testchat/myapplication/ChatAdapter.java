@@ -27,10 +27,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -150,24 +146,19 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://myapplication-89783.appspot.com")
                             .child("chats").child(roomKey).child(mChat.get(position).getUid()).child(fileName);
 
+                    //파일을 저장할 디렉토리 ('다운로드'로 설정해둠 'Pictures' 디렉토리의 경우 DIRECTORY_PICTURES)
                     File storagePath = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
+                    //디렉토리가 없을 경우 생성
                     if (!storagePath.exists())
                         storagePath.mkdirs();
 
+                    //이미지는 jpg로
                     final File image = new File(storagePath, UUID.randomUUID().toString()+".jpg");
 
+                    //Firebase 저장소에서 바로 파일로 가져와 다운
                     storageReference.getFile(image).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            try {
-                                OutputStream outputStream = new FileOutputStream(image);
-                                outputStream.flush();
-                                outputStream.close();
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                             Toast.makeText(context,"다운로드가 완료됐습니다",Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -188,10 +179,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.btnDownload.setVisibility(View.VISIBLE);
 
             final String fileName = mChat.get(position).getTime();
+            //MIME형식으로 해당 파일의 확장자를 버튼의 텍스트로 띄움
             final String fileType = MimeTypeMap.getSingleton().getExtensionFromMimeType(mChat.get(position).getFile());
             if(fileType != null)
                 holder.btnDownload.setText(fileType);
             else {
+                //MIME형식으로 알 수 없는 경우 (다운로드 버튼도 비활성화)
                 holder.btnDownload.setText("UNKNOWN");
                 holder.btnDownload.setEnabled(false);
             }
@@ -203,10 +196,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             holder.btnDownload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //이미지 파일 다운로드 시의 디렉토리와 동일
                     File storagePath = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)));
                     if (!storagePath.exists())
                         storagePath.mkdirs();
 
+                    //위에서 구했던 확장자로 파일 다운로드
                     File file = new File(storagePath, UUID.randomUUID().toString() +"."+ fileType);
                     storageReference.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override

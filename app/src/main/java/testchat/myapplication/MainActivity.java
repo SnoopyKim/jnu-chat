@@ -8,10 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -23,7 +21,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -37,11 +34,8 @@ import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.LoggingBehavior;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -165,12 +159,10 @@ public class MainActivity extends AppCompatActivity {
         RLinput = (RelativeLayout) findViewById(R.id.RLinput);
         pbLogin = (ProgressBar) findViewById(R.id.pbLogin);
 
+        //유저들의 정보와 기기 토큰 정보를 저장하는 DB 위치 선언(생성)
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
         tokenRef = database.getReference("fcmtoken");
-
-        //FirebaseAuth.getInstance().signOut();
-        //LoginManager.getInstance().logOut();
 
         //비밀번호 찾기 버튼 클릭 시 해당 Activity로 이동
         textbtnFindinfo = (TextView) findViewById(R.id.textbtnFindinfo);
@@ -206,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     if (mAuthListener != null) {
+                        //계정 감지 리스너를 끔 (이때 꺼줘도 뒤의 코드들 실행 됨)
                         mAuth.removeAuthStateListener(mAuthListener);
                     }
                     //접속 당시 유저의 기기 토큰을 업로드
@@ -265,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
                                 pbLogin.setVisibility(GONE);
                                 RLinput.setVisibility(VISIBLE);
 
+                                //DB에 로그인 상태로 작성
                                 myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                                 intent.putExtra("providerId","facebook");
@@ -279,10 +273,12 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
 
+                        //페이스북이 아닌 일반 이메일 유저
                     } else {
                         pbLogin.setVisibility(GONE);
                         RLinput.setVisibility(VISIBLE);
 
+                        //DB에 로그인 상태로 작성
                         myRef.child(user.getUid()).child("profile").child("login").setValue("on");
 
                         intent.putExtra("providerId","email");
@@ -323,12 +319,14 @@ public class MainActivity extends AppCompatActivity {
         fbtnLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                //로그인 성공시
                 handleFacebookAccessToken(loginResult.getAccessToken());
 
             }
 
             @Override
             public void onCancel() {
+                //로그인 실패 혹은 거절 시
                 Toast.makeText(getApplicationContext(), "cancel",Toast.LENGTH_SHORT).show();
                 pbLogin.setVisibility(GONE);
                 RLinput.setVisibility(VISIBLE);
@@ -336,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(FacebookException error) {
+                //로그인 에러 시
                 Toast.makeText(getApplicationContext(), "error",Toast.LENGTH_SHORT).show();
             }
         });
@@ -352,16 +351,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //계정 로그인 감지의 시작과 종료 호출 함수
+    //액티비티 실행 시 계정 감지 리스너 활성화
     @Override
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-        Log.d(TAG,"addAuthListener");
-    }
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     //로그인 버튼 클릭 시 Firebase에 해당 계정 로그인 on
@@ -508,6 +502,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //폰의 뒤로가기 버튼을 클릭할 시 Task중 가장 뒤로 보냄
     @Override
     public void onBackPressed() {
         super.onBackPressed();
