@@ -104,7 +104,7 @@ public class RoomsFragment extends Fragment {
                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
                             roomPeople.add(roomPerson.child("name").getValue().toString());
                         }
-                        //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
+                        //참여자, 채팅방 고유키, 존재여부, 사진정보를 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
 
                         Room room = new Room(roomPeople, roomKey);
                         mRoom.add(room);
@@ -116,8 +116,7 @@ public class RoomsFragment extends Fragment {
                 //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
                 mRAdapter = new RoomAdapter(mRoom, getActivity());
                 mRecyclerView.setAdapter(mRAdapter);
-                //어댑터 내의 데이터 정렬
-                mRAdapter.sortRoom();
+                mRAdapter.notifyDataSetChanged();
 
             }
 
@@ -172,61 +171,13 @@ public class RoomsFragment extends Fragment {
      * @Comment Override life-cycle function
      *           Same as this.onCreateView -> myRef.addListenerForSingleValueEvent -> ValueEventListener
      * */
+
     @Override
     public void onResume() {
-        //앱이 다른 화면에서 다시 돌아올 때 실행 (내용은 FloatingButton을 뺀 CreateView랑 같음)
+        //앱이 채팅화면에서 다시 돌아올 때 갱신된 데이터로 정렬 (새로 생긴 방은 X)
         super.onResume();
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                if(dataSnapshot.getValue() != null) {
-                    mRoom.clear();
-                    //DB에 존재하는 채팅방 중 참여자에 자신이 있는 경우에만 추가
-                    for (DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
-                        //방에 내가 없으면 패스
-                        if(dataSnapshot2.child("people").child(user.getUid()).getValue() == null) continue;
-
-                        List <String> roomPeople = new ArrayList<String>();
-                        List <String> chatInfo = new ArrayList<String>();
-                        String roomKey = dataSnapshot2.getKey();
-                        String myTime = dataSnapshot2.child("people").child(user.getUid()).child("in").getValue().toString();
-                        for(DataSnapshot chat : dataSnapshot2.child("chatInfo").getChildren()) {
-                            chatInfo.add(chat.getKey());
-                        }
-                        if (chatInfo.size() == 0) continue;
-                        String lastTime = chatInfo.get(chatInfo.size()-1);
-                        if (myTime.compareTo(lastTime) > 0) continue;
-
-
-                         for(DataSnapshot roomPerson : dataSnapshot2.child("people").getChildren()) {
-                             roomPeople.add(roomPerson.child("name").getValue().toString());
-                         }
-                         //참여자, 채팅방 고유키, 존재여부, 사진정보, 최근채팅시간을 가지고 Room형식의 데이터를 생성한 뒤 리스트에 추가
-
-                        Room room = new Room(roomPeople, roomKey);
-                        mRoom.add(room);
-
-                    }
-                } else {
-                    //empty room list
-                }
-                //채팅방 데이터 리스트를 완성한 뒤 어댑터에 넣고 RecyclerView에 어댑터를 장착
-                mRAdapter = new RoomAdapter(mRoom, getActivity());
-                mRecyclerView.setAdapter(mRAdapter);
-                //어댑터 내의 데이터 정렬
-                mRAdapter.sortRoom();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //Failed to read value
-                Toast.makeText(getContext(),"정보를 불러들이는데 실패했습니다. 잠시후 다시 시도해 주세요",Toast.LENGTH_SHORT).show();
-
-            }
-        });
+        if (mRAdapter!=null)
+            mRAdapter.sortRoom();
 
     }
 }

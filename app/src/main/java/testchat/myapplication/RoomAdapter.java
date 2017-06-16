@@ -172,7 +172,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
 
         }
         //최근 챗 시간과 표시내용 그려줌
-        chatReference.child(mRoom.get(position).getKey()).child("chatInfo").addListenerForSingleValueEvent(new ValueEventListener() {
+        chatReference.child(mRoom.get(position).getKey()).child("chatInfo").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<String> chatInfo = new ArrayList<String>();
@@ -265,6 +265,7 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.ViewHolder> {
     }
 
     //Sort room by recent chat time
+    //정렬하고 순서가 바뀐 데이터 정보를 알림 (onBindView 호출 = 다시 그림)
     public void sortRoom() {
         Comparator<Room> cmpAsc = new Comparator<Room>() {
             @Override
