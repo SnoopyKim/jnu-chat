@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -278,10 +277,11 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
-                                //해당 칸의 친구와 대화를 한적이 있는지 없는지
+                                //해당 칸의 친구와 대화를 한적이 있는지 없는지 (null: 없는 것)
                                 if (dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue() != null) {
                                     roomKey = dataSnapshot.child(user.getUid()).child("room").child(stFriendUid).getValue().toString();
 
+                                    //있을 때 해당 방에서의 자신의 입장 시간을 가지고 ChatActivity로 넘어감 (중간에 나왔을 경우 때문에 필요)
                                     chatReference.child(roomKey).child("people").addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -314,6 +314,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                                     String formattedDate = df.format(c.getTime()).replace(".",":");
 
                                     //DB에 새로운 채팅방을 하나 생성하고 그 고유키를 가지고 ChatActivity로 이동
+                                    //자신과 해당 친구에게 표시하고, 입장 시간을 넣어줌
                                     Hashtable<String, String> myInfo = new Hashtable<String, String>();
                                     myInfo.put("name", user.getDisplayName());
                                     myInfo.put("in", formattedDate);
@@ -340,7 +341,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
                         }
                     });
                 }
-                //if click delete button
+                //if click delete button (친구삭제 - 상대방에게도 자신이 지워짐)
                 else if (getValueForBool("Delete",true)) {
                     String friendUID = getValueForStr("friendUID");
                     userReference.child(user.getUid()).child("friends").child(friendUID).removeValue();

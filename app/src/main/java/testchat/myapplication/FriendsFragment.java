@@ -6,7 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -68,7 +67,7 @@ public class FriendsFragment extends Fragment {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
-        //친구 데이터 리스트의 정보를 추가하기 위해 처음에 한번만 FirebaseDB호출
+        //친구 데이터 리스트의 정보를 관련 DB의 정보가 업데이트 될 때마다 그림
         myRef.child(user.getUid()).child("friends").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {

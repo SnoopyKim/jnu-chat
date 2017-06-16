@@ -60,10 +60,12 @@ public class ProfileFragment extends Fragment {
     TextView tvBirth;
     TextView tvPhone;
 
-    Switch swAlarm;
+    Switch notiAlarm;
+    Switch popAlarm;
 
     private StorageReference mStorageRef;
     FirebaseUser user;
+    DatabaseReference alarmRef;
     Bitmap bitmap;
 
     String stUid;
@@ -77,19 +79,11 @@ public class ProfileFragment extends Fragment {
      * @return  void
      * */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         context = getContext();
-
-        swAlarm = (Switch) v.findViewById(R.id.switchAlarm);
-        swAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                PushFirebaseMessagingService.isPopup = !PushFirebaseMessagingService.isPopup;
-            }
-        });
 
         //프로필 관련 layout 객체 지정
         ivUser = (ImageView) v.findViewById(R.id.ivUser);
@@ -99,6 +93,9 @@ public class ProfileFragment extends Fragment {
         tvEmail = (TextView)v.findViewById(R.id.tvUseraccount);
         tvPhone = (TextView)v.findViewById(R.id.tvUserPhone);
         tvBirth = (TextView)v.findViewById(R.id.tvUserBirth);
+
+        notiAlarm = (Switch) v.findViewById(R.id.switchAlarm);
+        popAlarm = (Switch) v.findViewById(R.id.switchMessage);
 
         //Firebase 내 저장소 부분 호출
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -187,11 +184,69 @@ public class ProfileFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //토큰 정보 DB에 자신의 것 삭제 (알람이 안오기 위함)
+                FirebaseDatabase.getInstance().getReference("fcmtoken").child(user.getUid()).removeValue();
+
                 Intent in = new Intent(context,MainActivity.class);
                 startActivity(in);
                 FirebaseAuth.getInstance().signOut();
                 LoginManager.getInstance().logOut();
                 getActivity().finish();
+            }
+        });
+
+        //알람 버튼 활성화 비활성화 감지 & 클릭 시 On/Off
+        alarmRef = FirebaseDatabase.getInstance().getReference("users")
+                .child(user.getUid()).child("alarm");
+        alarmRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue()!=null) {
+                    if(dataSnapshot.child("noti").getValue() != null &&
+                            dataSnapshot.child("noti").getValue().toString().equals("on")) {
+                        notiAlarm.setChecked(true);
+                        popAlarm.setEnabled(true);
+                    }
+                    if(dataSnapshot.child("pop").getValue() != null &&
+                            dataSnapshot.child("pop").getValue().toString().equals("on")) {
+                        popAlarm.setChecked(true);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        //알람 스위치 버튼에서 키면 상단만 키고 팝업 버튼을 활성, 끄면 알람과 팝업 둘다 끄고 팝업 버튼 비활성
+        notiAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    alarmRef.child("noti").setValue("on");
+                    popAlarm.setEnabled(true);
+
+                } else {
+                    alarmRef.child("noti").setValue("off");
+                    alarmRef.child("pop").setValue("off");
+
+                    popAlarm.setChecked(false);
+                    popAlarm.setEnabled(false);
+                }
+            }
+        });
+        //팝업 스위치 버튼 (팝업 알림 켜기 끄기)
+        popAlarm.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    alarmRef.child("pop").setValue("on");
+
+                } else {
+                    alarmRef.child("pop").setValue("off");
+
+                }
             }
         });
 
@@ -237,8 +292,6 @@ public class ProfileFragment extends Fragment {
                 DatabaseReference myRef = database.getReference("users");
 
                 myRef.child(stUid).child("profile").child("photo").setValue(photoUri);
-
-                Glide.with(context).load(downloadUrl).into(ivUser);
 
                 //선택했던 사진을 Firebase 계정에 PhotoUri로 설정
                 UserProfileChangeRequest profileUpdate = new UserProfileChangeRequest.Builder()

@@ -1,26 +1,19 @@
 package testchat.myapplication;
 
-import android.*;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -172,6 +165,7 @@ public class TabActivity extends AppCompatActivity {
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String formattedDate = df.format(c.getTime());
 
+            //종료 시간을 로그인 DB에 기록
             loginRef.setValue(formattedDate);
 
             moveTaskToBack(true);
@@ -186,9 +180,11 @@ public class TabActivity extends AppCompatActivity {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String formattedDate = df.format(c.getTime());
 
+        //다른 액티비티나 앱으로 넘어가면 종료 시간을 로그인 DB에 기록
         loginRef.setValue(formattedDate);
 
     }
+    //탭 액티비티로 돌아왔을 시 로그인 DB에 '접속중' 기록
     @Override
     protected void onResume() {
         super.onResume();
